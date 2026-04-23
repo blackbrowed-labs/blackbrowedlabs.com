@@ -325,7 +325,7 @@ GET https://api.github.com/repos/{owner}/{repo}/releases
 
 Each release becomes an entry with: `productSlug`, `tagName`, `name`, `publishedAt`, `bodyMarkdown` (rendered with the same pipeline as local content), `isPrerelease`, `isDraft`, `htmlUrl`.
 
-Authentication: a fine-grained GitHub personal access token, `GITHUB_TOKEN`, stored as a Worker/Actions secret. Required scopes: `Contents: Read` and `Metadata: Read` on each product repo.
+Authentication: a fine-grained GitHub personal access token, `PRODUCT_REPOS_PAT`, stored as a Worker/Actions secret. Required scopes: `Contents: Read` and `Metadata: Read` on each product repo. See §10.1 for full setup procedure.
 
 Release notes are language-neutral (GitHub releases have one version each). They're rendered on both the DE and EN product pages.
 
@@ -438,6 +438,35 @@ The following documents — which were the strategic and creative inputs to this
 
 These belong in your private workspace. `CLAUDE_DESIGN_BRIEF.md` contains everything Claude Code needs (full palette values, contrast data, all tokens, all rationale). The source documents are reference material for you, not deliverables for the site.
 
+### 8.3 `.gitignore`
+
+The repo's `.gitignore` is at the root and covers three categories of files:
+
+**Build artifacts and dependencies** — never committed; regenerated on every build.
+
+- `node_modules/` — installed dependencies
+- `dist/` — Astro build output
+- `.astro/` — Astro cache
+- `.wrangler/` — Cloudflare Worker local state
+
+**Environment and secrets** — never committed. `.env` and `.env.*` are gitignored, with an explicit allow for `.env.example` so future contributors can see which variables are expected without the real values.
+
+**Editor and OS metadata** — ignored to keep the repo portable across machines.
+
+- `.vscode/*` with explicit allow for `extensions.json` and `settings.json` (the two shareable VS Code files; everything else is personal)
+- `.idea/` (JetBrains), `*.swp` / `*.swo` (vim)
+- macOS: `.DS_Store`, `.AppleDouble`, `.LSOverride`
+- Logs: `*.log`, `npm-debug.log*`, `yarn-debug.log*`, `pnpm-debug.log*`
+- Caches: `.cache/`, `.parcel-cache/`, `coverage/`, `.nyc_output/`
+
+**Claude Code artifacts** — `.claude/` is ignored because Claude Code stores local session state there.
+
+**What is deliberately NOT ignored:**
+
+- **Lockfiles** (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) must be committed so builds are reproducible across machines and CI.
+- **Source maps** (`.map` files) ship in production builds to aid debugging; no reason to ignore.
+- **Handoff documentation** in `docs/` and the Claude Design bundle in `design/handoff-bundle/` are committed — see §8.1 and §8.2 for the rationale.
+
 ---
 
 ## 9. Deployment & DNS
@@ -473,18 +502,97 @@ Cloudflare Universal SSL, Full (Strict). Automatic.
 
 ## 10. Secrets & Configuration
 
-| Name | Where | Purpose |
-|---|---|---|
-| `GITHUB_TOKEN` | Worker secret + GH Actions on `blackbrowedlabs.com` repo | Authenticated GitHub API calls for releases loader |
-| `WEBSITE_DISPATCH_TOKEN` | GH Actions on each product repo | Permits `repository_dispatch` to the website repo |
-| `CLOUDFLARE_API_TOKEN` | GH Actions on website repo | Only if deploying via `wrangler` directly instead of Workers Builds |
+All secrets live outside the repo. Never commit real values. The table below summarises what exists; §10.1–§10.3 give exact setup procedures.
 
-Environment variables exposed at build time:
+| Name | Where it lives | Purpose |
+|---|---|---|
+| `PRODUCT_REPOS_PAT` | Worker secret + GH Actions on `blackbrowedlabs.com` repo + local `.env` | Authenticated GitHub API calls for the releases loader (§7). Named `PRODUCT_REPOS_PAT` rather than `GITHUB_TOKEN` because the latter is reserved by GitHub Actions for the workflow's auto-generated token. |
+| `CLOUDFLARE_API_TOKEN` | GH Actions on website repo + local `.env` | Used by `wrangler` for deployments when running from CI or locally. |
+| `WEBSITE_DISPATCH_TOKEN` | GH Actions on each product repo | Permits `repository_dispatch` to the website repo. Not required in v1 (no product repos yet). |
+
+Environment variables exposed at build time (not secrets):
 
 | Name | Values | Purpose |
 |---|---|---|
 | `PUBLIC_ENVIRONMENT` | `production` \| `staging` | Drives noindex/nofollow injection and `robots.txt` variant |
 | `PUBLIC_SITE_URL` | `https://blackbrowedlabs.com` \| `https://dev.blackbrowedlabs.com` | Canonical URLs, OG tags |
+
+### Secrets flow — where each secret lives
+
+```
+┌─ Local machine ─────────────┐      ┌─ GitHub Actions ──────────┐      ┌─ Cloudflare Workers ──┐
+│  .env  (gitignored)         │      │  Repository secrets       │      │  wrangler secrets     │
+│                             │      │                           │      │                       │
+│  PRODUCT_REPOS_PAT      ────┼──┬──▶│  PRODUCT_REPOS_PAT    ────┼──┬──▶│  PRODUCT_REPOS_PAT    │
+│  CLOUDFLARE_API_TOKEN   ────┼──┤   │  CLOUDFLARE_API_TOKEN ────┼──┘   │  (set via `wrangler   │
+│                             │  │   │                           │      │   secret put`)        │
+└─────────────────────────────┘  │   └───────────────────────────┘      └───────────────────────┘
+                                 │
+                                 │        ┌─ Each product repo ──────┐
+                                 └───────▶│  WEBSITE_DISPATCH_TOKEN  │
+                                          │  (not needed in v1)      │
+                                          └──────────────────────────┘
+```
+
+### 10.1 `PRODUCT_REPOS_PAT` — fine-grained PAT for the releases loader
+
+**Type:** Fine-grained personal access token (not classic).
+
+**Generated via:** GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.
+
+**Configuration:**
+
+- **Token name:** `blackbrowedlabs-com-releases-reader`
+- **Expiration:** 1 year. Add a calendar reminder to rotate before expiry.
+- **Resource owner:** `blackbrowed-labs` (the organization, not a personal account).
+- **Repository access:** "All repositories" under `blackbrowed-labs`. This automatically includes any future product repos added to the org; the releases loader depends on the token being valid across all of them.
+- **Repository permissions (minimum):**
+  - `Contents: Read-only`
+  - `Metadata: Read-only` (forced by GitHub whenever any other permission is set)
+- All other permissions: leave as "No access".
+
+**Where the token lives after generation:**
+
+- **Local `.env`** on your development machine (gitignored) for local `wrangler dev` sessions. Variable name: `PRODUCT_REPOS_PAT`.
+- **Cloudflare Worker secret:** `wrangler secret put PRODUCT_REPOS_PAT` under both the production and staging environments.
+- **GitHub Actions secret** on `blackbrowed-labs/blackbrowedlabs.com`: Settings → Secrets and variables → Actions → New repository secret. Name: `PRODUCT_REPOS_PAT`.
+
+**Why not name it `GITHUB_TOKEN`?** GitHub Actions auto-generates a secret called `GITHUB_TOKEN` for every workflow run — scoped to that run, with permissions for the current repo only. Using a custom PAT named `GITHUB_TOKEN` would shadow the auto-generated one and cause confusion. Naming the custom PAT `PRODUCT_REPOS_PAT` disambiguates and makes its purpose self-evident.
+
+**Rotation:** Before the token expires, generate a new one with the same permissions, update all three locations above, and revoke the old token.
+
+### 10.2 `CLOUDFLARE_API_TOKEN` — Worker deployment token
+
+**Type:** Cloudflare API token (custom).
+
+**Generated via:** Cloudflare dashboard → Profile (top right) → API Tokens → Create Token → "Custom Token" template.
+
+**Configuration:**
+
+- **Token name:** `blackbrowedlabs-com-workers-deploy`
+- **Expiration:** 1 year. Calendar reminder to rotate.
+- **Permissions:**
+  - Account → **Workers Scripts: Edit**
+  - Zone → **Workers Routes: Edit**
+  - Zone → **DNS: Edit** (required for Custom Domain binding on the Worker; not for arbitrary DNS changes)
+- **Account Resources:** Include specifically the account that owns `blackbrowedlabs.com`. Do not use "All accounts".
+- **Zone Resources:** Include specifically `blackbrowedlabs.com`. Do not use "All zones" — restricting by zone limits blast radius if the token is compromised.
+- **IP Address Filtering:** Skip for v1. Can be added later if restricting token use to specific CI runner IPs becomes worthwhile.
+
+**Where the token lives:**
+
+- **GitHub Actions secret** on `blackbrowed-labs/blackbrowedlabs.com`: `CLOUDFLARE_API_TOKEN`. Used by the deploy workflow.
+- **Local `.env`** for local `wrangler deploy` sessions, if you deploy from your machine outside CI.
+
+**What this token CANNOT do:** It cannot edit DNS records outside of Worker Custom Domain bindings, cannot read or write Zone Settings beyond Worker Routes, cannot access billing, cannot touch account membership. Keeping the scope tight protects against accidental or compromised use.
+
+**Rotation:** Same procedure as the GitHub PAT. Before expiry, generate a new token with identical permissions, update both locations, delete the old token from Cloudflare.
+
+### 10.3 `WEBSITE_DISPATCH_TOKEN` — cross-repo dispatch from product repos
+
+Not needed in v1 — there are no product repos yet. Document here for completeness.
+
+When the first product repo is created (e.g., `blackbrowed-labs/thalura`), generate a fine-grained PAT with `Actions: Write` on `blackbrowed-labs/blackbrowedlabs.com`, and store it as an Actions secret named `WEBSITE_DISPATCH_TOKEN` on the product repo. The workflow uses it to dispatch `repository_dispatch` events back to the website repo on release publication (see §7).
 
 ---
 

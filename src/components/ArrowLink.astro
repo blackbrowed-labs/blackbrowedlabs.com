@@ -1,0 +1,53 @@
+---
+/**
+ * Text link with a trailing arrow glyph. Gap widens from 8px to 12px
+ * on hover over 200ms — matches the handoff README component inventory
+ * note ("Arrow link — on hover the gap widens from 8px to 12px over
+ * 200ms"). Used heavily: "Zurück zur Startseite →", "Was hier gerade
+ * entsteht →".
+ */
+
+interface Props {
+  href: string;
+  class?: string;
+}
+
+const { href, class: className } = Astro.props;
+---
+
+<a class:list={['arrow-link', className]} href={href}>
+  <span class="arrow-link__label"><slot /></span>
+  <span class="arrow-link__glyph" aria-hidden="true">&rarr;</span>
+</a>
+
+<style>
+  .arrow-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    color: var(--color-link);
+    border-bottom: 1px solid transparent;
+    transition:
+      gap var(--duration-bbl-base) var(--ease-bbl),
+      color var(--duration-bbl-fast) var(--ease-bbl),
+      border-color var(--duration-bbl-fast) var(--ease-bbl);
+  }
+
+  .arrow-link:hover {
+    gap: 0.75rem;
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+
+  .arrow-link:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 3px;
+    border-radius: var(--radius-bbl-1);
+    border-bottom-color: transparent;
+  }
+
+  .arrow-link__glyph {
+    display: inline-block;
+    transition: transform var(--duration-bbl-base) var(--ease-bbl);
+  }
+</style>

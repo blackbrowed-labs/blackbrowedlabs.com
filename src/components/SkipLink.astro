@@ -1,0 +1,40 @@
+---
+/**
+ * Skip link — first focusable element on every page.
+ * Visible on keyboard focus, off-screen otherwise.
+ * Per CLAUDE_DESIGN_BRIEF §10 accessibility requirements.
+ */
+
+interface Props {
+  label: string;
+  targetId?: string;
+}
+
+const { label, targetId = 'main' } = Astro.props;
+---
+
+<a class="skip-link" href={`#${targetId}`}>{label}</a>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    border: 2px solid var(--color-focus-ring);
+    border-radius: 4px;
+    font-weight: 500;
+    text-decoration: none;
+    transform: translateY(-120%);
+    transition: transform 120ms ease;
+    z-index: 1000;
+  }
+
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translateY(0.5rem);
+    outline: none;
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+/**
+ * Blackbrowed Labs brand logo.
+ *
+ * Two variants:
+ *   - 'horizontal' (default): arc + wordmark side-by-side. Used in the
+ *     site header and as a footer mark placement.
+ *   - 'mark': arc only. Used at display scale on the About page right
+ *     column, in the footer, and on the 404 page (Pass 2).
+ *
+ * Sizing is controlled via the `--brand-arc-height` CSS custom property
+ * on any ancestor. Defaults: 2rem for the solo mark, 1.75rem for the
+ * arc inside the horizontal lockup. Consumers that need responsive
+ * sizes declare the var under a media query.
+ *
+ * Colors come from the raw brand CSS variables (--bbl-primary for the
+ * arc, --bbl-neutral for the wordmark). This is the one component where
+ * raw brand vars are correct — see plan §3 "rule of thumb" carve-out.
+ * Dark mode swaps automatically via the tokens.css override.
+ *
+ * The arc SVG path is inlined from
+ * design/handoff-bundle/assets/logos/logo-mark.svg.
+ */
+
+export type BrandLogoVariant = 'horizontal' | 'mark';
+
+interface Props {
+  variant?: BrandLogoVariant;
+  ariaLabel?: string;
+  class?: string;
+}
+
+const {
+  variant = 'horizontal',
+  ariaLabel = 'Blackbrowed Labs',
+  class: className,
+} = Astro.props;
+---
+
+{variant === 'mark' ? (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 300 120"
+    role="img"
+    aria-label={ariaLabel}
+    class:list={['brand-mark', className]}
+  >
+    <path
+      fill="currentColor"
+      d="M 14 96 C 60 82, 100 56, 138 36 C 152 28, 166 25, 180 28 C 208 40, 244 64, 286 86 C 244 78, 214 60, 190 48 C 178 45, 168 45, 158 48 C 138 54, 114 68, 84 80 C 62 93, 40 99, 20 102 L 14 96 Z"
+    />
+  </svg>
+) : (
+  <span class:list={['brand-lockup', className]} role="img" aria-label={ariaLabel}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 300 120"
+      aria-hidden="true"
+      class="brand-lockup__arc"
+    >
+      <path
+        fill="currentColor"
+        d="M 14 96 C 60 82, 100 56, 138 36 C 152 28, 166 25, 180 28 C 208 40, 244 64, 286 86 C 244 78, 214 60, 190 48 C 178 45, 168 45, 158 48 C 138 54, 114 68, 84 80 C 62 93, 40 99, 20 102 L 14 96 Z"
+      />
+    </svg>
+    <span class="brand-lockup__wordmark">Blackbrowed Labs</span>
+  </span>
+)}
+
+<style>
+  .brand-mark {
+    color: var(--bbl-primary);
+    height: var(--brand-arc-height, 2rem);
+    width: auto;
+    display: block;
+  }
+
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .brand-lockup__arc {
+    color: var(--bbl-primary);
+    height: var(--brand-arc-height, 1.75rem);
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .brand-lockup__wordmark {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-light);
+    letter-spacing: 0.1em;
+    color: var(--bbl-neutral);
+    font-size: 1.0625rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+</style>

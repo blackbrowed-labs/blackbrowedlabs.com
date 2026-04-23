@@ -1,0 +1,266 @@
+---
+/**
+ * Three-state theme toggle: Light / Dark / System.
+ *
+ * The visible trigger button shows a sun or moon glyph reflecting the
+ * *resolved* theme (data-theme attribute). Clicking opens a disclosure
+ * panel with the three choices; the active choice is marked aria-pressed.
+ *
+ * The FOUC-prevention script in BaseLayout has already set data-theme
+ * before first paint, so this controller only handles user interaction
+ * and live updates (OS change while choice === 'system').
+ *
+ * localStorage key: bbl-theme. Values: 'light' | 'dark' | 'system'.
+ * 'system' is encoded as *absence* of the key so a cleared storage
+ * defaults to System.
+ */
+
+import { getLocaleFromPath } from '../lib/i18n';
+import { getUiStrings } from '../i18n';
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const t = getUiStrings(locale).themeToggle;
+---
+
+<div class="theme-toggle">
+  <button
+    type="button"
+    class="theme-toggle__trigger"
+    aria-label={t.triggerAriaLabel}
+    aria-haspopup="true"
+    aria-expanded="false"
+    data-theme-toggle-trigger
+  >
+    <svg
+      class="theme-toggle__icon theme-toggle__icon--sun"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+    </svg>
+    <svg
+      class="theme-toggle__icon theme-toggle__icon--moon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+    </svg>
+  </button>
+
+  <div
+    class="theme-toggle__menu"
+    role="group"
+    aria-label={t.groupLabel}
+    hidden
+    data-theme-toggle-menu
+  >
+    <button type="button" class="theme-toggle__option" data-theme-value="light" aria-pressed="false">{t.light}</button>
+    <button type="button" class="theme-toggle__option" data-theme-value="dark" aria-pressed="false">{t.dark}</button>
+    <button type="button" class="theme-toggle__option" data-theme-value="system" aria-pressed="false">{t.system}</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const STORAGE_KEY = 'bbl-theme';
+
+    function readChoice() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        return stored;
+      }
+      return 'system';
+    }
+
+    function resolve(choice) {
+      if (choice === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+      }
+      return choice;
+    }
+
+    function apply(choice) {
+      const resolved = resolve(choice);
+      document.documentElement.dataset.theme = resolved;
+      document.documentElement.dataset.themeChoice = choice;
+    }
+
+    function persist(choice) {
+      if (choice === 'system') {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, choice);
+      }
+    }
+
+    const triggers = document.querySelectorAll('[data-theme-toggle-trigger]');
+    const menus = document.querySelectorAll('[data-theme-toggle-menu]');
+    const options = document.querySelectorAll('[data-theme-value]');
+
+    function updateOptionsState() {
+      const choice = readChoice();
+      options.forEach(function (opt) {
+        const value = opt.getAttribute('data-theme-value');
+        opt.setAttribute('aria-pressed', value === choice ? 'true' : 'false');
+      });
+    }
+
+    function openMenu() {
+      menus.forEach(function (m) { m.hidden = false; });
+      triggers.forEach(function (tr) { tr.setAttribute('aria-expanded', 'true'); });
+      updateOptionsState();
+    }
+
+    function closeMenu() {
+      menus.forEach(function (m) { m.hidden = true; });
+      triggers.forEach(function (tr) { tr.setAttribute('aria-expanded', 'false'); });
+    }
+
+    triggers.forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        const expanded = trigger.getAttribute('aria-expanded') === 'true';
+        if (expanded) closeMenu();
+        else openMenu();
+      });
+    });
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        const value = opt.getAttribute('data-theme-value');
+        if (!value) return;
+        persist(value);
+        apply(value);
+        updateOptionsState();
+        closeMenu();
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest('[data-theme-toggle-trigger]') &&
+          !target.closest('[data-theme-toggle-menu]')) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    mql.addEventListener('change', function () {
+      if (readChoice() === 'system') apply('system');
+    });
+
+    // FOUC script already set data-theme; ensure choice attribute matches.
+    apply(readChoice());
+    updateOptionsState();
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    position: relative;
+    display: inline-block;
+  }
+
+  .theme-toggle__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-bbl-2);
+    color: var(--color-text);
+    cursor: pointer;
+    transition:
+      color var(--duration-bbl-fast) var(--ease-bbl),
+      background var(--duration-bbl-fast) var(--ease-bbl),
+      border-color var(--duration-bbl-fast) var(--ease-bbl);
+  }
+
+  .theme-toggle__trigger:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-border);
+  }
+
+  .theme-toggle__trigger:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .theme-toggle__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Sun visible in light, moon visible in dark. FOUC script sets
+     data-theme before first paint, so there's no wrong-icon flash. */
+  .theme-toggle__icon--sun { display: block; }
+  .theme-toggle__icon--moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle__icon--sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle__icon--moon { display: block; }
+
+  .theme-toggle__menu {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-bbl-2);
+    padding: 0.25rem;
+    min-width: 9rem;
+    box-shadow: 0 4px 12px color-mix(in oklab, var(--bbl-neutral) 15%, transparent);
+    z-index: 20;
+  }
+
+  .theme-toggle__menu[hidden] {
+    display: none;
+  }
+
+  .theme-toggle__option {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-bbl-1);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: var(--text-small);
+    cursor: pointer;
+    min-height: 36px;
+    transition: background var(--duration-bbl-fast) var(--ease-bbl);
+  }
+
+  .theme-toggle__option:hover {
+    background: var(--color-surface-warm);
+  }
+
+  .theme-toggle__option[aria-pressed="true"] {
+    color: var(--color-heading);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .theme-toggle__option:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: -1px;
+  }
+</style>

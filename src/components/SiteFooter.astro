@@ -1,0 +1,111 @@
+---
+/**
+ * Site footer — small brand mark, tiny nav (About + GitHub), copyright.
+ *
+ * Pass 1 scope: only Pass 1 pages are linked. Pass 2 adds Products,
+ * Contact, Impressum, Datenschutz when the pages exist.
+ */
+
+import BrandLogo from './BrandLogo.astro';
+import { getLocaleFromPath } from '../lib/i18n';
+import { getUiStrings } from '../i18n';
+
+const path = Astro.url.pathname;
+const locale = getLocaleFromPath(path);
+const t = getUiStrings(locale).footer;
+
+const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__brand">
+      <BrandLogo variant="mark" />
+    </div>
+
+    <nav class="site-footer__nav" aria-label={t.about}>
+      <ul>
+        <li><a href={aboutHref}>{t.about}</a></li>
+        <li>
+          <a
+            href="https://github.com/blackbrowed-labs"
+            rel="noopener external"
+            aria-label={t.githubAriaLabel}
+          >{t.github}</a>
+        </li>
+      </ul>
+    </nav>
+
+    <p class="site-footer__copyright">{t.copyright}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-warm);
+    margin-top: 6rem;
+  }
+
+  .site-footer__brand {
+    --brand-arc-height: 1.5rem;
+  }
+
+  .site-footer__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+
+  .site-footer__nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  .site-footer__nav a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-small);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-footer__nav a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+
+  .site-footer__nav a:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-bbl-1);
+  }
+
+  .site-footer__copyright {
+    color: var(--color-text-muted);
+    margin: 0;
+    text-align: right;
+    font-size: var(--text-caption);
+    letter-spacing: var(--tracking-caption);
+  }
+
+  @media (max-width: 767px) {
+    .site-footer__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+      justify-items: center;
+    }
+    .site-footer__copyright { text-align: center; }
+  }
+</style>

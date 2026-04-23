@@ -1,0 +1,109 @@
+---
+/**
+ * Base page layout — handles <html>, <head>, skip link, header, footer,
+ * and the FOUC-prevention theme-init script. Every page wraps its body
+ * content in this layout.
+ *
+ * Staging protection triad member 1 of 3 (the <meta name="robots">) is
+ * gated here on isStaging(). The robots.txt endpoint and the _headers
+ * X-Robots-Tag cover the other two.
+ */
+
+import '../styles/global.css';
+
+import SkipLink from '../components/SkipLink.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+import { getLocaleFromPath, getHreflangAlternates } from '../lib/i18n';
+import { getUiStrings } from '../i18n';
+import { getSiteUrl, isStaging } from '../lib/env';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Override the locale-default OG image for page-specific variants. */
+  ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+
+const path = Astro.url.pathname;
+const locale = getLocaleFromPath(path);
+const t = getUiStrings(locale);
+
+const siteUrl = getSiteUrl();
+const canonical = `${siteUrl}${path}`;
+const defaultOgImage = locale === 'de' ? '/og/og-image-de.png' : '/og/og-image-en.png';
+const ogImageUrl = `${siteUrl}${ogImage ?? defaultOgImage}`;
+
+const alternates = getHreflangAlternates(path, siteUrl);
+const shouldNoindex = isStaging();
+const ogLocale = locale === 'de' ? 'de_DE' : 'en_US';
+---
+
+<!DOCTYPE html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    {shouldNoindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <link rel="canonical" href={canonical} />
+    {alternates.map(alt => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t.siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content={ogLocale} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/* FOUC-prevention. Runs synchronously before first paint. Sets
+        data-theme (resolved: 'light' | 'dark') and data-theme-choice
+        (user's pick: 'light' | 'dark' | 'system'). */}
+    <script is:inline>
+      (function () {
+        var KEY = 'bbl-theme';
+        var choice = 'system';
+        try {
+          var stored = localStorage.getItem(KEY);
+          if (stored === 'light' || stored === 'dark' || stored === 'system') {
+            choice = stored;
+          }
+        } catch (_) {}
+        var resolved = 'light';
+        try {
+          if (choice === 'dark') {
+            resolved = 'dark';
+          } else if (choice === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            resolved = 'dark';
+          }
+        } catch (_) {}
+        document.documentElement.dataset.theme = resolved;
+        document.documentElement.dataset.themeChoice = choice;
+      })();
+    </script>
+  </head>
+  <body>
+    <SkipLink label={t.skipLink} />
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

@@ -11,6 +11,8 @@ node_modules/
 dist/
 .astro/
 .wrangler/
+# Generated per-environment by scripts/build-headers.mjs as part of `npm run build`.
+public/_headers
 
 # --- Environment variables ---
 # Real secrets never go into the repo. .env.example (if we create one) is

@@ -1,0 +1,58 @@
+# ============================================================================
+# Blackbrowed Labs website — .gitignore
+# ============================================================================
+
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build output ---
+dist/
+.astro/
+.wrangler/
+
+# --- Environment variables ---
+# Real secrets never go into the repo. .env.example (if we create one) is
+# deliberately allowed as a shareable template with placeholder values.
+.env
+.env.*
+!.env.example
+
+# --- Editor / IDE ---
+# VS Code: allow shared project settings (extensions.json, settings.json)
+# but ignore personal workspace files.
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# --- Testing / coverage ---
+coverage/
+.nyc_output/
+
+# --- Local caches ---
+.cache/
+.parcel-cache/
+
+# --- Claude Code local artifacts ---
+.claude/
+
+# ============================================================================
+# Note: lockfiles (package-lock.json, pnpm-lock.yaml, yarn.lock) are NOT
+# gitignored. They must be committed so builds are reproducible.
+# ============================================================================

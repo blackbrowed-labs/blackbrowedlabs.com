@@ -52,6 +52,11 @@ coverage/
 # --- Claude Code local artifacts ---
 .claude/
 
+# --- Local planning workspace (Claude Code working drafts, not project docs) ---
+# Large plan drafts live here for review before implementation. Not source of
+# truth — canonical docs are in /docs/.
+plans/
+
 # ============================================================================
 # Note: lockfiles (package-lock.json, pnpm-lock.yaml, yarn.lock) are NOT
 # gitignored. They must be committed so builds are reproducible.

@@ -126,7 +126,7 @@ One scheduled trigger on the production Worker, daily at 03:00 UTC, dispatches a
 - `compatibility_date` set to today's date at initial deploy.
 - `assets.directory` points at Astro's build output (`./dist/`).
 - `not_found_handling` = `"404-page"` (this is a content site, not an SPA).
-- Git-based Workers Builds enabled with branch-to-environment mapping (`main` → production, `dev` → staging).
+- **GitHub Actions deploys** on push to `dev` (→ staging) and `main` (→ production). Workflows run `wrangler deploy --env <staging|production>` authenticated via the `CLOUDFLARE_API_TOKEN` GitHub Actions secret (§10.2). Cloudflare's native Workers Builds is intentionally **not** connected to this repo — one deploy mechanism at a time, no duplicate deploys or race conditions.
 - Custom Domains on the Worker, not CNAME records. `blackbrowedlabs.com` bound to production, `dev.blackbrowedlabs.com` bound to staging.
 
 ---
@@ -139,54 +139,55 @@ TypeScript throughout. Content collections + custom content loaders for the rele
 
 ### 4.2 Tailwind — Design Tokens
 
-The Tailwind theme is extended with the full Tussock Ridge palette (see `CLAUDE_DESIGN_BRIEF.md` §4 for the full specification). The tokens below are authoritative for code.
+Tailwind 4 is integrated via `@tailwindcss/vite` (a Vite plugin configured in `astro.config.mjs` under `vite.plugins`, not an Astro integration — `@astrojs/tailwind` is not used). Tailwind 4 is CSS-first: there is no `tailwind.config.ts` / `tailwind.config.js`. All design tokens live in `src/styles/tokens.css` declared via the `@theme` directive. The Tussock Ridge palette (full spec in `CLAUDE_DESIGN_BRIEF.md` §4) is authoritative; the values below are what `tokens.css` declares.
 
 **Light mode**
 
-```ts
-// tailwind.config.ts — theme.extend.colors
-{
-  bg:         '#FFFFFF',
-  'bg-warm':  '#FBF7F2',
-  'bg-card':  '#F5F0E9',
-  border:     '#D6CDBE',
+```css
+/* src/styles/tokens.css — @theme block (excerpt, indicative naming) */
+@theme {
+  --color-bg:         #FFFFFF;
+  --color-bg-warm:    #FBF7F2;
+  --color-bg-card:    #F5F0E9;
+  --color-border:     #D6CDBE;
 
-  primary:    '#7D4912',  // Tussock Gold   (31°, 75%, 28%)
-  accent:     '#1C5E66',  // Ridge Teal     (186°, 57%, 25%)
-  neutral:    '#2C2622',  // Volcanic Stone (24°, 13%, 15%)
-  error:      '#882218',  // Peat Ember     (5°, 70%, 31%)
+  --color-primary:    #7D4912;  /* Tussock Gold   (31°, 75%, 28%) */
+  --color-accent:     #1C5E66;  /* Ridge Teal     (186°, 57%, 25%) */
+  --color-neutral:    #2C2622;  /* Volcanic Stone (24°, 13%, 15%) */
+  --color-error:      #882218;  /* Peat Ember     (5°, 70%, 31%) */
 
-  'primary-hover': '#6A3D0F',
-  'accent-hover':  '#174E55',
-  'error-hover':   '#751E15',
+  --color-primary-hover: #6A3D0F;
+  --color-accent-hover:  #174E55;
+  --color-error-hover:   #751E15;
 }
 ```
 
-**Dark mode** (applied via `class` strategy, `dark:` prefix)
+**Dark mode** — applied via the `[data-theme="dark"]` attribute on `<html>`. Tokens swap automatically, so Tailwind's `dark:` variant prefix is **not needed for colors**. For any future non-color utility that needs per-mode behavior, `src/styles/global.css` defines `@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));` so the attribute drives the variant uniformly.
 
-```ts
-{
-  bg:         '#1C1C1E',
-  'bg-warm':  '#24221F',
-  'bg-card':  '#2E2A26',
-  border:     '#4A443E',
+```css
+/* src/styles/tokens.css — dark override (excerpt) */
+[data-theme="dark"] {
+  --color-bg:         #1C1C1E;
+  --color-bg-warm:    #24221F;
+  --color-bg-card:    #2E2A26;
+  --color-border:     #4A443E;
 
-  primary:    '#D4A45C',
-  accent:     '#7CB3BC',
-  neutral:    '#E0D8CE',
-  error:      '#EC9C8C',
+  --color-primary:    #D4A45C;
+  --color-accent:     #7CB3BC;
+  --color-neutral:    #E0D8CE;
+  --color-error:      #EC9C8C;
 
-  'primary-hover': '#DFB26E',
-  'accent-hover':  '#8EC1C9',
-  'error-hover':   '#F0A494',
+  --color-primary-hover: #DFB26E;
+  --color-accent-hover:  #8EC1C9;
+  --color-error-hover:   #F0A494;
 }
 ```
 
-Semantic aliases, high-contrast values, and forced-colors handling: full spec in `CLAUDE_DESIGN_BRIEF.md` §4.
+Semantic aliases (e.g. `--color-heading`, `--color-link`), high-contrast variants, and forced-colors handling: full spec in `CLAUDE_DESIGN_BRIEF.md` §4. Authoritative source: `src/styles/tokens.css` (produced via the Tailwind 3→4 migration — see `docs/tailwind-4-conversion-notes.md`).
 
 ### 4.3 Typography
 
-- **Primary typeface:** **Inter** (variable), self-hosted via `@fontsource-variable/inter` — no Google Fonts CDN (GDPR).
+- **Primary typeface:** **Inter**, self-hosted via four static `.woff2` files (weights 300 / 400 / 500 / 600) shipped in `design/handoff-bundle/assets/fonts/`, copied to `public/fonts/` at scaffold time and declared via `@font-face` in `src/styles/global.css`. No Google Fonts CDN (GDPR). The variable-axis build (`@fontsource-variable/inter`) is intentionally **not** used: only four fixed weights are needed, and the bundle's static files are lighter overall and keep the handoff bundle as the single source of truth for typography assets.
 - **Fallback stack:** `Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif`.
 - **Weights used:** 300, 400, 500, 600. No bold 700+.
 - **Scale:** fluid, clamp-based. Full table in `CLAUDE_DESIGN_BRIEF.md` §5.
@@ -460,6 +461,8 @@ The repo's `.gitignore` is at the root and covers three categories of files:
 - Caches: `.cache/`, `.parcel-cache/`, `coverage/`, `.nyc_output/`
 
 **Claude Code artifacts** — `.claude/` is ignored because Claude Code stores local session state there.
+
+**Local planning workspace** — `plans/` is ignored. It's Claude Code's scratch space for draft plans (e.g. `pass-1-implementation-plan.md`) that Lars reviews before implementation begins. Canonical project documentation remains under `docs/`; `plans/` is intentionally transient and not authoritative.
 
 **What is deliberately NOT ignored:**
 

@@ -1,0 +1,143 @@
+---
+/**
+ * Homepage (EN — secondary).
+ * Matches design/handoff-bundle/design/pages/02-homepage-en.html.
+ * Copy is verbatim from docs/BASELINE_COPY.md §2 and §3.
+ *
+ * The "What's being built →" secondary link is omitted in Pass 1
+ * (no /en/products route yet). Pass 2 restores it in the commit that
+ * adds the Products page. See plans/pass-1-implementation-plan.md §7.
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BrandLogo from '../../components/BrandLogo.astro';
+---
+
+<BaseLayout
+  title="Blackbrowed Labs — Precise tools for teaching"
+  description="A small software studio in Reinbek, near Hamburg. Tools for classroom management, built from conversations with teachers."
+>
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__arc" aria-hidden="true">
+        <BrandLogo variant="mark" />
+      </div>
+      <h1 class="display">Precise tools for teaching.</h1>
+      <p class="lead">
+        Blackbrowed Labs is a small software studio in Reinbek, near Hamburg.
+        I build tools for classroom management — software that takes work off
+        teachers' plates.
+      </p>
+    </div>
+  </section>
+
+  <section class="secondary">
+    <div class="secondary__inner">
+      <h2>Close to the work</h2>
+      <p class="lead">
+        The software here grows out of conversations with teachers — what
+        really costs time in the classroom, what works, what doesn't. No
+        feature catalogue, no big promises, just tools that do what they're
+        meant to do.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--color-border);
+    min-height: calc(100vh - 6rem);
+  }
+
+  .hero__inner {
+    width: 100%;
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 6rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero__arc {
+    --brand-arc-height: 6.875rem;
+    margin-bottom: 6rem;
+    line-height: 0;
+  }
+
+  .hero .display {
+    color: var(--color-heading);
+    margin: 0 auto 4rem;
+    font-weight: var(--font-weight-light);
+    max-width: 16ch;
+    text-align: center;
+  }
+
+  .hero .lead {
+    color: var(--color-text);
+    max-width: 54ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .secondary {
+    background: var(--color-surface-warm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .secondary__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem;
+  }
+
+  .secondary h2 {
+    max-width: 20ch;
+    margin: 0 0 2rem;
+  }
+
+  .secondary .lead {
+    max-width: 70ch;
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .hero__inner {
+      padding: 3.5rem 1.5rem 4rem;
+    }
+    .hero__arc {
+      --brand-arc-height: 3.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero .display {
+      font-size: 2.75rem;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      max-width: 12ch;
+    }
+    .hero .lead {
+      font-size: 1.0625rem;
+      max-width: 32ch;
+    }
+
+    .secondary__inner {
+      padding: 3.5rem 1.5rem;
+    }
+    .secondary h2 {
+      font-size: 1.75rem;
+      letter-spacing: -0.01em;
+      max-width: 14ch;
+      margin-bottom: 1.25rem;
+    }
+    .secondary .lead {
+      font-size: 1.0625rem;
+      max-width: none;
+    }
+  }
+</style>

@@ -1,0 +1,27 @@
+{
+  "name": "blackbrowedlabs-com",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Blackbrowed Labs marketing website (Astro + Tailwind 4, Cloudflare Workers).",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "^5.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@tailwindcss/vite": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

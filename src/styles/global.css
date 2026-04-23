@@ -1,0 +1,185 @@
+/* =============================================================
+   Blackbrowed Labs — Global stylesheet
+   Imports Tailwind 4, the design tokens, declares @font-face for
+   the self-hosted Inter weights, binds the `dark:` variant to the
+   [data-theme] attribute, and defines base element styles.
+   ============================================================= */
+
+@import "tailwindcss";
+@import "./tokens.css";
+
+
+/* ─── Self-hosted Inter (four static weights) ─────────────────── */
+/* Files served from public/fonts/ (copied from the handoff bundle). */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* ─── Dark variant bound to [data-theme="dark"] ───────────────── */
+/* Color tokens flip automatically (see tokens.css). This directive
+   lets any future non-color `dark:` utility use the same attribute,
+   so we never split color-vs-non-color dark handling. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+
+/* ─── Base element styles ─────────────────────────────────────── */
+/* Extracted from design/handoff-bundle/design/tokens/colors_and_type.css.
+   Values reference @theme tokens declared in tokens.css. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--font-weight-normal);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings — gold, light-weight, left-aligned */
+  h1, h2, h3, h4 {
+    color: var(--color-heading);
+    text-align: left;
+    text-wrap: pretty;
+    margin: 0;
+  }
+
+  .display {
+    font-size: var(--text-display);
+    font-weight: var(--font-weight-light);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    font-weight: var(--font-weight-light);
+    line-height: var(--leading-h1);
+    letter-spacing: var(--tracking-h1);
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--leading-h2);
+    letter-spacing: var(--tracking-h2);
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-h3);
+    letter-spacing: var(--tracking-h3);
+  }
+
+  h4 {
+    font-size: var(--text-h4);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-h4);
+  }
+
+  /* Body text — capped at the reading measure */
+  p {
+    max-width: var(--max-width-measure);
+    margin: 0 0 var(--spacing-sp-4);
+    color: var(--color-text);
+  }
+
+  .lead {
+    font-size: var(--text-lead);
+    line-height: var(--leading-lead);
+  }
+
+  small, .small {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+
+  .caption {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-caption);
+    font-weight: var(--font-weight-medium);
+    text-transform: none;
+  }
+
+  /* Links — teal, underline on hover */
+  a {
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition:
+      color var(--duration-bbl-fast) var(--ease-bbl),
+      border-color var(--duration-bbl-fast) var(--ease-bbl);
+  }
+  a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  a:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-bbl-1);
+  }
+
+  /* Code */
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+  }
+  pre {
+    background: var(--color-surface-warm);
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-sp-4);
+    overflow-x: auto;
+    border-radius: var(--radius-bbl-2);
+  }
+
+  /* Wordmark — used by the logo + any Inter Light + +0.10em contexts */
+  .wordmark {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-light);
+    letter-spacing: 0.10em;
+  }
+}
+
+
+/* ─── Reduced motion ──────────────────────────────────────────── */
+/* Kill all non-essential animation/transition regardless of layer. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

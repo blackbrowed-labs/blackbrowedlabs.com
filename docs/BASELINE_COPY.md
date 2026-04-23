@@ -63,7 +63,7 @@ The software here grows out of conversations with teachers — what really costs
 
 ### DE
 
-**H1:** Über Blackbrowed Labs
+**H1:** Über
 
 Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei Hamburg. Ich entwickle Werkzeuge für die Klassenführung — Software, die Lehrkräften im Schulalltag Arbeit abnimmt.
 
@@ -83,7 +83,7 @@ Was funktioniert, bleibt. Was nicht, fliegt raus.
 
 ### EN
 
-**H1:** About Blackbrowed Labs
+**H1:** About
 
 Blackbrowed Labs is a small software studio in Reinbek, near Hamburg. I build tools for classroom management — software that takes work off teachers' plates.
 

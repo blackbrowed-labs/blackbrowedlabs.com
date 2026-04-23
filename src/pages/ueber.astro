@@ -1,0 +1,243 @@
+---
+/**
+ * About page (DE — primary) — "Über Blackbrowed Labs".
+ * Matches design/handoff-bundle/design/pages/04-about.html (DE artboard).
+ * Copy verbatim from docs/BASELINE_COPY.md §4.
+ *
+ * Layout: asymmetric reading grid. Left column has the prose; right
+ * column carries the arc mark at display scale as a wordless signature
+ * (per handoff README "the arc carries its own weight here; do not
+ * re-add the caption that was removed in revision").
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrandLogo from '../components/BrandLogo.astro';
+---
+
+<BaseLayout
+  title="Über — Blackbrowed Labs"
+  description="Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei Hamburg. Ich entwickle Werkzeuge für die Klassenführung."
+>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">Über</span>
+    </div>
+  </nav>
+
+  <article class="about">
+    <div class="about__container">
+      <div class="about__top">
+        <div class="about__text">
+          <h1>Über Blackbrowed Labs</h1>
+          <p>
+            Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei
+            Hamburg. Ich entwickle Werkzeuge für die Klassenführung — Software,
+            die Lehrkräften im Schulalltag Arbeit abnimmt.
+          </p>
+          <p>
+            Ich bin selbst kein Lehrer. Aber ich bin von Lehrkräften umgeben —
+            Freunde, Familie, langjährige Gespräche über das, was im Unterricht
+            funktioniert und was nicht. Die Software entsteht aus diesen
+            Gesprächen, nicht aus allgemeinen Annahmen darüber, was Schulen
+            brauchen.
+          </p>
+          <p>
+            Aktuell entstehen zwei Werkzeuge: eine iPad-App für die
+            Klassenführung — Noten, Schülerleistungen, Beobachtungen, ohne
+            Papierkram — und ein Claude-Cowork-Plugin, das bei der Planung von
+            Unterrichtseinheiten hilft. Beide bekommen eine eigene Website,
+            sobald sie so weit sind.
+          </p>
+        </div>
+        <aside class="about__visual" aria-hidden="true">
+          <div class="about__mark">
+            <BrandLogo variant="mark" />
+          </div>
+        </aside>
+      </div>
+
+      <section class="about__section">
+        <h2>Woher der Name kommt</h2>
+        <p>
+          Der Name <strong>Blackbrowed Labs</strong> stammt vom
+          Schwarzbrauenalbatros — einem Seevogel, der tausende Kilometer mit
+          minimalem Aufwand zurücklegt, getragen vom Wind statt von Muskelkraft.
+          Das markante dunkle Augenband gibt dem Vogel seinen Namen und dem
+          Studio seinen Charakter: ein kleiner, präziser Strich als
+          Erkennungszeichen.
+        </p>
+        <p>
+          Der Anspruch an die Software ist derselbe wie der Flug des Albatros:
+          lange tragen, wenig verbrauchen, klar bleiben.
+        </p>
+      </section>
+
+      <footer class="about__closing">
+        <p class="about__aphorism">Was funktioniert, bleibt. Was nicht, fliegt raus.</p>
+        <p class="about__signature">— Lars Weiser</p>
+      </footer>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep {
+    color: var(--color-border);
+  }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .about {
+    background: var(--color-bg);
+  }
+  .about__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem 6rem;
+  }
+
+  .about__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
+    gap: 6rem;
+    align-items: start;
+    margin-bottom: 6rem;
+  }
+
+  .about__text {
+    min-width: 0;
+    max-width: 68ch;
+  }
+
+  .about__visual {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+  }
+
+  .about__mark {
+    width: 100%;
+    max-width: 300px;
+    --brand-arc-height: auto;
+  }
+  /* Override the default fixed height — let the arc scale to its container width. */
+  .about__mark :global(.brand-mark) {
+    height: auto;
+    width: 100%;
+  }
+
+  .about h1 {
+    margin: 0 0 3rem;
+  }
+
+  .about__text p {
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+  }
+
+  .about__section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 4rem;
+    margin-top: 4rem;
+    max-width: 68ch;
+  }
+  .about__section h2 {
+    max-width: 20ch;
+    margin: 0 0 1.5rem;
+  }
+  .about__section p {
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+  }
+  .about__section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about__closing {
+    margin-top: 6rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    max-width: 68ch;
+  }
+  .about__aphorism {
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  .about__signature {
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
+    margin: 1rem 0 0;
+    font-weight: var(--font-weight-medium);
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .about__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .about__top {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .about__visual { padding-top: 0; }
+    .about__mark { max-width: 200px; }
+    .about h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1.5rem;
+      max-width: 14ch;
+    }
+    .about__section h2 {
+      font-size: 1.625rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      max-width: none;
+    }
+    .about__text p,
+    .about__section p { max-width: none; }
+    .about__section {
+      padding-top: 2rem;
+      margin-top: 2rem;
+    }
+    .about__closing {
+      max-width: none;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+    }
+  }
+</style>

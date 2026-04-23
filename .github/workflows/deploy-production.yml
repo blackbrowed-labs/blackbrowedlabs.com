@@ -1,0 +1,47 @@
+# Deploy the production environment on every push to `main`.
+# Target: blackbrowedlabs.com (Cloudflare Workers, Custom Domain).
+# See docs/TECH_STACK.md §3 and §10.2.
+
+name: Deploy — production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to blackbrowedlabs.com
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_ENVIRONMENT: production
+      PUBLIC_SITE_URL: https://blackbrowedlabs.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env production

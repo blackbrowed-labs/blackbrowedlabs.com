@@ -1,0 +1,43 @@
+/**
+ * Wrangler config — Cloudflare Workers Static Assets deployment.
+ *
+ * Two named environments bound via Custom Domains:
+ *   - production: main branch → blackbrowedlabs.com
+ *   - staging:    dev branch  → dev.blackbrowedlabs.com
+ *
+ * Assets-only (no Worker script). The Astro build output (./dist) is
+ * served directly; per-environment headers live in ./dist/_headers
+ * emitted by scripts/build-headers.mjs.
+ *
+ * Deploy mechanism: GitHub Actions (.github/workflows/deploy-*.yml).
+ * Cloudflare's native Workers Builds is intentionally NOT connected to
+ * this repo — one deploy mechanism at a time (see docs/TECH_STACK.md §3.5).
+ *
+ * not_found_handling = "404-page" expects /404.html in the assets tree.
+ * Pass 1 does not include /404.html yet; that lands in Pass 2 with the
+ * rest of the Pass 2 pages. Until then, unmatched paths may fall
+ * through to a bare Cloudflare 404 response.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blackbrowedlabs-com",
+  "compatibility_date": "2026-04-23",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "env": {
+    "production": {
+      "name": "blackbrowedlabs-com-production",
+      "routes": [
+        { "pattern": "blackbrowedlabs.com", "custom_domain": true }
+      ]
+    },
+    "staging": {
+      "name": "blackbrowedlabs-com-staging",
+      "routes": [
+        { "pattern": "dev.blackbrowedlabs.com", "custom_domain": true }
+      ]
+    }
+  }
+}

@@ -1,0 +1,179 @@
+/* =========================================================
+   Blackbrowed Labs — About page ("Über Blackbrowed Labs")
+   Asymmetric reading layout · arc as portrait substitute
+   ========================================================= */
+
+.about-page { display: flex; flex-direction: column; min-height: 100%; }
+.about-page main { flex: 1; display: flex; flex-direction: column; }
+
+/* ---------- Breadcrumb rail (shared visual language with Products) ---------- */
+.about-rail {
+  border-bottom: var(--hairline) solid var(--color-border);
+  background: var(--color-bg);
+}
+.about-rail-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-7);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+.about-rail a {
+  color: var(--color-text-muted);
+  border-bottom: var(--hairline) solid transparent;
+  font-weight: var(--fw-medium);
+}
+.about-rail a:hover { color: var(--color-link); border-bottom-color: currentColor; }
+.about-rail-sep { color: var(--color-border); }
+.about-rail-current {
+  color: var(--color-text);
+  font-weight: var(--fw-medium);
+}
+
+/* ---------- Main reading layout ---------- */
+.about-main {
+  flex: 1;
+  background: var(--color-bg);
+}
+.about-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-10) var(--sp-7) var(--sp-9);
+}
+
+/* Top band: H1 + opening prose on left, arc as "portrait" on right */
+.about-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
+  gap: var(--sp-9);
+  align-items: start;
+  margin-bottom: var(--sp-9);
+}
+.about-top-text { min-width: 0; max-width: 68ch; }
+.about-top-visual {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  color: var(--bbl-primary);
+  padding-top: 8px;
+}
+.about-portrait {
+  width: 100%;
+  max-width: 300px;
+  margin-top: var(--sp-3);
+}
+.about-portrait svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.about-portrait-caption {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  max-width: 28ch;
+  line-height: var(--lh-caption);
+}
+
+/* H1 — H1 scale, not display */
+.about-content h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--color-heading);
+  margin: 0 0 var(--sp-7);
+  max-width: none;
+}
+
+.about-content h2 {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--tr-h2);
+  color: var(--color-heading);
+  margin: 0 0 var(--sp-5);
+  max-width: 20ch;
+}
+
+.about-p {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  max-width: 68ch;
+  margin: 0 0 var(--sp-5);
+}
+
+/* Section containing "Where the name comes from" — continues left column,
+   marked off with a hairline above the H2 */
+.about-section {
+  border-top: var(--hairline) solid var(--color-border);
+  padding-top: var(--sp-8);
+  margin-top: var(--sp-8);
+  max-width: 68ch;
+}
+
+/* Closing aphorism + signature — set apart, smaller, caption-like */
+.about-closing {
+  margin-top: var(--sp-9);
+  padding-top: var(--sp-6);
+  border-top: var(--hairline) solid var(--color-border);
+  max-width: 68ch;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.about-closing-line {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--color-text-muted);
+  margin: 0;
+  font-style: normal;
+}
+.about-signature {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--color-text-muted);
+  margin: var(--sp-4) 0 0;
+  font-weight: var(--fw-medium);
+}
+
+/* ---------- Mobile ---------- */
+.about-page--mobile .about-rail-inner { padding: 14px 20px; }
+.about-page--mobile .about-container { padding: 40px 24px 64px; }
+.about-page--mobile .about-top {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+.about-page--mobile .about-top-visual { padding-top: 0; }
+.about-page--mobile .about-portrait { max-width: 200px; }
+.about-page--mobile .about-content h1 {
+  font-size: 2.25rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-bottom: 24px;
+  max-width: 14ch;
+}
+.about-page--mobile .about-content h2 {
+  font-size: 1.625rem;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  max-width: none;
+}
+.about-page--mobile .about-p { max-width: none; }
+.about-page--mobile .about-section {
+  padding-top: 32px;
+  margin-top: 32px;
+}
+.about-page--mobile .about-closing {
+  max-width: none;
+  margin-top: 40px;
+  padding-top: 24px;
+}

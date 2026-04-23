@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blackbrowed Labs — Component reference</title>
+  <link rel="stylesheet" href="../design/tokens/colors_and_type.css" />
+  <style>
+    body { background: var(--color-surface-warm); padding: 48px 32px 96px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .wrap h1 { font-size: var(--fs-h1); font-weight: var(--fw-light); letter-spacing: var(--tr-h1); margin: 0 0 8px; }
+    .wrap > p.lead { color: var(--color-text-muted); max-width: 62ch; margin: 0 0 48px; }
+    section { margin: 0 0 56px; padding: 32px 0 0; border-top: 1px solid var(--color-border); }
+    section:first-of-type { border-top: 0; padding-top: 0; }
+    section h2 { font-size: var(--fs-h2); font-weight: var(--fw-regular); margin: 0 0 8px; }
+    section > p.note { color: var(--color-text-muted); font-size: var(--fs-small); max-width: 60ch; margin: 0 0 24px; }
+    .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 0 0 20px; }
+    .row.col { flex-direction: column; align-items: stretch; gap: 12px; }
+    .card { background: var(--color-bg); border: 1px solid var(--color-border); padding: 20px 22px; border-radius: var(--radius-2); }
+    code.kbd { font-family: var(--font-mono); font-size: 0.85em; background: var(--color-surface-card); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--color-border); }
+    .label { font-size: var(--fs-caption); text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-muted); font-weight: var(--fw-medium); margin: 0 0 10px; }
+
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-size:var(--fs-body); font-weight:var(--fw-medium); line-height:1.2; border:1px solid transparent; border-radius: var(--radius-2); cursor:pointer; transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+    .btn-primary { background: var(--color-cta-bg); color: var(--color-cta-text); }
+    .btn-primary:hover { background: var(--bbl-primary-hover); }
+    .btn-accent { background: var(--bbl-accent); color: #fff; }
+    .btn-accent:hover { background: var(--bbl-accent-hover); }
+    .btn-ghost { background: transparent; color: var(--color-text); border-color: var(--color-border); }
+    .btn-ghost:hover { border-color: var(--color-text); }
+    .btn-destructive { background: var(--bbl-error); color: #fff; }
+    .btn-destructive:hover { background: var(--bbl-error-hover); }
+    .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .btn:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+    /* Inputs */
+    .field { display:flex; flex-direction:column; gap:6px; max-width: 420px; }
+    .field label { font-size: var(--fs-small); color: var(--color-text); font-weight: var(--fw-medium); }
+    .field input[type="text"], .field input[type="email"], .field textarea, .field select {
+      font: inherit; color: var(--color-text); background: var(--color-bg);
+      border: 1px solid var(--color-border); border-radius: var(--radius-2);
+      padding: 10px 12px; font-size: var(--fs-body);
+    }
+    .field textarea { min-height: 96px; resize: vertical; }
+    .field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 1px; border-color: var(--color-focus-ring); }
+    .field.error input, .field.error textarea { border-color: var(--bbl-error); }
+    .field .hint { font-size: var(--fs-caption); color: var(--color-text-muted); }
+    .field.error .hint { color: var(--color-error-text); }
+    .check { display:flex; gap:10px; align-items:flex-start; }
+    .check input { margin-top: 3px; accent-color: var(--bbl-primary); }
+
+    /* Callout */
+    .callout { background: var(--color-surface-card); border-left: 2px solid var(--bbl-primary); padding: 16px 20px; }
+    .callout p { margin: 0; font-size: var(--fs-small); color: var(--color-text); max-width: none; }
+    .callout.error { border-left-color: var(--bbl-error); background: var(--color-error-bg); }
+
+    /* Tag / badge */
+    .tag { display:inline-flex; align-items:center; font-size: var(--fs-caption); font-weight: var(--fw-medium); letter-spacing: 0.06em; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text-muted); text-transform: uppercase; }
+    .tag.primary { color: var(--bbl-primary); border-color: color-mix(in oklab, var(--bbl-primary) 35%, transparent); }
+    .tag.accent { color: var(--bbl-accent); border-color: color-mix(in oklab, var(--bbl-accent) 35%, transparent); }
+
+    /* Release notes card */
+    .release { padding: 20px 0; border-top: 1px solid var(--color-border); }
+    .release:first-of-type { border-top: 0; padding-top: 0; }
+    .release-meta { display:flex; gap:16px; align-items: baseline; font-size: var(--fs-caption); color: var(--color-text-muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: var(--fw-medium); margin-bottom: 8px; }
+    .release h3 { font-size: var(--fs-h3); font-weight: var(--fw-medium); margin: 0 0 8px; }
+    .release p { max-width: 62ch; color: var(--color-text); margin: 0; }
+
+    /* Product reference card */
+    .product { background: var(--color-bg); border: 1px solid var(--color-border); padding: 28px 28px 24px; border-radius: var(--radius-2); }
+    .product .product-name { font-size: var(--fs-h3); font-weight: var(--fw-medium); color: var(--color-heading); margin: 0 0 6px; }
+    .product .product-role { font-size: var(--fs-caption); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.14em; font-weight: var(--fw-medium); margin: 0 0 12px; }
+    .product p { color: var(--color-text); margin: 0 0 18px; }
+    .product .product-meta { display:flex; gap: 24px; font-size: var(--fs-caption); color: var(--color-text-muted); }
+
+    /* Coming soon block */
+    .coming-soon { padding: 56px 48px; background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--radius-3); text-align: center; }
+    .coming-soon h3 { font-size: var(--fs-h2); font-weight: var(--fw-light); color: var(--color-heading); margin: 0 0 12px; letter-spacing: -0.01em; }
+    .coming-soon p { color: var(--color-text-muted); max-width: 48ch; margin: 0 auto; }
+
+    /* Breadcrumb */
+    .crumb { display:flex; gap:10px; align-items: center; font-size: var(--fs-caption); letter-spacing: 0.06em; color: var(--color-text-muted); }
+    .crumb a { color: var(--color-text-muted); border-bottom: 1px solid transparent; }
+    .crumb a:hover { color: var(--color-link); border-bottom-color: currentColor; }
+    .crumb .sep { color: var(--color-border); }
+    .crumb .current { color: var(--color-text); font-weight: var(--fw-medium); }
+
+    /* Language switch */
+    .lang { display:inline-flex; align-items: center; gap: 6px; font-size: var(--fs-small); color: var(--color-text-muted); font-weight: var(--fw-medium); }
+    .lang button { background: none; border: 0; padding: 3px 6px; cursor: pointer; color: inherit; font: inherit; border-radius: var(--radius-1); }
+    .lang button.active { color: var(--color-text); background: var(--color-surface-card); }
+    .lang .sep { color: var(--color-border); }
+
+    /* Theme toggle */
+    .theme-group { display:inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-2); overflow: hidden; }
+    .theme-group button { background: none; border: 0; padding: 6px 12px; cursor: pointer; font: inherit; font-size: var(--fs-small); color: var(--color-text-muted); border-right: 1px solid var(--color-border); }
+    .theme-group button:last-child { border-right: 0; }
+    .theme-group button.active { color: var(--color-text); background: var(--color-surface-card); }
+
+    /* Inline code + block */
+    .inline-code { font-family: var(--font-mono); font-size: 0.9em; background: var(--color-surface-card); padding: 1px 6px; border: 1px solid var(--color-border); border-radius: 3px; }
+
+    /* Arrow link */
+    .arrow-link { display:inline-flex; align-items: baseline; gap: 8px; color: var(--color-link); font-weight: var(--fw-medium); border-bottom: 1px solid transparent; transition: gap var(--dur-base) var(--ease); }
+    .arrow-link:hover { gap: 12px; border-bottom-color: currentColor; }
+
+    /* Swatches grid */
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .swatch { border: 1px solid var(--color-border); border-radius: var(--radius-2); overflow: hidden; background: var(--color-bg); }
+    .swatch .chip { height: 64px; }
+    .swatch .meta { padding: 10px 12px; font-size: var(--fs-caption); }
+    .swatch .meta strong { display:block; color: var(--color-text); font-weight: var(--fw-medium); font-size: var(--fs-small); margin-bottom: 2px; }
+    .swatch .meta code { font-family: var(--font-mono); color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom: 48px;">
+      <h1>Component reference</h1>
+      <p class="lead">Every component, every state. Inline CSS here for standalone viewing; in production, use Tailwind classes with <code class="kbd">blackbrowed-preset.js</code>.</p>
+    </header>
+
+    <section>
+      <h2>Color tokens</h2>
+      <p class="note">Light-mode values shown. In dark mode, the same tokens resolve to their <code class="kbd">data-theme="dark"</code> pair — see <code class="kbd">tokens.ts</code>.</p>
+      <p class="label">Brand roles</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#7D4912"></div><div class="meta"><strong>Tussock Gold</strong><code>#7D4912 · --bbl-primary</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#1C5E66"></div><div class="meta"><strong>Ridge Teal</strong><code>#1C5E66 · --bbl-accent</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#2C2622"></div><div class="meta"><strong>Volcanic Stone</strong><code>#2C2622 · --bbl-neutral</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#882218"></div><div class="meta"><strong>Peat Ember</strong><code>#882218 · --bbl-error</code></div></div>
+      </div>
+      <p class="label" style="margin-top:24px">Surfaces</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#FFFFFF; border-bottom:1px solid var(--color-border)"></div><div class="meta"><strong>bg</strong><code>#FFFFFF</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#FBF7F2"></div><div class="meta"><strong>bg-warm</strong><code>#FBF7F2</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#F5F0E9"></div><div class="meta"><strong>bg-card</strong><code>#F5F0E9</code></div></div>
+        <div class="swatch"><div class="chip" style="background:#D6CDBE"></div><div class="meta"><strong>border</strong><code>#D6CDBE</code></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Typography scale</h2>
+      <div class="row col">
+        <div class="display" style="font-size:var(--fs-display); font-weight:300; line-height:1.05; letter-spacing:-0.02em; color:var(--color-heading)">Display / Tussock Gold / 300</div>
+        <div style="font-size:var(--fs-h1); font-weight:300; line-height:1.1; letter-spacing:-0.015em; color:var(--color-heading)">H1 heading (Light 300)</div>
+        <div style="font-size:var(--fs-h2); font-weight:400; line-height:1.2; letter-spacing:-0.01em; color:var(--color-heading)">H2 heading (Regular 400)</div>
+        <div style="font-size:var(--fs-h3); font-weight:500; line-height:1.3; color:var(--color-heading)">H3 heading (Medium 500)</div>
+        <p class="lead" style="max-width:64ch">Lead paragraph style — used for the first sentence under a hero or section header. Slightly larger than body, same line-height feel.</p>
+        <p>Body copy. 1.0625rem / 1.65 line-height. Constrained to 70ch by default. Links look like <a href="#">this teal link</a>.</p>
+        <p class="small">Small text — captions, timestamps, metadata. 0.9375rem.</p>
+        <p class="caption">CAPTION · 0.8125rem · uppercase · letter-spaced</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Buttons</h2>
+      <p class="note">Four roles. Primary (Tussock Gold CTA), accent (Ridge Teal), ghost (outlined), destructive (Peat Ember). All share the same sizing, padding, focus ring, and disabled style.</p>
+      <div class="row">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-accent">Accent</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-destructive">Destructive</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+      </div>
+      <p class="note" style="margin-top:8px">Focus ring is always <code class="kbd">2px solid var(--color-focus-ring)</code> with a 2px offset — never remove it.</p>
+    </section>
+
+    <section>
+      <h2>Form inputs</h2>
+      <div class="row col">
+        <div class="field"><label for="t1">Name</label><input id="t1" type="text" placeholder="Lars Weiser" /><span class="hint">Optional.</span></div>
+        <div class="field error"><label for="t2">E-Mail</label><input id="t2" type="email" value="nicht@gültig" /><span class="hint">Bitte eine gültige E-Mail-Adresse eingeben.</span></div>
+        <div class="field"><label for="t3">Nachricht</label><textarea id="t3" placeholder="Kurz beschreiben, worum es geht."></textarea></div>
+        <div class="field"><label for="s1">Rolle</label><select id="s1"><option>Lehrkraft</option><option>Schulleitung</option><option>Anders</option></select></div>
+        <div class="check"><input type="checkbox" id="c1" /><label for="c1" style="font-weight:400">Ich stimme der Verarbeitung meiner Anfrage zu.</label></div>
+        <div class="check"><input type="radio" id="r1" name="r" /><label for="r1" style="font-weight:400">Option eins</label></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Callouts</h2>
+      <div class="callout" style="margin-bottom:12px"><p><strong>Hinweis.</strong> Der ruhige Standard-Callout. Hairline links, keine Icons.</p></div>
+      <div class="callout error"><p><strong>Fehler.</strong> Derselbe Baustein, Peat-Ember-Akzent, getönter Hintergrund.</p></div>
+    </section>
+
+    <section>
+      <h2>Tags / badges</h2>
+      <div class="row">
+        <span class="tag">Status</span>
+        <span class="tag primary">In Arbeit</span>
+        <span class="tag accent">Beta</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Release-notes card</h2>
+      <div class="release">
+        <div class="release-meta"><span>2026-03-12</span><span>v1.2.0</span></div>
+        <h3>Sitzplan-Ansicht: schnellere Tastaturbedienung</h3>
+        <p>Pfeiltasten springen jetzt zwischen Plätzen. Enter öffnet die Detailkarte. Nichts Lautes — aber im Unterricht spart es Sekunden, und Sekunden sind das Material.</p>
+      </div>
+      <div class="release">
+        <div class="release-meta"><span>2026-02-28</span><span>v1.1.3</span></div>
+        <h3>Export: CSV mit korrekten Umlauten</h3>
+        <p>UTF-8-BOM, damit Excel unter Windows die Umlaute richtig liest. Kleiner Patch, große Wirkung für Lehrkräfte, die Listen weitergeben.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Product reference card</h2>
+      <p class="note">Template for future product pages. No product is live in v1; this is the pattern.</p>
+      <article class="product">
+        <p class="product-role">Klassenführung</p>
+        <h3 class="product-name">[Produktname]</h3>
+        <p>Eine kurze, ruhige Zeile dazu, was das Werkzeug für den Schulalltag tut. Kein Feature-Katalog, keine großen Versprechen.</p>
+        <div class="product-meta"><span>Desktop · Tablet</span><span>Deutsch</span><span>Einzellizenz / Schullizenz</span></div>
+      </article>
+    </section>
+
+    <section>
+      <h2>"Coming soon" empty state</h2>
+      <div class="coming-soon">
+        <h3>Hier entsteht etwas.</h3>
+        <p>Das erste Werkzeug ist in Arbeit. Wenn es so weit ist, steht es hier — mit einer kurzen Notiz, was es tut und für wen.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Breadcrumb</h2>
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="#">Blackbrowed Labs</a>
+        <span class="sep">/</span>
+        <a href="#">Produkte</a>
+        <span class="sep">/</span>
+        <span class="current">Sitzplan</span>
+      </nav>
+    </section>
+
+    <section>
+      <h2>Language switcher</h2>
+      <div class="lang" role="group" aria-label="Sprachauswahl">
+        <button class="active" aria-pressed="true">DE</button>
+        <span class="sep">/</span>
+        <button aria-pressed="false">EN</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Theme toggle</h2>
+      <p class="note">Three-way: Light / Dark / System. The eighth (404) and landing pages have a simpler sun/moon button; this group form is for the settings menu.</p>
+      <div class="theme-group" role="group" aria-label="Erscheinungsbild">
+        <button class="active">Hell</button>
+        <button>Dunkel</button>
+        <button>System</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Inline code + code block</h2>
+      <p>Use <span class="inline-code">npm run dev</span> for local preview. The Astro content collection lives in <span class="inline-code">src/content/products/</span>.</p>
+      <pre>{
+  "name": "blackbrowed-labs",
+  "private": true,
+  "scripts": { "dev": "astro dev", "build": "astro build" }
+}</pre>
+    </section>
+
+    <section>
+      <h2>Arrow link</h2>
+      <a class="arrow-link" href="#">Zurück zur Startseite <span aria-hidden="true">→</span></a>
+    </section>
+  </div>
+</body>
+</html>

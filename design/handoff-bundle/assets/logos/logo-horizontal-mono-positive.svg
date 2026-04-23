@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 160" role="img" aria-label="Blackbrowed Labs">
+  <g transform="translate(0,18)">
+    <path fill="#2C2622" d="M 14 96 C 60 82, 100 56, 138 36 C 152 28, 166 25, 180 28 C 208 40, 244 64, 286 86 C 244 78, 214 60, 190 48 C 178 45, 168 45, 158 48 C 138 54, 114 68, 84 80 C 62 93, 40 99, 20 102 L 14 96 Z"></path>
+  </g>
+  <text x="320" y="104" fill="#2C2622" font-family="Inter,ui-sans-serif,system-ui,-apple-system,&#39;Segoe UI&#39;,Helvetica,Arial,sans-serif" font-weight="300" font-size="72" letter-spacing="7.2">Blackbrowed Labs</text>
+</svg>

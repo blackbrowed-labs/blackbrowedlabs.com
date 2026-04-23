@@ -1,0 +1,106 @@
+/* =========================================================
+   Blackbrowed Labs — Impressum / Legal Notice
+   Left-anchored reading page. Legal content, editorial care.
+   ========================================================= */
+
+.impressum-page { display: flex; flex-direction: column; min-height: 100%; }
+.impressum-page main { flex: 1; display: flex; flex-direction: column; }
+
+/* Rail */
+.impressum-rail {
+  border-bottom: var(--hairline) solid var(--color-border);
+  background: var(--color-bg);
+}
+.impressum-rail-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-7);
+  display: flex; align-items: center; gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+.impressum-rail a { color: var(--color-text-muted); border-bottom: var(--hairline) solid transparent; font-weight: var(--fw-medium); }
+.impressum-rail a:hover { color: var(--color-link); border-bottom-color: currentColor; }
+.impressum-rail-sep { color: var(--color-border); }
+.impressum-rail-current { color: var(--color-text); font-weight: var(--fw-medium); }
+
+/* Main */
+.impressum-main { flex: 1; background: var(--color-bg); }
+.impressum-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-10) var(--sp-7) var(--sp-9);
+}
+.impressum-content { max-width: 68ch; }
+
+.impressum-content h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--color-heading);
+  margin: 0 0 var(--sp-7);
+}
+
+.impressum-courtesy {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--color-text-muted);
+  margin: calc(var(--sp-7) * -1 + var(--sp-3)) 0 var(--sp-8);
+  padding: var(--sp-3) 0 0;
+  border-top: var(--hairline) solid var(--color-border);
+  max-width: 48ch;
+}
+
+.impressum-lede {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  margin: 0 0 var(--sp-6);
+}
+
+.impressum-address {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--color-text);
+  margin: 0 0 var(--sp-8);
+  font-style: normal;
+}
+
+.impressum-section { margin-top: var(--sp-7); }
+.impressum-section:first-of-type { margin-top: 0; }
+
+.impressum-content h3 {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--color-heading);
+  margin: 0 0 var(--sp-3);
+}
+
+.impressum-p {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  margin: 0 0 var(--sp-3);
+}
+.impressum-p:last-child { margin-bottom: 0; }
+.impressum-p a { color: var(--color-link); border-bottom: 1px solid transparent; }
+.impressum-p a:hover { border-bottom-color: currentColor; }
+
+/* Mobile */
+.impressum-page--mobile .impressum-rail-inner { padding: 14px 20px; }
+.impressum-page--mobile .impressum-container { padding: 40px 24px 56px; }
+.impressum-page--mobile .impressum-content h1 {
+  font-size: 2.25rem; line-height: 1.1; letter-spacing: -0.015em;
+  margin-bottom: 24px;
+}
+.impressum-page--mobile .impressum-courtesy {
+  margin: -4px 0 28px;
+}
+.impressum-page--mobile .impressum-content h3 {
+  font-size: 1.125rem;
+}
+.impressum-page--mobile .impressum-section { margin-top: 28px; }

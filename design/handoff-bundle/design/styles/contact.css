@@ -1,0 +1,95 @@
+/* =========================================================
+   Blackbrowed Labs — Contact page ("Kontakt / Contact")
+   Left-anchored, short by design, business-card posture.
+   ========================================================= */
+
+.contact-page { display: flex; flex-direction: column; min-height: 100%; }
+.contact-page main { flex: 1; display: flex; flex-direction: column; }
+
+/* Breadcrumb rail — same shared vocabulary as Products / About */
+.contact-rail {
+  border-bottom: var(--hairline) solid var(--color-border);
+  background: var(--color-bg);
+}
+.contact-rail-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-7);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+.contact-rail a {
+  color: var(--color-text-muted);
+  border-bottom: var(--hairline) solid transparent;
+  font-weight: var(--fw-medium);
+}
+.contact-rail a:hover { color: var(--color-link); border-bottom-color: currentColor; }
+.contact-rail-sep { color: var(--color-border); }
+.contact-rail-current { color: var(--color-text); font-weight: var(--fw-medium); }
+
+/* Main */
+.contact-main { flex: 1; background: var(--color-bg); }
+.contact-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-10) var(--sp-7) var(--sp-9);
+}
+
+.contact-content { max-width: 56ch; }
+
+.contact-content h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--color-heading);
+  margin: 0 0 var(--sp-8);
+}
+
+/* Each link block: caption-style framing line above, then large link */
+.contact-block { margin-top: var(--sp-8); }
+.contact-block:first-of-type { margin-top: 0; }
+
+.contact-frame {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--sp-3);
+  letter-spacing: 0.01em;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-lead);
+  line-height: 1.2;
+  font-weight: var(--fw-regular);
+  color: var(--color-link);
+  border-bottom: 1px solid transparent;
+  transition: border-color 120ms ease;
+}
+.contact-link:hover { border-bottom-color: currentColor; }
+.contact-link svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+/* Mobile */
+.contact-page--mobile .contact-rail-inner { padding: 14px 20px; }
+.contact-page--mobile .contact-container { padding: 40px 24px 56px; }
+.contact-page--mobile .contact-content h1 {
+  font-size: 2.25rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-bottom: 32px;
+}
+.contact-page--mobile .contact-block { margin-top: 28px; }
+.contact-page--mobile .contact-link {
+  font-size: 1.125rem;
+}

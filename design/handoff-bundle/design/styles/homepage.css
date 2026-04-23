@@ -1,0 +1,402 @@
+/* =========================================================
+   Blackbrowed Labs — Homepage styles
+   Option C · centered hero · light & dark · desktop & mobile
+   ========================================================= */
+
+html, body { margin: 0; padding: 0; }
+
+/* Page shell is always the full viewport/artboard */
+.bbl-page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+}
+.bbl-page main { flex: 1; display: flex; flex-direction: column; }
+
+/* Dark scope — applies all dark tokens to a subtree without touching <html> */
+.dark-scope {
+  /* Brand */
+  --bbl-primary:        #D4A45C;
+  --bbl-primary-hover:  #DFB26E;
+  --bbl-primary-hc:     #E2B87A;
+  --bbl-accent:         #7CB3BC;
+  --bbl-accent-hover:   #8EC1C9;
+  --bbl-accent-hc:      #92C6CE;
+  --bbl-neutral:        #E0D8CE;
+  --bbl-neutral-hc:     #F0EAE2;
+  --bbl-error:          #EC9C8C;
+  --bbl-bg:             #1C1C1E;
+  --bbl-bg-warm:        #24221F;
+  --bbl-bg-card:        #2E2A26;
+  --bbl-border:         #4A443E;
+  /* Aliases re-resolve from the updated brand vars */
+  --color-bg:             var(--bbl-bg);
+  --color-surface:        var(--bbl-bg);
+  --color-surface-warm:   var(--bbl-bg-warm);
+  --color-surface-card:   var(--bbl-bg-card);
+  --color-border:         var(--bbl-border);
+  --color-text:           var(--bbl-neutral);
+  --color-text-muted:     color-mix(in oklab, var(--bbl-neutral) 70%, transparent);
+  --color-heading:        var(--bbl-primary);
+  --color-link:           var(--bbl-accent);
+  --color-link-hover:     var(--bbl-accent-hover);
+  --color-focus-ring:     var(--bbl-primary);
+  --color-cta-text:       #1C1C1E;
+}
+
+/* ========== Top nav — desktop ========== */
+.bbl-nav {
+  border-bottom: var(--hairline) solid var(--color-border);
+  background: var(--color-bg);
+  flex-shrink: 0;
+}
+.bbl-nav-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-7);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-7);
+}
+
+.bbl-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--bbl-primary);
+  text-decoration: none;
+  border: none;
+}
+.bbl-logo:hover { border: none; color: var(--bbl-primary-hover); }
+.bbl-logo-mark {
+  width: 40px;
+  height: 16px;
+  display: block;
+  color: var(--bbl-primary);
+}
+.bbl-wordmark {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-light);
+  font-size: 0.9375rem;
+  letter-spacing: 0.10em;
+  color: var(--color-text);
+}
+
+.bbl-nav-links {
+  display: flex;
+  gap: var(--sp-6);
+  justify-content: center;
+}
+.bbl-nav-links a {
+  color: var(--color-text);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-regular);
+  border-bottom: var(--hairline) solid transparent;
+}
+.bbl-nav-links a:hover {
+  color: var(--color-link);
+  border-bottom-color: currentColor;
+}
+.bbl-nav-links a.is-current {
+  color: var(--color-heading);
+  font-weight: var(--fw-medium);
+}
+
+.bbl-nav-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+}
+.bbl-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-small);
+}
+.bbl-lang-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  font-weight: var(--fw-regular);
+}
+.bbl-lang-btn.is-active { color: var(--color-text); font-weight: var(--fw-medium); }
+.bbl-lang-btn:hover { color: var(--color-link); }
+.bbl-lang-sep { color: var(--color-border); }
+.bbl-theme {
+  background: none;
+  border: var(--hairline) solid var(--color-border);
+  border-radius: var(--radius-2);
+  padding: 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.bbl-theme:hover { color: var(--color-link); border-color: var(--color-link); }
+
+/* Mobile nav variant */
+.bbl-nav--mobile .bbl-nav-inner {
+  grid-template-columns: auto auto;
+  padding: 14px 20px;
+  gap: 0;
+  justify-content: space-between;
+}
+.bbl-nav--mobile .bbl-nav-links,
+.bbl-nav--mobile .bbl-nav-meta { display: none; }
+.bbl-hamburger {
+  background: none;
+  border: var(--hairline) solid var(--color-border);
+  border-radius: var(--radius-2);
+  padding: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.bbl-hamburger:hover { color: var(--color-link); border-color: var(--color-link); }
+
+/* ========== Shared small pieces ========== */
+.bbl-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  color: var(--bbl-accent);
+  margin: 0 0 var(--sp-5);
+  text-transform: none;
+  max-width: none;
+}
+
+.bbl-arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-link);
+  font-size: var(--fs-lead);
+  font-weight: var(--fw-regular);
+  border-bottom: var(--hairline) solid transparent;
+  padding-bottom: 2px;
+}
+.bbl-arrow-link:hover {
+  color: var(--color-link-hover);
+  border-bottom-color: currentColor;
+}
+.bbl-arrow-link svg {
+  transition: transform var(--dur-base) var(--ease);
+  flex-shrink: 0;
+}
+.bbl-arrow-link:hover svg { transform: translateX(4px); }
+
+.bbl-muted { color: var(--color-text-muted); }
+
+/* ========== Hero — centered (Option C, refined) ========== */
+.hero {
+  /* Fill viewport minus nav — exact on the artboard */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: var(--hairline) solid var(--color-border);
+  background: var(--color-bg);
+}
+.hero-inner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-9) var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Vertical rhythm: arc → silence → heading → silence → lead → silence → link */
+.hero-inner { text-align: center; }
+.hero-arc {
+  display: inline-block;
+  color: var(--bbl-primary);
+  margin: 0 0 var(--sp-9);        /* generous silence after arc */
+  line-height: 0;
+}
+.hero-arc svg { display: block; }
+
+.hero .display {
+  color: var(--color-heading);
+  margin: 0 auto var(--sp-8);     /* silence after heading */
+  font-weight: var(--fw-light);
+  max-width: 16ch;
+  text-align: center;
+}
+
+.hero .lead {
+  color: var(--color-text);
+  max-width: 54ch;
+  margin: 0 auto var(--sp-8);     /* silence before link */
+  text-align: center;
+}
+
+.hero .bbl-arrow-link { text-align: center; }
+
+/* Desktop arc sizing — monumental but calm */
+.hero-arc--desktop svg { width: 275px; height: 110px; }
+
+/* ========== Secondary section — "Nah an der Praxis" ========== */
+.bbl-secondary {
+  background: var(--color-surface-warm);
+  border-bottom: var(--hairline) solid var(--color-border);
+}
+.bbl-secondary-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-10) var(--sp-7);
+}
+.bbl-secondary .bbl-eyebrow { text-align: left; }
+.bbl-secondary h2 {
+  max-width: 20ch;
+  margin: 0 0 var(--sp-6);
+  color: var(--color-heading);
+  text-align: left;
+}
+.bbl-secondary .lead {
+  max-width: 70ch;
+  margin: 0;
+  text-align: left;
+  color: var(--color-text);
+}
+
+/* ========== Footer — desktop ========== */
+.bbl-footer {
+  background: var(--color-bg);
+  border-top: var(--hairline) solid var(--color-border);
+  flex-shrink: 0;
+}
+.bbl-footer-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-7) var(--sp-6);
+  display: grid;
+  grid-template-columns: 1.2fr 1.6fr 1fr;
+  gap: var(--sp-8);
+  align-items: start;
+}
+.bbl-footer-brand .bbl-logo { margin-bottom: 0; }
+
+.bbl-footer-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6);
+}
+.bbl-footer-nav a {
+  color: var(--color-text);
+  font-size: var(--fs-small);
+  border-bottom: var(--hairline) solid transparent;
+}
+.bbl-footer-nav a:hover {
+  color: var(--color-link);
+  border-bottom-color: currentColor;
+}
+
+.bbl-footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.bbl-github {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--color-text);
+  font-size: var(--fs-small);
+  border-bottom: var(--hairline) solid transparent;
+}
+.bbl-github:hover { color: var(--color-link); border-bottom-color: currentColor; }
+.bbl-footer-meta .caption { margin: 0; }
+
+/* ========== Mobile overrides ========== */
+.bbl-page--mobile {
+  font-size: 16px;
+}
+.bbl-page--mobile .hero-inner {
+  padding: 56px 24px 64px;
+}
+.bbl-page--mobile .hero-arc { margin-bottom: 40px; }
+.bbl-page--mobile .hero-arc svg { width: 140px; height: 56px; }
+.bbl-page--mobile .hero .display {
+  font-size: 2.75rem;       /* 44px at 360 viewport */
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  max-width: 12ch;
+}
+.bbl-page--mobile .hero .lead {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: 32ch;          /* natural wrap at 360 */
+  margin-bottom: 32px;
+}
+.bbl-page--mobile .hero .bbl-arrow-link {
+  font-size: 1rem;
+}
+
+.bbl-page--mobile .bbl-secondary-inner {
+  padding: 56px 24px;
+}
+.bbl-page--mobile .bbl-secondary h2 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  max-width: 14ch;
+  margin-bottom: 20px;
+}
+.bbl-page--mobile .bbl-secondary .lead {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: none;
+}
+.bbl-page--mobile .bbl-secondary .bbl-eyebrow { margin-bottom: 20px; }
+
+.bbl-page--mobile .bbl-footer-inner,
+.about-page--mobile .bbl-footer-inner,
+.prod-page--mobile .bbl-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 40px 24px 32px;
+  align-items: stretch;
+}
+.bbl-page--mobile .bbl-footer-nav ul,
+.about-page--mobile .bbl-footer-nav ul,
+.prod-page--mobile .bbl-footer-nav ul {
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 0;
+}
+.bbl-page--mobile .bbl-footer-meta,
+.about-page--mobile .bbl-footer-meta,
+.prod-page--mobile .bbl-footer-meta {
+  align-items: flex-start;
+  padding-top: 0;
+}
+
+/* Focus styles inside frames */
+.bbl-page a:focus-visible,
+.bbl-page button:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}

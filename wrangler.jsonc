@@ -19,28 +19,35 @@
  * re-add `"not_found_handling": "404-page"` in the same commit that
  * introduces src/pages/404.astro.
  *
- * `observability` is enabled so Workers Trace Events / runtime logs
- * are captured from day one. No cost; useful for post-deploy debugging.
+ * `observability` is enabled per environment so Workers Logs and Trace
+ * Events are captured from day one. Must be declared inside each `env.*`
+ * block — the top-level `observability` setting does NOT inherit into
+ * named environments when deploying with `--env` (wrangler gotcha
+ * confirmed via Cloudflare dashboard after the first staging deploy
+ * showed Logs/Traces as Disabled despite a top-level enable).
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "blackbrowedlabs-com",
   "compatibility_date": "2026-04-23",
-  "observability": {
-    "enabled": true
-  },
   "assets": {
     "directory": "./dist"
   },
   "env": {
     "production": {
       "name": "blackbrowedlabs-com-production",
+      "observability": {
+        "enabled": true
+      },
       "routes": [
         { "pattern": "blackbrowedlabs.com", "custom_domain": true }
       ]
     },
     "staging": {
       "name": "blackbrowedlabs-com-staging",
+      "observability": {
+        "enabled": true
+      },
       "routes": [
         { "pattern": "dev.blackbrowedlabs.com", "custom_domain": true }
       ]

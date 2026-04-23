@@ -40,7 +40,15 @@
   --bbl-bg-card:        #F5F0E9;
   --bbl-border:         #D6CDBE;
 
-  /* Semantic aliases — components use these */
+  /* Semantic aliases — components use these.
+     Note: --color-bg and --color-surface both resolve to --bbl-bg, and
+     --color-bg-warm and --color-surface-warm both resolve to --bbl-bg-warm.
+     Both namings are valid and inherited from the handoff bundle's
+     colors_and_type.css. Convention: use --color-surface* for card/section
+     backgrounds, --color-bg* for the page itself. Do NOT remove one "for
+     consistency" — both are referenced across the codebase. */
+  --color-bg:             var(--bbl-bg);
+  --color-bg-warm:        var(--bbl-bg-warm);
   --color-surface:        var(--bbl-bg);
   --color-surface-warm:   var(--bbl-bg-warm);
   --color-surface-card:   var(--bbl-bg-card);
@@ -126,6 +134,8 @@
   /* Semantic / functional alias tokens (preset keys: surface, text,
      heading, link, etc.)
      Utility classes: bg-surface, text-text, text-heading, … */
+  --color-bg:            var(--color-bg);
+  --color-bg-warm:       var(--color-bg-warm);
   --color-surface:       var(--color-surface);
   --color-surface-warm:  var(--color-surface-warm);
   --color-surface-card:  var(--color-surface-card);

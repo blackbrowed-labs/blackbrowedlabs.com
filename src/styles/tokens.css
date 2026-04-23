@@ -1,0 +1,233 @@
+/* =============================================================
+   Blackbrowed Labs — Design Tokens (Tailwind 4 CSS-first)
+   Translated from design/handoff-bundle/dev/blackbrowed-preset.js.
+   Source of truth for all theme values. Do NOT modify directly —
+   sync any changes back to the preset and to this comment header.
+
+   Structure:
+     1. :root  — raw brand custom properties (--bbl-*, --color-*)
+                 These are NOT Tailwind tokens; they are the CSS
+                 custom properties that the @theme tokens reference,
+                 so light/dark swapping stays in plain CSS.
+     2. .dark, [data-theme="dark"]  — dark-mode overrides.
+     3. @theme  — Tailwind 4 design token declarations. All @theme
+                  tokens resolve at computed-value time, so they pick
+                  up whatever :root (or dark override) has set.
+   ============================================================= */
+
+
+/* ─── 1. Raw brand custom properties (light mode) ──────────────── */
+:root {
+  /* Brand primitives */
+  --bbl-primary:        #7D4912;   /* Tussock Gold  — hero, CTAs, headings */
+  --bbl-primary-hover:  #6A3D0F;
+  --bbl-primary-hc:     #5C360D;   /* high contrast */
+
+  --bbl-accent:         #1C5E66;   /* Ridge Teal    — links, secondary */
+  --bbl-accent-hover:   #174E55;
+  --bbl-accent-hc:      #134B52;
+
+  --bbl-neutral:        #2C2622;   /* Volcanic Stone — body text, borders */
+  --bbl-neutral-hc:     #1A1614;
+
+  --bbl-error:          #882218;   /* Peat Ember — error, destructive */
+  --bbl-error-hover:    #751E15;
+  --bbl-error-hc:       #6A1C14;
+
+  /* Surfaces */
+  --bbl-bg:             #FFFFFF;
+  --bbl-bg-warm:        #FBF7F2;
+  --bbl-bg-card:        #F5F0E9;
+  --bbl-border:         #D6CDBE;
+
+  /* Semantic aliases — components use these */
+  --color-surface:        var(--bbl-bg);
+  --color-surface-warm:   var(--bbl-bg-warm);
+  --color-surface-card:   var(--bbl-bg-card);
+  --color-border:         var(--bbl-border);
+  --color-text:           var(--bbl-neutral);
+  --color-text-muted:     color-mix(in oklab, var(--bbl-neutral) 70%, transparent);
+  --color-heading:        var(--bbl-primary);
+  --color-link:           var(--bbl-accent);
+  --color-link-hover:     var(--bbl-accent-hover);
+  --color-focus-ring:     var(--bbl-primary);
+  --color-error-text:     var(--bbl-error);
+  --color-error-bg:       color-mix(in oklab, var(--bbl-error) 10%, var(--bbl-bg));
+  --color-cta-bg:         var(--bbl-primary);
+  --color-cta-text:       #FFFFFF;
+}
+
+
+/* ─── 2. Dark-mode overrides ────────────────────────────────────── */
+/*
+   Selector mirrors colors_and_type.css: both `.dark` (utility-class
+   toggling) and `[data-theme="dark"]` (attribute toggling, preferred
+   per TECH_STACK.md §4.2) are supported so either mechanism works.
+*/
+.dark,
+[data-theme="dark"] {
+  --bbl-primary:        #D4A45C;
+  --bbl-primary-hover:  #DFB26E;
+  --bbl-primary-hc:     #E2B87A;
+
+  --bbl-accent:         #7CB3BC;
+  --bbl-accent-hover:   #8EC1C9;
+  --bbl-accent-hc:      #92C6CE;
+
+  --bbl-neutral:        #E0D8CE;   /* warm off-white, never pure */
+  --bbl-neutral-hc:     #F0EAE2;
+
+  --bbl-error:          #EC9C8C;
+  --bbl-error-hover:    #F0A494;
+  --bbl-error-hc:       #F0AC9C;
+
+  --bbl-bg:             #1C1C1E;
+  --bbl-bg-warm:        #24221F;
+  --bbl-bg-card:        #2E2A26;
+  --bbl-border:         #4A443E;
+
+  /* Dark-mode-specific semantic override (not a primitive flip) */
+  --color-cta-text:     #1C1C1E; /* dark text on gold chip — avoids halation */
+}
+
+
+/* ─── 3. Tailwind 4 @theme tokens ──────────────────────────────── */
+/*
+   All color tokens reference the CSS custom properties above so they
+   automatically reflect the active mode without any `dark:` variant
+   prefix on color utilities.
+*/
+@theme {
+
+  /* ── Colors ── */
+
+  /* Brand-layer tokens (preset key: bbl-primary, bbl-accent, etc.)
+     Utility classes: bg-bbl-primary, text-bbl-accent, … */
+  --color-bbl-primary:        var(--bbl-primary);
+  --color-bbl-primary-hover:  var(--bbl-primary-hover);
+  --color-bbl-primary-hc:     var(--bbl-primary-hc);
+
+  --color-bbl-accent:         var(--bbl-accent);
+  --color-bbl-accent-hover:   var(--bbl-accent-hover);
+  --color-bbl-accent-hc:      var(--bbl-accent-hc);
+
+  --color-bbl-neutral:        var(--bbl-neutral);
+  --color-bbl-neutral-hc:     var(--bbl-neutral-hc);
+
+  --color-bbl-error:          var(--bbl-error);
+  --color-bbl-error-hover:    var(--bbl-error-hover);
+  --color-bbl-error-hc:       var(--bbl-error-hc);
+
+  --color-bbl-bg:             var(--bbl-bg);
+  --color-bbl-bg-warm:        var(--bbl-bg-warm);
+  --color-bbl-bg-card:        var(--bbl-bg-card);
+  --color-bbl-border:         var(--bbl-border);
+
+  /* Semantic / functional alias tokens (preset keys: surface, text,
+     heading, link, etc.)
+     Utility classes: bg-surface, text-text, text-heading, … */
+  --color-surface:       var(--color-surface);
+  --color-surface-warm:  var(--color-surface-warm);
+  --color-surface-card:  var(--color-surface-card);
+  --color-border:        var(--color-border);
+  --color-text:          var(--color-text);
+  --color-text-muted:    var(--color-text-muted);
+  --color-heading:       var(--color-heading);
+  --color-link:          var(--color-link);
+  --color-link-hover:    var(--color-link-hover);
+  --color-focus-ring:    var(--color-focus-ring);
+  --color-error-text:    var(--color-error-text);
+  --color-error-bg:      var(--color-error-bg);
+  --color-cta-bg:        var(--color-cta-bg);
+  --color-cta-text:      var(--color-cta-text);
+
+  /* ── Font families ── */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas,
+               monospace;
+
+  /* ── Font weights (300/400/500/600 only — no 700+) ── */
+  --font-weight-light:    300;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+
+  /* ── Fluid type scale ──
+     Each --text-* token carries the font-size value.
+     Companion --leading-* and --tracking-* tokens capture the
+     per-step line-height and letter-spacing from the preset so
+     they remain addressable as Tailwind utilities (leading-display,
+     tracking-h1, etc.) in addition to being consumed by global.css
+     base styles.
+  */
+  --text-display:  clamp(2.75rem, 6vw, 4.5rem);
+  --text-h1:       clamp(2rem, 4vw, 3rem);
+  --text-h2:       clamp(1.5rem, 3vw, 2.25rem);
+  --text-h3:       1.375rem;
+  --text-h4:       1.125rem;
+  --text-lead:     1.1875rem;
+  --text-body:     1.0625rem;
+  --text-small:    0.9375rem;
+  --text-caption:  0.8125rem;
+
+  /* Line-height companions */
+  --leading-display: 1.05;
+  --leading-h1:      1.1;
+  --leading-h2:      1.2;
+  --leading-h3:      1.3;
+  --leading-h4:      1.4;
+  --leading-lead:    1.6;
+  --leading-body:    1.65;
+  --leading-small:   1.55;
+  --leading-caption: 1.45;
+
+  /* Letter-spacing companions */
+  --tracking-display: -0.02em;
+  --tracking-h1:      -0.015em;
+  --tracking-h2:      -0.01em;
+  --tracking-h3:      -0.005em;
+  --tracking-caption:  0.02em;
+
+  /* ── Spacing (4-px base) ── */
+  --spacing-sp-0:  0;
+  --spacing-sp-1:  0.25rem;
+  --spacing-sp-2:  0.5rem;
+  --spacing-sp-3:  0.75rem;
+  --spacing-sp-4:  1rem;
+  --spacing-sp-5:  1.5rem;
+  --spacing-sp-6:  2rem;
+  --spacing-sp-7:  3rem;
+  --spacing-sp-8:  4rem;
+  --spacing-sp-9:  6rem;
+  --spacing-sp-10: 8rem;
+
+  /* ── Border radii (mostly rectangular) ── */
+  --radius-bbl-0: 0;
+  --radius-bbl-1: 2px;
+  --radius-bbl-2: 4px;
+  --radius-bbl-3: 6px;
+
+  /* ── Motion ── */
+  --ease-bbl: cubic-bezier(0.2, 0, 0, 1);
+
+  --duration-bbl-fast: 120ms;
+  --duration-bbl-base: 200ms;
+
+  /* ── Layout ── */
+  /*
+     max-w-* utilities resolve from Tailwind 4's --max-width-* namespace
+     (primary), with --spacing-* and --container-* as fallbacks — see
+     packages/tailwindcss/src/utilities.ts in tailwindlabs/tailwindcss.
+     Using --max-width-* so `max-w-measure` and `max-w-site` generate
+     correctly. The second token is named `site` (not `container`) to
+     avoid collision with Tailwind's built-in `container` utility class.
+     See docs/tailwind-4-conversion-notes.md "Post-review corrections"
+     for the source trail.
+  */
+  --max-width-measure: 70ch;
+  --max-width-site:    1200px;
+
+  /* ── Border widths ── */
+  --border-width-hairline: 1px;
+}

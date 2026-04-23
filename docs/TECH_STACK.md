@@ -127,6 +127,8 @@ One scheduled trigger on the production Worker, daily at 03:00 UTC, dispatches a
 - `assets.directory` points at Astro's build output (`./dist/`).
 - `not_found_handling` = `"404-page"` (this is a content site, not an SPA).
 - **GitHub Actions deploys** on push to `dev` (→ staging) and `main` (→ production). Workflows run `wrangler deploy --env <staging|production>` authenticated via the `CLOUDFLARE_API_TOKEN` GitHub Actions secret (§10.2). Cloudflare's native Workers Builds is intentionally **not** connected to this repo — one deploy mechanism at a time, no duplicate deploys or race conditions.
+- **Node 24** (Active LTS) on the CI runners and the declared `engines.node` in `package.json`. Chosen for longest active-support runway: Node 20 reaches EOL in April 2026, Node 22 is already on maintenance-only security updates, Node 24 gets active support (bug fixes + targeted enhancements) through April 2028. Revisit before Node 24 EOL.
+- **Observability** is enabled on both Worker environments (`observability.enabled: true` in `wrangler.jsonc`) so runtime logs and Trace Events are captured from first deploy. No additional cost.
 - Custom Domains on the Worker, not CNAME records. `blackbrowedlabs.com` bound to production, `dev.blackbrowedlabs.com` bound to staging.
 
 ---

@@ -13,18 +13,24 @@
  * Cloudflare's native Workers Builds is intentionally NOT connected to
  * this repo — one deploy mechanism at a time (see docs/TECH_STACK.md §3.5).
  *
- * not_found_handling = "404-page" expects /404.html in the assets tree.
- * Pass 1 does not include /404.html yet; that lands in Pass 2 with the
- * rest of the Pass 2 pages. Until then, unmatched paths may fall
- * through to a bare Cloudflare 404 response.
+ * `not_found_handling` is intentionally omitted in Pass 1 — no
+ * src/pages/404.astro exists yet, so pointing Cloudflare at a
+ * nonexistent /404.html produces ambiguous behaviour. Pass 2 will
+ * re-add `"not_found_handling": "404-page"` in the same commit that
+ * introduces src/pages/404.astro.
+ *
+ * `observability` is enabled so Workers Trace Events / runtime logs
+ * are captured from day one. No cost; useful for post-deploy debugging.
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "blackbrowedlabs-com",
   "compatibility_date": "2026-04-23",
+  "observability": {
+    "enabled": true
+  },
   "assets": {
-    "directory": "./dist",
-    "not_found_handling": "404-page"
+    "directory": "./dist"
   },
   "env": {
     "production": {

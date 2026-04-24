@@ -283,7 +283,7 @@ Diese Website setzt keine Cookies zu Analyse-, Marketing- oder Tracking-Zwecken.
 
 8. Keine Social-Media-Plugins oder externen Einbettungen
 
-Diese Website bindet keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine externen Skripte). Alle Ressourcen werden vom eigenen Server ausgeliefert.
+Mit Ausnahme des in Abschnitt 4 beschriebenen Cloudflare-Web-Analytics-Beacons bindet diese Website keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine weiteren externen Skripte). Alle übrigen Ressourcen werden vom eigenen Server ausgeliefert.
 
 9. Ihre Rechte
 
@@ -382,7 +382,7 @@ This website does not set cookies for analytics, marketing, or tracking. Technic
 
 8. No Social Media Plugins or External Embeds
 
-This website does not embed third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no external scripts). All resources are served from the site's own origin.
+Apart from the Cloudflare Web Analytics beacon described in Section 4, this website embeds no third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts). All other resources are served from the site's own origin.
 
 9. Your Rights
 

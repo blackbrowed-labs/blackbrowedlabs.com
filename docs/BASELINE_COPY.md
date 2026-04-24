@@ -219,7 +219,7 @@ The content and works on this website created by the site operator are subject t
 
 ## 9. Datenschutzerklärung (DE — primary legal version)
 
-> **Disclaimer for the owner:** This is a baseline drafted for the specific stack profile of this website — static content, no forms, no accounts, no third-party trackers, cookieless analytics. It covers the GDPR Art. 13 disclosure requirements for these narrow circumstances. It is **not legal advice**. Before public launch, consider a one-off review: IHK Hamburg offers affordable legal consultation for Kleinunternehmer; services like e-recht24 generate tailored policies for a small fee; or a specialist data-protection lawyer for full assurance. The baseline below is legally complete for the stack described.
+> **Disclaimer for the owner:** This is a baseline drafted for the specific stack profile of this website — static content, no forms, no accounts, no third-party trackers, cookieless analytics. It covers the GDPR Art. 13 disclosure requirements for these narrow circumstances. It is **not legal advice**. Before public launch, consider a one-off review: IHK zu Lübeck offers affordable legal consultation for Kleinunternehmer; services like e-recht24 generate tailored policies for a small fee; or a specialist data-protection lawyer for full assurance. The baseline below is legally complete for the stack described.
 
 ```
 Datenschutzerklärung

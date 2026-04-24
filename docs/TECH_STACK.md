@@ -131,6 +131,15 @@ One scheduled trigger on the production Worker, daily at 03:00 UTC, dispatches a
 - **Observability** is enabled on both Worker environments (`observability.enabled: true` in `wrangler.jsonc`) so runtime logs and Trace Events are captured from first deploy. No additional cost.
 - Custom Domains on the Worker, not CNAME records. `blackbrowedlabs.com` bound to production, `dev.blackbrowedlabs.com` bound to staging.
 
+### 3.6 Cloudflare managed robots.txt (zone-level)
+
+Cloudflare's zone-level "Manage robots.txt" is deliberately enabled on the `blackbrowedlabs.com` zone. When enabled, Cloudflare prepends a managed block to the `robots.txt` our Worker serves.
+
+- **Production:** the managed block names known AI-training crawlers (the current list is visible in the Cloudflare dashboard and updated over time) with `Disallow: /` lines plus Cloudflare's Content Signals Policy preamble. Cloudflare maintains the list over time, so new crawlers enter the block without manual maintenance.
+- **Staging:** the managed block prepends `User-agent: *` / `Allow: /` ahead of the Worker-served `Disallow: /`, which a crawler may read as an override. The additional `X-Robots-Tag` response header and the `<meta name="robots">` tag injected on staging (§3.3) remain the authoritative noindex signals — any crawler that respects either will not index staging regardless of the merged `robots.txt`.
+
+Toggle off at Cloudflare dashboard → Bots / Scrape Shield → Manage robots.txt if the managed content ever becomes undesirable.
+
 ---
 
 ## 4. Framework & Styling — Astro + Tailwind
@@ -645,7 +654,7 @@ Content:
 
 Full draft provided in `BASELINE_COPY.md` §9. Covers: controller details, Cloudflare hosting + server logs, IONOS email, Cloudflare Web Analytics (cookieless), no third-party services, data subject rights, supervisory authority.
 
-**Disclaimer:** the Datenschutz draft is a baseline for a strictly-necessary, no-forms, no-tracking static site. It is not legal advice. For public launch, consider a one-off review from IHK Hamburg, a service like e-recht24, or a specialist data-protection lawyer.
+**Disclaimer:** the Datenschutz draft is a baseline for a strictly-necessary, no-forms, no-tracking static site. It is not legal advice. For public launch, consider a one-off review from IHK zu Lübeck, a service like e-recht24, or a specialist data-protection lawyer.
 
 ### 11.3 Cookie / consent banner
 

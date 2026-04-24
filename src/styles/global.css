@@ -179,6 +179,18 @@
 }
 
 
+/* ─── Mobile menu: lock body scroll while open ─────────────────── */
+/* Class is toggled from src/components/SiteHeader.astro on body when the
+   hamburger menu opens/closes. Mobile-only — desktop nav is always
+   visible and never locks body scroll. overflow: hidden (not position:
+   fixed) so scroll position is preserved on close. */
+@media (max-width: 767px) {
+  body.menu-open {
+    overflow: hidden;
+  }
+}
+
+
 /* ─── Reduced motion ──────────────────────────────────────────── */
 /* Kill all non-essential animation/transition regardless of layer. */
 @media (prefers-reduced-motion: reduce) {

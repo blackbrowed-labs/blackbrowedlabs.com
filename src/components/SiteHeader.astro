@@ -89,7 +89,9 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
 
 <style>
   .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 50;
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg);
   }

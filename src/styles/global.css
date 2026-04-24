@@ -54,6 +54,10 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* Covers the sticky SiteHeader's rendered height (~60px) with a
+       small buffer, so skip-link activations and any future anchor
+       jumps land below the header, not behind it. */
+    scroll-padding-top: 5rem;
   }
 
   body {

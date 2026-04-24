@@ -79,7 +79,7 @@ Blackbrowed Labs builds tools for classroom management. Two areas are in active 
 
 - **GitHub organisation:** `blackbrowed-labs` *(note the hyphen — the org name differs from the domain/brand, which have no hyphen: `blackbrowedlabs`)*
 - **Website repo:** `blackbrowed-labs/blackbrowedlabs.com`
-- **Visibility:** Public (signal of craftsmanship and openness; content is not commercially sensitive). **Before making the repo public** — if any private history exists — run a secret scan such as `gitleaks detect --source . -v`. For a fresh repo with no history, skip this step.
+- **Visibility:** Public (signal of craftsmanship and openness; content is not commercially sensitive). Full pre-flip secret-scan procedure and branch-protection ruleset details in §8.4.
 
 ---
 
@@ -471,6 +471,32 @@ The repo's `.gitignore` is at the root and covers three categories of files:
 - **Lockfiles** (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) must be committed so builds are reproducible across machines and CI.
 - **Source maps** (`.map` files) ship in production builds to aid debugging; no reason to ignore.
 - **Handoff documentation** in `docs/` and the Claude Design bundle in `design/handoff-bundle/` are committed — see §8.1 and §8.2 for the rationale.
+
+### 8.4 Repository visibility and branch protection
+
+- **Visibility:** The repository is **public**. Flipped to public on 2026-04-23, after Pass 1 foundation was complete and a secret scan confirmed no sensitive values had been committed. The repo is `blackbrowed-labs/blackbrowedlabs.com`.
+
+- **Rationale for public:** The repo contains only brand-facing documentation (`docs/`), design-system handoff material (`design/handoff-bundle/`), and the Astro source. No secrets (all in `.env`, gitignored per §8.3). Public visibility signals craftsmanship and aligns with the studio's open posture. Also unlocks free branch protection rulesets on the GitHub free plan, which private repos on Team plans don't get.
+
+- **Pre-flip secret scan:** Before flipping, run `gitleaks detect --source . --verbose --redact` from the repo root. Expected output: `no leaks found`. If any leaks are reported: do not flip public until they're resolved (rotate exposed secrets, rewrite history with `git filter-repo` or equivalent, rerun scan).
+
+- **Branch protection rulesets** (GitHub → Settings → Rules):
+  - **`protect-main`** (Active):
+    - Target: `main`
+    - Restrict deletions: enabled
+    - Block force pushes: enabled
+    - Require pull request before merging: enabled (0 required approvals — solo founder; raise if collaborators join)
+    - Require linear history: enabled
+    - Allow bypass: empty (no one bypasses)
+  - **`protect-dev`** (Active):
+    - Target: `dev`
+    - Restrict deletions: enabled
+    - Block force pushes: enabled
+    - Other toggles intentionally off — `dev` is an integration branch and direct commits are expected
+
+- **Status checks deliberately not required:** "Require status checks to pass" is off on `protect-main` because GitHub requires at least one specific check to be named, and we don't yet have a PR-triggered CI workflow (the deploy workflows are push-triggered, not PR-triggered). Pass 2 backlog item #5: add a PR-triggered CI workflow (`npm ci && npm run build` at minimum) and add it as a required status check on `protect-main`.
+
+- **Default branch:** `main`. Changed from `dev` to `main` at the same time as ruleset configuration. Workflow is now: feature work on `dev` → auto-deploy to staging (`dev.blackbrowedlabs.com`) → PR `dev` → `main` → auto-deploy to production (`blackbrowedlabs.com`).
 
 ---
 

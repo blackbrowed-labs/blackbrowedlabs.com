@@ -54,6 +54,10 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* Covers the sticky SiteHeader's rendered height (~60px) with a
+       small buffer, so skip-link activations and any future anchor
+       jumps land below the header, not behind it. */
+    scroll-padding-top: 5rem;
   }
 
   body {
@@ -171,6 +175,18 @@
     font-family: var(--font-sans);
     font-weight: var(--font-weight-light);
     letter-spacing: 0.10em;
+  }
+}
+
+
+/* ─── Mobile menu: lock body scroll while open ─────────────────── */
+/* Class is toggled from src/components/SiteHeader.astro on body when the
+   hamburger menu opens/closes. Mobile-only — desktop nav is always
+   visible and never locks body scroll. overflow: hidden (not position:
+   fixed) so scroll position is preserved on close. */
+@media (max-width: 767px) {
+  body.menu-open {
+    overflow: hidden;
   }
 }
 

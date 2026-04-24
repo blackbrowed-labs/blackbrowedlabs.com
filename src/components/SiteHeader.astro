@@ -66,30 +66,101 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
     const nav = document.getElementById('primary-nav');
     if (!(trigger instanceof HTMLElement) || !(nav instanceof HTMLElement)) return;
 
+    // Mirrors the mobile breakpoint used by the CSS: hamburger + nav panel
+    // live below 768px; desktop nav is always visible.
+    const mobileMql = window.matchMedia('(max-width: 767px)');
+
+    function isOpen() {
+      return trigger.getAttribute('aria-expanded') === 'true';
+    }
+
+    // Focusable elements currently VISIBLE inside the nav panel. Used for
+    // initial focus placement on open and for the Tab focus-trap cycle.
+    // offsetWidth/Height is 0 for display:none subtrees (e.g. the closed
+    // theme-toggle options), so those are filtered out automatically.
+    function getFocusables() {
+      const selector = 'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])';
+      return Array.from(nav.querySelectorAll(selector))
+        .filter(function (el) { return el.offsetWidth > 0 || el.offsetHeight > 0; });
+    }
+
     function open() {
       trigger.setAttribute('aria-expanded', 'true');
       nav.dataset.open = 'true';
+      document.body.classList.add('menu-open');
+      // Move focus into the panel for keyboard + screen-reader continuity.
+      const first = getFocusables()[0];
+      if (first) first.focus({ preventScroll: true });
     }
-    function close() {
+
+    // restoreFocus=true returns focus to the hamburger (Escape / tap-outside);
+    // =false leaves focus alone (hamburger click — trigger already focused;
+    // desktop-resize — hamburger is hidden at ≥768px anyway).
+    function close(restoreFocus) {
       trigger.setAttribute('aria-expanded', 'false');
       delete nav.dataset.open;
+      document.body.classList.remove('menu-open');
+      if (restoreFocus) trigger.focus({ preventScroll: true });
     }
 
     trigger.addEventListener('click', function () {
-      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
-      if (isOpen) close();
+      if (isOpen()) close(false);
       else open();
     });
 
+    // Tap outside the panel (and outside the trigger) closes the menu.
+    document.addEventListener('click', function (e) {
+      if (!isOpen()) return;
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (nav.contains(t) || trigger.contains(t)) return;
+      close(true);
+    });
+
+    // Escape closes + restores focus. Tab / Shift+Tab cycles within the panel.
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') close();
+      if (!isOpen()) return;
+
+      if (e.key === 'Escape') {
+        close(true);
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      const focusables = getFocusables();
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey) {
+        if (active === first || !nav.contains(active)) {
+          e.preventDefault();
+          last.focus({ preventScroll: true });
+        }
+      } else {
+        if (active === last) {
+          e.preventDefault();
+          first.focus({ preventScroll: true });
+        }
+      }
+    });
+
+    // If the viewport crosses to ≥768px while the menu is open, close cleanly:
+    // desktop nav is always visible and must not leave body-scroll locked or
+    // the hamburger's aria-expanded state mismatched with the visible nav.
+    mobileMql.addEventListener('change', function (e) {
+      if (!e.matches && isOpen()) close(false);
     });
   })();
 </script>
 
 <style>
   .site-header {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 50;
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg);
   }

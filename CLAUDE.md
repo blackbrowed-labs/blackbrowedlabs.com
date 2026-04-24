@@ -44,6 +44,44 @@ feel.
 **Pass 2 — remaining pages.** After Pass 1 is validated in real deployment,
 implement Products (with empty state), Contact, Impressum, Datenschutz, and 404.
 
+## Gate-based handoff pattern
+
+Pass 1 shipped a working production system on the first production deploy
+despite three failed staging attempts. The discipline below is what made that
+possible; Pass 2 should follow it.
+
+- For implementation work involving multiple decision points (token
+  conversions, multi-step deploys, significant architecture changes), produce
+  a plan document first and surface it for review before starting. Don't
+  begin implementation until explicit approval.
+- For each significant commit or deploy, pause at named gates (e.g., after
+  `wrangler.jsonc` is written, before first deploy) and wait for confirmation.
+- For diagnostic work, report findings before making changes. Don't edit
+  based on an assumed fix until the diagnostic has been reviewed.
+- Surface uncertainty as explicit open questions in plans, not resolved
+  silently.
+
+## Process rules from Pass 1
+
+Specific technical lessons worth codifying:
+
+- **Token conversion verification.** When translating design tokens between
+  framework versions, diff against **both** the source preset **and** any
+  companion CSS-custom-property file in the handoff bundle. Presets may omit
+  aliases that the companion file declares for readability. The Pass 1
+  missing-`--color-bg` bug slipped through because verification compared the
+  converted file against the preset only.
+- **Wrangler environment inheritance.** `wrangler.jsonc` top-level config does
+  **not** inherit into named environments for several keys: `observability`,
+  `vars`, `routes`, `name`, `main`, `compatibility_flags` (and more). Declare
+  these inside each `env.*` block when using `--env` in `wrangler deploy`.
+- **Primary-source verification for API / namespace questions.** When a task
+  depends on version-specific API behavior (framework routing, build-tool
+  namespaces, CLI permissions), verify against primary sources — the
+  framework's own source code, official docs, maintainer statements in
+  issues/discussions — before assuming. A targeted sub-agent with web search
+  is a valid escalation pattern and was used three times in Pass 1.
+
 ## Skills
 
 When writing or modifying UI components, invoke the `frontend-design` skill.

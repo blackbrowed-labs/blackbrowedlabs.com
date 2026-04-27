@@ -2,44 +2,44 @@
 /**
  * Homepage (DE — primary).
  * Matches design/handoff-bundle/design/pages/01-homepage-de.html.
- * Copy is verbatim from docs/BASELINE_COPY.md §2 and §3.
+ * Copy migrates from inline literals to the `editorial` collection
+ * in Pass 2 / A.4. The H2 + lead-paragraph body lives in the
+ * Markdown file; the lead paragraph is authored as inline HTML to
+ * preserve the global `.lead` utility class binding.
  *
  * The "Was hier gerade entsteht →" secondary link is omitted in Pass 1
- * (no /produkte route yet). Pass 2 restores it in the commit that adds
- * the Products page. See docs/pass-1-implementation-plan.md §7.
+ * (no /produkte route yet). Phase C.3 restores it in the commit that
+ * adds the Products page.
  */
 
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BrandLogo from '../components/BrandLogo.astro';
+
+const entry = await getEntry('editorial', 'home.de');
+if (!entry) throw new Error('Missing editorial entry: home.de');
+const { Content } = await render(entry);
+const { title, tagline, heroLead, description } = entry.data;
+// Schema fields are collection-wide optional but home.de must populate them.
+if (!title || !tagline || !heroLead || !description) {
+  throw new Error('home.de editorial entry missing required fields');
+}
 ---
 
-<BaseLayout
-  title="Blackbrowed Labs — Präzise Werkzeuge für den Unterricht"
-  description="Kleines Softwarestudio in Reinbek bei Hamburg. Werkzeuge für die Klassenführung, aus Gesprächen mit Lehrkräften entstanden."
->
+<BaseLayout title={title} description={description}>
   <section class="hero">
     <div class="hero__inner">
       <div class="hero__arc" aria-hidden="true">
         <BrandLogo variant="mark" />
       </div>
-      <h1 class="display">Präzise Werkzeuge für den Unterricht.</h1>
-      <p class="lead">
-        Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei Hamburg.
-        Ich entwickle Werkzeuge für die Klassenführung — Software, die
-        Lehrkräften im Schulalltag Arbeit abnimmt.
-      </p>
+      <h1 class="display">{tagline}</h1>
+      <p class="lead">{heroLead}</p>
     </div>
   </section>
 
   <section class="secondary">
     <div class="secondary__inner">
-      <h2>Nah an der Praxis</h2>
-      <p class="lead">
-        Die Software hier entsteht aus Gesprächen mit Lehrkräften — was im
-        Unterricht wirklich Zeit kostet, was funktioniert, was nicht. Kein
-        Feature-Katalog, keine großen Versprechen, nur Werkzeuge, die das tun,
-        was sie sollen.
-      </p>
+      <Content />
     </div>
   </section>
 </BaseLayout>

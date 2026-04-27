@@ -3,8 +3,7 @@
  *
  * Counterpart URLs are resolved via an explicit hand-maintained map
  * because German slugs are not mechanical translations of English slugs
- * (see docs/BASELINE_COPY.md §12). Pass 1 covers Home + About only;
- * Pass 2 extends the map when the other pages land.
+ * (see docs/BASELINE_COPY.md §12).
  */
 
 import type { Locale } from '../i18n';
@@ -28,6 +27,14 @@ const counterparts: Record<string, string> = {
   '/en': '/',
   '/ueber': '/en/about',
   '/en/about': '/ueber',
+  '/kontakt': '/en/contact',
+  '/en/contact': '/kontakt',
+  '/impressum': '/en/legal',
+  '/en/legal': '/impressum',
+  '/datenschutz': '/en/privacy',
+  '/en/privacy': '/datenschutz',
+  '/produkte': '/en/products',
+  '/en/products': '/produkte',
 };
 
 export function getLocaleFromPath(path: string): Locale {

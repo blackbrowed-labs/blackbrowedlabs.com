@@ -1,10 +1,9 @@
 /**
  * German (primary) UI strings for the Blackbrowed Labs site shell.
  *
- * Scope is Pass 1: Home + About only. Nav does not contain a "Home"
- * entry — the logo is the home link (see plan §7). Further nav entries
- * (Products, Contact, Impressum, Datenschutz) arrive in Pass 2
- * alongside the pages themselves.
+ * Nav does not contain a "Home" entry — the logo is the home link
+ * (see plan §7). Legal pages (Impressum, Datenschutz) live in the
+ * footer only, not in the primary nav.
  */
 
 export const de = {
@@ -19,6 +18,8 @@ export const de = {
   nav: {
     ariaLabel: 'Hauptnavigation',
     about: 'Über',
+    products: 'Produkte',
+    contact: 'Kontakt',
   },
 
   languageSwitcher: {
@@ -41,6 +42,11 @@ export const de = {
     about: 'Über',
     github: 'GitHub',
     githubAriaLabel: 'Blackbrowed Labs auf GitHub',
+    navAriaLabel: 'Footer-Navigation',
+    products: 'Produkte',
+    contact: 'Kontakt',
+    legal: 'Impressum',
+    privacy: 'Datenschutz',
   },
 } as const;
 

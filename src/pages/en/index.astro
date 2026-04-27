@@ -2,44 +2,44 @@
 /**
  * Homepage (EN — secondary).
  * Matches design/handoff-bundle/design/pages/02-homepage-en.html.
- * Copy is verbatim from docs/BASELINE_COPY.md §2 and §3.
+ * Copy migrates from inline literals to the `editorial` collection
+ * in Pass 2 / A.4. The H2 + lead-paragraph body lives in the
+ * Markdown file; the lead paragraph is authored as inline HTML to
+ * preserve the global `.lead` utility class binding.
  *
  * The "What's being built →" secondary link is omitted in Pass 1
- * (no /en/products route yet). Pass 2 restores it in the commit that
- * adds the Products page. See plans/pass-1-implementation-plan.md §7.
+ * (no /en/products route yet). Phase C.3 restores it in the commit
+ * that adds the Products page.
  */
 
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BrandLogo from '../../components/BrandLogo.astro';
+
+const entry = await getEntry('editorial', 'home.en');
+if (!entry) throw new Error('Missing editorial entry: home.en');
+const { Content } = await render(entry);
+const { title, tagline, heroLead, description } = entry.data;
+// Schema fields are collection-wide optional but home.en must populate them.
+if (!title || !tagline || !heroLead || !description) {
+  throw new Error('home.en editorial entry missing required fields');
+}
 ---
 
-<BaseLayout
-  title="Blackbrowed Labs — Precise tools for teaching"
-  description="A small software studio in Reinbek, near Hamburg. Tools for classroom management, built from conversations with teachers."
->
+<BaseLayout title={title} description={description}>
   <section class="hero">
     <div class="hero__inner">
       <div class="hero__arc" aria-hidden="true">
         <BrandLogo variant="mark" />
       </div>
-      <h1 class="display">Precise tools for teaching.</h1>
-      <p class="lead">
-        Blackbrowed Labs is a small software studio in Reinbek, near Hamburg.
-        I build tools for classroom management — software that takes work off
-        teachers' plates.
-      </p>
+      <h1 class="display">{tagline}</h1>
+      <p class="lead">{heroLead}</p>
     </div>
   </section>
 
   <section class="secondary">
     <div class="secondary__inner">
-      <h2>Close to the work</h2>
-      <p class="lead">
-        The software here grows out of conversations with teachers — what
-        really costs time in the classroom, what works, what doesn't. No
-        feature catalogue, no big promises, just tools that do what they're
-        meant to do.
-      </p>
+      <Content />
     </div>
   </section>
 </BaseLayout>

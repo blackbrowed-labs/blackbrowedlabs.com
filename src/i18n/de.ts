@@ -44,4 +44,12 @@ export const de = {
   },
 } as const;
 
-export type UiStrings = typeof de;
+type WidenStrings<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends object
+      ? WidenStrings<T[K]>
+      : T[K];
+};
+
+export type UiStrings = WidenStrings<typeof de>;

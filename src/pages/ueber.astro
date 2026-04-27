@@ -2,27 +2,33 @@
 /**
  * About page (DE — primary) — "Über Blackbrowed Labs".
  * Matches design/handoff-bundle/design/pages/04-about.html (DE artboard).
- * Copy verbatim from docs/BASELINE_COPY.md §4.
- *
- * Layout: asymmetric reading grid. Left column has the prose; right
- * column carries the arc mark at display scale as a wordless signature
- * (per handoff README "the arc carries its own weight here; do not
- * re-add the caption that was removed in revision").
+ * Copy migrates from inline literals to the `editorial` collection
+ * in Pass 2 / A.4. Three regions map to dedicated frontmatter fields
+ * (title → H1; intro[] → .about__text paragraphs; closing → footer)
+ * to preserve the asymmetric `.about__top` grid + closing styling;
+ * body Markdown carries only the "Woher der Name kommt" H2 section.
  */
 
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BrandLogo from '../components/BrandLogo.astro';
+
+const entry = await getEntry('editorial', 'about.de');
+if (!entry) throw new Error('Missing editorial entry: about.de');
+const { Content } = await render(entry);
+const { title, description, intro, closing } = entry.data;
+// Schema fields are collection-wide optional but about.de must populate them.
+if (!title || !description) {
+  throw new Error('about.de editorial entry missing required fields');
+}
 ---
 
-<BaseLayout
-  title="Über — Blackbrowed Labs"
-  description="Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei Hamburg. Ich entwickle Werkzeuge für die Klassenführung."
->
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <div class="breadcrumb__inner">
       <a href="/">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>
-      <span class="breadcrumb__current" aria-current="page">Über</span>
+      <span class="breadcrumb__current" aria-current="page">{title}</span>
     </div>
   </nav>
 
@@ -30,26 +36,8 @@ import BrandLogo from '../components/BrandLogo.astro';
     <div class="about__container">
       <div class="about__top">
         <div class="about__text">
-          <h1>Über</h1>
-          <p>
-            Blackbrowed Labs ist ein kleines Softwarestudio in Reinbek bei
-            Hamburg. Ich entwickle Werkzeuge für die Klassenführung — Software,
-            die Lehrkräften im Schulalltag Arbeit abnimmt.
-          </p>
-          <p>
-            Ich bin selbst kein Lehrer. Aber ich bin von Lehrkräften umgeben —
-            Freunde, Familie, langjährige Gespräche über das, was im Unterricht
-            funktioniert und was nicht. Die Software entsteht aus diesen
-            Gesprächen, nicht aus allgemeinen Annahmen darüber, was Schulen
-            brauchen.
-          </p>
-          <p>
-            Aktuell entstehen zwei Werkzeuge: eine iPad-App für die
-            Klassenführung — Noten, Schülerleistungen, Beobachtungen, ohne
-            Papierkram — und ein Claude-Cowork-Plugin, das bei der Planung von
-            Unterrichtseinheiten hilft. Beide bekommen eine eigene Website,
-            sobald sie so weit sind.
-          </p>
+          <h1>{title}</h1>
+          {intro?.map((paragraph) => <p>{paragraph}</p>)}
         </div>
         <aside class="about__visual" aria-hidden="true">
           <div class="about__mark">
@@ -59,25 +47,15 @@ import BrandLogo from '../components/BrandLogo.astro';
       </div>
 
       <section class="about__section">
-        <h2>Woher der Name kommt</h2>
-        <p>
-          Der Name <strong>Blackbrowed Labs</strong> stammt vom
-          Schwarzbrauenalbatros — einem Seevogel, der tausende Kilometer mit
-          minimalem Aufwand zurücklegt, getragen vom Wind statt von Muskelkraft.
-          Das markante dunkle Augenband gibt dem Vogel seinen Namen und dem
-          Studio seinen Charakter: ein kleiner, präziser Strich als
-          Erkennungszeichen.
-        </p>
-        <p>
-          Der Anspruch an die Software ist derselbe wie der Flug des Albatros:
-          lange tragen, wenig verbrauchen, klar bleiben.
-        </p>
+        <Content />
       </section>
 
-      <footer class="about__closing">
-        <p class="about__aphorism">Was funktioniert, bleibt. Was nicht, fliegt raus.</p>
-        <p class="about__signature">— Lars Weiser</p>
-      </footer>
+      {closing && (
+        <footer class="about__closing">
+          <p class="about__aphorism">{closing.aphorism}</p>
+          <p class="about__signature">{closing.signature}</p>
+        </footer>
+      )}
     </div>
   </article>
 </BaseLayout>

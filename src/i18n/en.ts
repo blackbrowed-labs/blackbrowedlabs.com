@@ -1,6 +1,6 @@
 /**
  * English (secondary) UI strings for the Blackbrowed Labs site shell.
- * Mirror of de.ts — same structure, translated copy. Scope: Pass 1.
+ * Mirror of de.ts — same structure, translated copy.
  */
 
 import type { UiStrings } from './de';
@@ -17,6 +17,8 @@ export const en: UiStrings = {
   nav: {
     ariaLabel: 'Main navigation',
     about: 'About',
+    products: 'Products',
+    contact: 'Contact',
   },
 
   languageSwitcher: {
@@ -39,5 +41,10 @@ export const en: UiStrings = {
     about: 'About',
     github: 'GitHub',
     githubAriaLabel: 'Blackbrowed Labs on GitHub',
+    navAriaLabel: 'Footer navigation',
+    products: 'Products',
+    contact: 'Contact',
+    legal: 'Legal',
+    privacy: 'Privacy',
   },
 };

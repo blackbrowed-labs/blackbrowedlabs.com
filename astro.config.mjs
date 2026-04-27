@@ -13,6 +13,13 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  // Disable smartypants so Markdown body content preserves the ASCII
+  // apostrophes ('), straight quotes, and `--` from BASELINE_COPY.md
+  // verbatim. The default (enabled) silently rewrites them to typographic
+  // forms, violating the "use copy verbatim" project rule.
+  markdown: {
+    smartypants: false,
+  },
   vite: {
     plugins: [tailwindcss()],
   },

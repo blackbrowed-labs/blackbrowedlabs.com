@@ -169,11 +169,11 @@ Kleinunternehmer gemäß § 19 UStG. Es wird keine Umsatzsteuer ausgewiesen.
 USt-IdNr. gemäß § 27a UStG
 DE461658750
 
-Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
-Lars Weiser (Anschrift wie oben)
-
 Haftungsausschluss
 Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden. Als Diensteanbieter bin ich gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+
+Haftung für Links
+Diese Website enthält Links zu externen Webseiten Dritter, auf deren Inhalte ich keinen Einfluss habe. Für diese fremden Inhalte kann ich keine Gewähr übernehmen; verantwortlich ist stets der jeweilige Anbieter oder Betreiber der verlinkten Seiten. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße geprüft; rechtswidrige Inhalte waren zu diesem Zeitpunkt nicht erkennbar. Eine dauerhafte inhaltliche Kontrolle der verlinkten Seiten ist ohne konkrete Anhaltspunkte einer Rechtsverletzung nach §§ 8 bis 10 DDG nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werde ich derartige Links umgehend entfernen.
 
 Urheberrecht
 Die durch den Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors.
@@ -205,11 +205,11 @@ Small-business exemption under § 19 UStG. No VAT is charged.
 VAT Identification Number per § 27a UStG
 DE461658750
 
-Responsible for content per § 18 (2) MStV
-Lars Weiser (address as above)
-
 Liability for Content
 The contents of this website have been created with the greatest care. However, no guarantee can be given for the accuracy, completeness, or currency of the content. As a service provider, I am responsible for my own content on these pages pursuant to § 7 (1) DDG. According to §§ 8 to 10 DDG, as a service provider I am not obliged to monitor transmitted or stored third-party information or to investigate circumstances indicating illegal activity.
+
+Liability for Links
+This website contains links to external third-party websites whose content is outside my control. No guarantee can be given for this third-party content; responsibility lies in each case with the respective provider or operator of the linked sites. The linked sites were checked for possible legal violations at the time of linking; no unlawful content was apparent at that time. Continuous monitoring of the content of linked sites is not reasonable without concrete indications of a legal violation, pursuant to §§ 8 to 10 DDG. Should I become aware of any legal violations, I will remove such links promptly.
 
 Copyright
 The content and works on this website created by the site operator are subject to German copyright law. Duplication, processing, distribution, and any form of exploitation outside the limits of copyright law require the written consent of the respective author.
@@ -255,21 +255,23 @@ Diese Website wird auf der Infrastruktur von Cloudflare, Inc. gehostet (101 Town
 
 Diese Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren und stabilen Betrieb der Website) und ist für die Auslieferung der Website technisch erforderlich. Cloudflare speichert diese Daten in Form von Server-Logs. Die Speicherdauer wird auf ein technisch notwendiges Minimum begrenzt.
 
-Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert, sodass für Datenübermittlungen in die USA ein angemessenes Datenschutzniveau nach Art. 45 DSGVO sichergestellt ist. Zusätzlich besteht zwischen dem Verantwortlichen und Cloudflare ein Auftragsverarbeitungsvertrag (Data Processing Addendum) nach Art. 28 DSGVO.
+Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert, sodass für Datenübermittlungen in die USA ein angemessenes Datenschutzniveau nach Art. 45 DSGVO sichergestellt ist. Diese Zertifizierung wird regelmäßig anhand der offiziellen Teilnehmerliste des EU-US Data Privacy Frameworks geprüft (zuletzt geprüft am {{ cloudflare_facts_verified_date }}). Zusätzlich besteht zwischen dem Verantwortlichen und Cloudflare ein Auftragsverarbeitungsvertrag (Data Processing Addendum) nach Art. 28 DSGVO.
 
 Weitere Informationen zum Datenschutz bei Cloudflare: https://www.cloudflare.com/privacypolicy/
 
 4. Analyse: Cloudflare Web Analytics
 
-Zur Reichweitenmessung wird Cloudflare Web Analytics eingesetzt. Dieser Dienst arbeitet cookiefrei und ohne Fingerprinting. Es werden ausschließlich aggregierte Nutzungsstatistiken erhoben (Seitenaufrufe, Referrer, ungefähre geografische Herkunft auf Länderebene). Eine Identifizierung einzelner Besucher ist weder vorgesehen noch möglich.
+Zur Reichweitenmessung wird Cloudflare Web Analytics eingesetzt. Hierzu wird beim Aufruf der Website ein Skript (Beacon) vom Cloudflare-Host static.cloudflareinsights.com nachgeladen. Dieser Dienst arbeitet cookiefrei und ohne Fingerprinting. Es werden ausschließlich aggregierte Nutzungsstatistiken erhoben (Seitenaufrufe, Referrer, ungefähre geografische Herkunft auf Länderebene). Eine Identifizierung einzelner Besucher ist weder vorgesehen noch möglich. Aggregierte Auswertungsdaten werden für {{ cwa_retention_aggregates_months }} Monate gespeichert; einzelne Rohereignisse werden innerhalb von {{ cwa_retention_raw_hours }} Stunden aggregiert und anschließend gelöscht. Diese Angaben werden regelmäßig anhand der öffentlichen Dokumentation von Cloudflare geprüft (zuletzt geprüft am {{ cloudflare_facts_verified_date }}).
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer datenschutzfreundlichen Reichweitenmessung).
 
 5. E-Mail-Kommunikation
 
-Wenn Sie mich per E-Mail kontaktieren (z. B. über die auf der Kontaktseite angegebene Adresse), wird Ihre Nachricht zur Bearbeitung gespeichert. Das zugehörige E-Mail-Postfach wird bei der IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Deutschland) betrieben.
+Wenn Sie mich per E-Mail kontaktieren (z. B. über die auf der Kontaktseite angegebene Adresse), wird Ihre Nachricht zur Bearbeitung gespeichert. Das zugehörige E-Mail-Postfach wird bei der IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Deutschland) betrieben. Zwischen dem Verantwortlichen und IONOS besteht ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.
 
-Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen) bzw. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung Ihrer Anfrage). Die E-Mails werden so lange gespeichert, wie es für die Bearbeitung erforderlich ist, und anschließend gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.
+Nachrichten an Adressen unter der Domain blackbrowedlabs.de werden über Cloudflare Email Routing entgegengenommen und an das oben genannte IONOS-Postfach weitergeleitet. Es wird keine E-Mail-Adresse unter blackbrowedlabs.de aktiv veröffentlicht; die Catch-all-Weiterleitung dient als Auffangfunktion für versehentlich an diese Domain gerichtete Nachrichten. Die in Abschnitt 3 beschriebenen Maßnahmen für Datenübermittlungen in die USA (EU-US Data Privacy Framework nach Art. 45 DSGVO sowie Auftragsverarbeitungsvertrag nach Art. 28 DSGVO) gelten entsprechend für die E-Mail-Weiterleitung über Cloudflare Email Routing.
+
+Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen) bzw. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung Ihrer Anfrage). E-Mails ohne geschäftlichen oder steuerlichen Bezug werden nach abgeschlossener Bearbeitung gelöscht. Soweit E-Mails als Handels- und Geschäftsbriefe einzuordnen sind, werden sie nach § 147 Abs. 1 Nr. 2 und 3 AO sechs Jahre aufbewahrt; soweit sie Buchungsbelege darstellen, beträgt die Aufbewahrungsfrist nach § 147 Abs. 1 Nr. 4 AO zehn Jahre.
 
 Weitere Informationen zum Datenschutz bei IONOS: https://www.ionos.de/terms-gtc/terms-privacy
 
@@ -277,13 +279,13 @@ Weitere Informationen zum Datenschutz bei IONOS: https://www.ionos.de/terms-gtc/
 
 Eine Weitergabe Ihrer personenbezogenen Daten an Dritte findet — über die oben genannten Auftragsverarbeiter (Cloudflare, IONOS) hinaus — nicht statt.
 
-7. Keine Cookies außerhalb technischer Notwendigkeit
+7. Keine Cookies oder vergleichbaren Speichertechnologien außerhalb technischer Notwendigkeit
 
-Diese Website setzt keine Cookies zu Analyse-, Marketing- oder Tracking-Zwecken. Sollten technisch notwendige Cookies (z. B. durch den Schutzmechanismus von Cloudflare) zum Einsatz kommen, erfolgt dies auf Grundlage von § 25 Abs. 2 Nr. 2 TDDDG.
+Diese Website setzt keine Cookies oder vergleichbaren Speichertechnologien (z. B. Web Storage) zu Analyse-, Marketing- oder Tracking-Zwecken. Sollten technisch notwendige Cookies (z. B. durch den Schutzmechanismus von Cloudflare) zum Einsatz kommen, erfolgt dies auf Grundlage von § 25 Abs. 2 Nr. 2 TDDDG. Auf derselben Grundlage wird zur Speicherung Ihrer Designeinstellung (Hell, Dunkel, System) ein Eintrag im Web Storage Ihres Browsers (Schlüssel: bbl-theme) angelegt. Dieser Eintrag wird ausschließlich gesetzt, wenn Sie die Designauswahl aktiv ändern; er enthält keine personenbezogenen Daten und wird nicht zur Wiedererkennung über Websites hinweg verwendet.
 
 8. Keine Social-Media-Plugins oder externen Einbettungen
 
-Mit Ausnahme des in Abschnitt 4 beschriebenen Cloudflare-Web-Analytics-Beacons bindet diese Website keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine weiteren externen Skripte). Alle übrigen Ressourcen werden vom eigenen Server ausgeliefert.
+Mit Ausnahme des in Abschnitt 4 beschriebenen Cloudflare-Web-Analytics-Beacons (geladen von static.cloudflareinsights.com) bindet diese Website keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine weiteren externen Skripte). Alle übrigen Ressourcen werden vom eigenen Server ausgeliefert.
 
 9. Ihre Rechte
 
@@ -354,21 +356,23 @@ This website is hosted on Cloudflare, Inc.'s infrastructure (101 Townsend St, Sa
 
 This processing is based on Art. 6 (1) (f) GDPR (legitimate interest in secure and stable operation of the site) and is technically required for delivering the website. Cloudflare stores this data in server logs. Retention is limited to what is technically necessary.
 
-Cloudflare is certified under the EU-US Data Privacy Framework, ensuring an adequate level of data protection for transfers to the United States per Art. 45 GDPR. A Data Processing Addendum under Art. 28 GDPR is in place between the controller and Cloudflare.
+Cloudflare is certified under the EU-US Data Privacy Framework, ensuring an adequate level of data protection for transfers to the United States per Art. 45 GDPR. This certification is verified periodically against the official EU-US Data Privacy Framework participant list (last verified on {{ cloudflare_facts_verified_date }}). A Data Processing Addendum under Art. 28 GDPR is in place between the controller and Cloudflare.
 
 Cloudflare's privacy policy: https://www.cloudflare.com/privacypolicy/
 
 4. Analytics: Cloudflare Web Analytics
 
-Cloudflare Web Analytics is used to measure site usage. This service operates without cookies and without fingerprinting. Only aggregate usage statistics are collected (page views, referrer, approximate country-level geolocation). Identification of individual visitors is neither intended nor possible.
+Cloudflare Web Analytics is used to measure site usage. To do this, a script (beacon) is loaded from the Cloudflare host static.cloudflareinsights.com when a page is opened. This service operates without cookies and without fingerprinting. Only aggregate usage statistics are collected (page views, referrer, approximate country-level geolocation). Identification of individual visitors is neither intended nor possible. Aggregated analytics data is retained for {{ cwa_retention_aggregates_months }} months; individual raw events are aggregated and then deleted within {{ cwa_retention_raw_hours }} hours. These figures are verified periodically against Cloudflare's public documentation (last verified on {{ cloudflare_facts_verified_date }}).
 
 Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in privacy-friendly analytics).
 
 5. Email Communication
 
-If you contact me by email (e.g. using the address on the contact page), your message is stored for processing. The mailbox is operated by IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Germany).
+If you contact me by email (e.g. using the address on the contact page), your message is stored for processing. The mailbox is operated by IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Germany). A Data Processing Addendum under Art. 28 GDPR is in place between the controller and IONOS.
 
-Legal basis: Art. 6 (1) (b) GDPR (pre-contractual measures) or Art. 6 (1) (f) GDPR (legitimate interest in responding to your inquiry). Emails are retained as long as necessary to process the inquiry and then deleted, unless statutory retention periods apply.
+Inbound messages to addresses on the domain blackbrowedlabs.de are received via Cloudflare Email Routing and forwarded to the IONOS mailbox named above. No email address on blackbrowedlabs.de is publicly advertised; the catch-all forwarding serves as a fallback for messages mistakenly sent to this domain. The measures described in Section 3 for data transfers to the United States (EU-US Data Privacy Framework per Art. 45 GDPR; Data Processing Addendum per Art. 28 GDPR) apply accordingly to email forwarding via Cloudflare Email Routing.
+
+Legal basis: Art. 6 (1) (b) GDPR (pre-contractual measures) or Art. 6 (1) (f) GDPR (legitimate interest in responding to your inquiry). Emails without a business or tax-relevant context are deleted once processing is complete. Where emails qualify as commercial and business correspondence (Handels- und Geschäftsbriefe), they are retained for six years pursuant to § 147 Abs. 1 Nr. 2 und 3 AO; where they constitute accounting records (Buchungsbelege), the retention period is ten years pursuant to § 147 Abs. 1 Nr. 4 AO.
 
 IONOS privacy information: https://www.ionos.com/terms-gtc/terms-privacy
 
@@ -376,13 +380,13 @@ IONOS privacy information: https://www.ionos.com/terms-gtc/terms-privacy
 
 Your personal data is not disclosed to third parties beyond the processors listed above (Cloudflare, IONOS).
 
-7. No Non-Essential Cookies
+7. No Non-Essential Cookies or Comparable Storage Technologies
 
-This website does not set cookies for analytics, marketing, or tracking. Technically necessary cookies (e.g. from Cloudflare's security layer) are set on the basis of § 25 (2) no. 2 TDDDG.
+This website does not set cookies or comparable storage technologies (e.g. Web Storage) for analytics, marketing, or tracking. Technically necessary cookies (e.g. from Cloudflare's security layer) are set on the basis of § 25 (2) no. 2 TDDDG. On the same basis, an entry is written to your browser's Web Storage (key: bbl-theme) to remember your theme preference (Light, Dark, System). This entry is only set when you actively change the theme selection; it contains no personal data and is not used for cross-site recognition.
 
 8. No Social Media Plugins or External Embeds
 
-Apart from the Cloudflare Web Analytics beacon described in Section 4, this website embeds no third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts). All other resources are served from the site's own origin.
+Apart from the Cloudflare Web Analytics beacon described in Section 4 (loaded from static.cloudflareinsights.com), this website embeds no third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts). All other resources are served from the site's own origin.
 
 9. Your Rights
 

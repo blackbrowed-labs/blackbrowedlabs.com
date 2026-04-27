@@ -75,7 +75,9 @@ const t = getUiStrings(locale).themeToggle;
   (function () {
     const STORAGE_KEY = 'bbl-theme';
 
-    function readChoice() {
+    type ThemeChoice = 'light' | 'dark' | 'system';
+
+    function readChoice(): ThemeChoice {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light' || stored === 'dark' || stored === 'system') {
         return stored;
@@ -83,7 +85,7 @@ const t = getUiStrings(locale).themeToggle;
       return 'system';
     }
 
-    function resolve(choice) {
+    function resolve(choice: ThemeChoice): 'light' | 'dark' {
       if (choice === 'system') {
         return window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
@@ -92,13 +94,13 @@ const t = getUiStrings(locale).themeToggle;
       return choice;
     }
 
-    function apply(choice) {
+    function apply(choice: ThemeChoice) {
       const resolved = resolve(choice);
       document.documentElement.dataset.theme = resolved;
       document.documentElement.dataset.themeChoice = choice;
     }
 
-    function persist(choice) {
+    function persist(choice: ThemeChoice) {
       if (choice === 'system') {
         localStorage.removeItem(STORAGE_KEY);
       } else {
@@ -106,9 +108,9 @@ const t = getUiStrings(locale).themeToggle;
       }
     }
 
-    const triggers = document.querySelectorAll('[data-theme-toggle-trigger]');
-    const menus = document.querySelectorAll('[data-theme-toggle-menu]');
-    const options = document.querySelectorAll('[data-theme-value]');
+    const triggers = document.querySelectorAll<HTMLElement>('[data-theme-toggle-trigger]');
+    const menus = document.querySelectorAll<HTMLElement>('[data-theme-toggle-menu]');
+    const options = document.querySelectorAll<HTMLElement>('[data-theme-value]');
 
     function updateOptionsState() {
       const choice = readChoice();
@@ -140,7 +142,10 @@ const t = getUiStrings(locale).themeToggle;
     options.forEach(function (opt) {
       opt.addEventListener('click', function () {
         const value = opt.getAttribute('data-theme-value');
-        if (!value) return;
+        // Boundary validation: data-theme-value markup is hard-coded to the
+        // three valid values, but we narrow defensively so persist/apply
+        // receive a typed ThemeChoice without a cast.
+        if (value !== 'light' && value !== 'dark' && value !== 'system') return;
         persist(value);
         apply(value);
         updateOptionsState();

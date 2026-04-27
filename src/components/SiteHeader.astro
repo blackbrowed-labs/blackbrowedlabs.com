@@ -65,13 +65,17 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
     const trigger = document.querySelector('[data-menu-trigger]');
     const nav = document.getElementById('primary-nav');
     if (!(trigger instanceof HTMLElement) || !(nav instanceof HTMLElement)) return;
+    // Re-bind to typed locals so the L67 instanceof narrowing propagates into
+    // every inner-function closure below. Type-only; same DOM references.
+    const triggerEl: HTMLElement = trigger;
+    const navEl: HTMLElement = nav;
 
     // Mirrors the mobile breakpoint used by the CSS: hamburger + nav panel
     // live below 768px; desktop nav is always visible.
     const mobileMql = window.matchMedia('(max-width: 767px)');
 
     function isOpen() {
-      return trigger.getAttribute('aria-expanded') === 'true';
+      return triggerEl.getAttribute('aria-expanded') === 'true';
     }
 
     // Focusable elements currently VISIBLE inside the nav panel. Used for
@@ -80,13 +84,13 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
     // theme-toggle options), so those are filtered out automatically.
     function getFocusables() {
       const selector = 'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])';
-      return Array.from(nav.querySelectorAll(selector))
+      return Array.from(navEl.querySelectorAll<HTMLElement>(selector))
         .filter(function (el) { return el.offsetWidth > 0 || el.offsetHeight > 0; });
     }
 
     function open() {
-      trigger.setAttribute('aria-expanded', 'true');
-      nav.dataset.open = 'true';
+      triggerEl.setAttribute('aria-expanded', 'true');
+      navEl.dataset.open = 'true';
       document.body.classList.add('menu-open');
       // Move focus into the panel for keyboard + screen-reader continuity.
       const first = getFocusables()[0];
@@ -96,14 +100,14 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
     // restoreFocus=true returns focus to the hamburger (Escape / tap-outside);
     // =false leaves focus alone (hamburger click — trigger already focused;
     // desktop-resize — hamburger is hidden at ≥768px anyway).
-    function close(restoreFocus) {
-      trigger.setAttribute('aria-expanded', 'false');
-      delete nav.dataset.open;
+    function close(restoreFocus: boolean) {
+      triggerEl.setAttribute('aria-expanded', 'false');
+      delete navEl.dataset.open;
       document.body.classList.remove('menu-open');
-      if (restoreFocus) trigger.focus({ preventScroll: true });
+      if (restoreFocus) triggerEl.focus({ preventScroll: true });
     }
 
-    trigger.addEventListener('click', function () {
+    triggerEl.addEventListener('click', function () {
       if (isOpen()) close(false);
       else open();
     });
@@ -113,7 +117,7 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
       if (!isOpen()) return;
       const t = e.target;
       if (!(t instanceof Element)) return;
-      if (nav.contains(t) || trigger.contains(t)) return;
+      if (navEl.contains(t) || triggerEl.contains(t)) return;
       close(true);
     });
 
@@ -135,7 +139,7 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
       const active = document.activeElement;
 
       if (e.shiftKey) {
-        if (active === first || !nav.contains(active)) {
+        if (active === first || !navEl.contains(active)) {
           e.preventDefault();
           last.focus({ preventScroll: true });
         }

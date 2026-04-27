@@ -11,6 +11,23 @@ Read these in order:
 3. `docs/BASELINE_COPY.md` — editorial content for every page. Use verbatim.
 4. `design/handoff-bundle/README.md` — the Claude Design export, if present.
 
+## Workspace bootstrap
+
+After the docs above, orient against the working state:
+
+1. `plans/BOOTSTRAP.md` — current project state, in-flight topics, recent
+   decisions. The slow-moving entry point.
+2. `plans/INDEX.md` — table of contents for the workspace. Claude-maintained
+   via propose-then-validate; never hand-edited.
+3. `plans/HANDOFFS/` — if a file dated within the last week exists, read the
+   most recent one before acting; it carries the previous session's tail
+   state.
+
+Working artefacts (plans, sub-agent reports, drafts, decision logs) live
+under `plans/active/<topic>/`; closed work lives under `plans/_archive/`.
+Naming, write-path, and INDEX-maintenance conventions: `plans/meta/conventions.md`.
+Sub-agents dispatch on Opus by default; Sonnet only for mechanical tasks (justification in prompt frontmatter).
+
 ## Core principles
 
 - This is a **content website**, not an application. Prioritize performance,

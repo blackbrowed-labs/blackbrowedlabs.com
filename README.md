@@ -22,3 +22,5 @@ this repo; editing happens through GitHub.
 ## License
 
 © 2026 Blackbrowed Labs. All rights reserved.
+
+<!-- ruleset-verify: throwaway marker; PR closed without merging -->

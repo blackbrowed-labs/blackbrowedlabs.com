@@ -1,0 +1,47 @@
+# PR-triggered CI on PRs targeting `main`.
+# Runs `astro check` (TypeScript + Astro templates) and a full build.
+# The `build-pr` job name is referenced as a required status check on
+# the `protect-main` ruleset — see docs/TECH_STACK.md §8.4.
+#
+# `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` opts into Node 24 for JS-based
+# actions, ahead of GitHub's runtime default flip on 2026-06-02.
+
+name: CI — PR
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-pr-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-pr:
+    name: build-pr
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Astro check
+        run: npm run check
+
+      - name: Build
+        run: npm run build

@@ -1,0 +1,223 @@
+---
+/**
+ * Legal Notice (EN — courtesy translation) — § 5 DDG legal notice.
+ * Matches design/handoff-bundle/design/pages/06-impressum.html (EN artboard).
+ * Copy held inline (per OQ-1: legal pages stay as .astro, not in the
+ * editorial collection) and verbatim from docs/BASELINE_COPY.md §8.
+ * The German Impressum at /impressum is legally authoritative.
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Legal Notice';
+const description =
+  'Legal notice for Blackbrowed Labs pursuant to § 5 DDG. Lars Weiser, Reinbek. VAT ID DE461658750.';
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/en">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{title}</span>
+    </div>
+  </nav>
+
+  <article class="impressum">
+    <div class="impressum__container">
+      <div class="impressum__content">
+        <h1>{title}</h1>
+
+        <p class="impressum__courtesy">
+          This is a courtesy translation. The German version is legally authoritative.
+        </p>
+
+        <p class="impressum__lede">
+          Information pursuant to § 5 DDG (German Digital Services Act):
+        </p>
+
+        <address class="impressum__address">
+          Lars Weiser<br />
+          Blackbrowed Labs<br />
+          Schröders Stieg 8a<br />
+          21465 Reinbek<br />
+          Germany
+        </address>
+
+        <div class="impressum__section">
+          <h3>Contact</h3>
+          <p class="impressum__p">
+            Email: <a href="mailto:lars@blackbrowedlabs.com">lars@blackbrowedlabs.com</a>
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>VAT</h3>
+          <p class="impressum__p">
+            Small-business exemption under § 19 UStG. No VAT is charged.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>VAT Identification Number per § 27a UStG</h3>
+          <p class="impressum__p">DE461658750</p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Liability for Content</h3>
+          <p class="impressum__p">
+            The contents of this website have been created with the greatest care. However, no
+            guarantee can be given for the accuracy, completeness, or currency of the content. As
+            a service provider, I am responsible for my own content on these pages pursuant to
+            § 7 (1) DDG. According to §§ 8 to 10 DDG, as a service provider I am not obliged to
+            monitor transmitted or stored third-party information or to investigate circumstances
+            indicating illegal activity.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Liability for Links</h3>
+          <p class="impressum__p">
+            This website contains links to external third-party websites whose content is outside
+            my control. No guarantee can be given for this third-party content; responsibility
+            lies in each case with the respective provider or operator of the linked sites. The
+            linked sites were checked for possible legal violations at the time of linking; no
+            unlawful content was apparent at that time. Continuous monitoring of the content of
+            linked sites is not reasonable without concrete indications of a legal violation,
+            pursuant to §§ 8 to 10 DDG. Should I become aware of any legal violations, I will
+            remove such links promptly.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Copyright</h3>
+          <p class="impressum__p">
+            The content and works on this website created by the site operator are subject to
+            German copyright law. Duplication, processing, distribution, and any form of
+            exploitation outside the limits of copyright law require the written consent of the
+            respective author.
+          </p>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep {
+    color: var(--color-border);
+  }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .impressum {
+    background: var(--color-bg);
+  }
+  .impressum__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem 6rem;
+  }
+  .impressum__content {
+    max-width: 68ch;
+  }
+
+  .impressum__content h1 {
+    margin: 0 0 3rem;
+  }
+
+  .impressum__courtesy {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--color-text-muted);
+    max-width: 48ch;
+    margin: -2rem 0 2.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .impressum__lede {
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+  }
+
+  .impressum__address {
+    max-width: 68ch;
+    line-height: 1.5;
+    margin: 0 0 2.5rem;
+    font-style: normal;
+  }
+
+  .impressum__section {
+    margin-top: 2rem;
+  }
+  .impressum__section:first-of-type {
+    margin-top: 0;
+  }
+  .impressum__content h3 {
+    margin: 0 0 0.75rem;
+  }
+  .impressum__p {
+    max-width: 68ch;
+    margin: 0 0 0.75rem;
+  }
+  .impressum__p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .impressum__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .impressum__content h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1.5rem;
+    }
+    .impressum__content h3 {
+      font-size: 1.125rem;
+    }
+    .impressum__courtesy {
+      max-width: none;
+      margin: -0.25rem 0 1.75rem;
+    }
+    .impressum__lede,
+    .impressum__address,
+    .impressum__p {
+      max-width: none;
+    }
+    .impressum__section {
+      margin-top: 1.75rem;
+    }
+  }
+</style>

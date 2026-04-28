@@ -1,0 +1,203 @@
+---
+/**
+ * Impressum (DE — legally authoritative) — § 5 DDG legal notice.
+ * Matches design/handoff-bundle/design/pages/06-impressum.html (DE artboard).
+ * Copy held inline (per OQ-1: legal pages stay as .astro, not in the
+ * editorial collection) and verbatim from docs/BASELINE_COPY.md §7.
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Impressum';
+const description =
+  'Impressum von Blackbrowed Labs nach § 5 DDG. Lars Weiser, Reinbek. USt-IdNr. DE461658750.';
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{title}</span>
+    </div>
+  </nav>
+
+  <article class="impressum">
+    <div class="impressum__container">
+      <div class="impressum__content">
+        <h1>{title}</h1>
+
+        <p class="impressum__lede">Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz):</p>
+
+        <address class="impressum__address">
+          Lars Weiser<br />
+          Blackbrowed Labs<br />
+          Schröders Stieg 8a<br />
+          21465 Reinbek<br />
+          Deutschland
+        </address>
+
+        <div class="impressum__section">
+          <h3>Kontakt</h3>
+          <p class="impressum__p">
+            E-Mail: <a href="mailto:lars@blackbrowedlabs.com">lars@blackbrowedlabs.com</a>
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Umsatzsteuer</h3>
+          <p class="impressum__p">
+            Kleinunternehmer gemäß § 19 UStG. Es wird keine Umsatzsteuer ausgewiesen.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>USt-IdNr. gemäß § 27a UStG</h3>
+          <p class="impressum__p">DE461658750</p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Haftungsausschluss</h3>
+          <p class="impressum__p">
+            Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
+            Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.
+            Als Diensteanbieter bin ich gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten
+            nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich als
+            Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
+            Informationen zu überwachen oder nach Umständen zu forschen, die auf eine
+            rechtswidrige Tätigkeit hinweisen.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Haftung für Links</h3>
+          <p class="impressum__p">
+            Diese Website enthält Links zu externen Webseiten Dritter, auf deren Inhalte ich
+            keinen Einfluss habe. Für diese fremden Inhalte kann ich keine Gewähr übernehmen;
+            verantwortlich ist stets der jeweilige Anbieter oder Betreiber der verlinkten Seiten.
+            Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße
+            geprüft; rechtswidrige Inhalte waren zu diesem Zeitpunkt nicht erkennbar. Eine
+            dauerhafte inhaltliche Kontrolle der verlinkten Seiten ist ohne konkrete Anhaltspunkte
+            einer Rechtsverletzung nach §§ 8 bis 10 DDG nicht zumutbar. Bei Bekanntwerden von
+            Rechtsverletzungen werde ich derartige Links umgehend entfernen.
+          </p>
+        </div>
+
+        <div class="impressum__section">
+          <h3>Urheberrecht</h3>
+          <p class="impressum__p">
+            Die durch den Seitenbetreiber erstellten Inhalte und Werke auf dieser Website
+            unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung
+            und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der
+            schriftlichen Zustimmung des jeweiligen Autors.
+          </p>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep {
+    color: var(--color-border);
+  }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .impressum {
+    background: var(--color-bg);
+  }
+  .impressum__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem 6rem;
+  }
+  .impressum__content {
+    max-width: 68ch;
+  }
+
+  .impressum__content h1 {
+    margin: 0 0 3rem;
+  }
+
+  .impressum__lede {
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+  }
+
+  .impressum__address {
+    max-width: 68ch;
+    line-height: 1.5;
+    margin: 0 0 2.5rem;
+    font-style: normal;
+  }
+
+  .impressum__section {
+    margin-top: 2rem;
+  }
+  .impressum__section:first-of-type {
+    margin-top: 0;
+  }
+  .impressum__content h3 {
+    margin: 0 0 0.75rem;
+  }
+  .impressum__p {
+    max-width: 68ch;
+    margin: 0 0 0.75rem;
+  }
+  .impressum__p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .impressum__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .impressum__content h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1.5rem;
+    }
+    .impressum__content h3 {
+      font-size: 1.125rem;
+    }
+    .impressum__lede,
+    .impressum__address,
+    .impressum__p {
+      max-width: none;
+    }
+    .impressum__section {
+      margin-top: 1.75rem;
+    }
+  }
+</style>

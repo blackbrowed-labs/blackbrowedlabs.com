@@ -98,6 +98,15 @@ Specific technical lessons worth codifying:
   framework's own source code, official docs, maintainer statements in
   issues/discussions — before assuming. A targeted sub-agent with web search
   is a valid escalation pattern and was used three times in Pass 1.
+- **Hybrid Workers + Static Assets posture (since Phase B.1).** The deploy
+  is mostly Workers Static Assets (the `./dist` build is served directly
+  via `env.ASSETS.fetch`), with one narrow Worker entry at
+  `src/worker/index.ts` for `POST /api/contact` only. Every other path
+  falls through to the assets binding. This is the exception, not a new
+  norm: future surfaces should default to "assets-only" and earn a Worker
+  carve-out only when a static page genuinely cannot serve the use case.
+  The `wrangler.jsonc` comment block carries the same posture statement
+  alongside its env-inheritance gotcha.
 
 ## Skills
 

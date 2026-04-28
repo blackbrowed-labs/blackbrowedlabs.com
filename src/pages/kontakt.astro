@@ -1,0 +1,110 @@
+---
+/**
+ * Contact page (DE). Renders the editorial body (email + GitHub +
+ * Art. 13 privacy notice from BASELINE_COPY §6) followed by the
+ * contact form. Form submits to POST /api/contact; the Worker
+ * handles validation, Turnstile, rate-limit, send_email, and
+ * 303-redirects back here with `?ok=1` or `?error=<code>`.
+ */
+
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/forms/ContactForm.astro';
+
+const entry = await getEntry('editorial', 'contact.de');
+if (!entry) throw new Error('Missing editorial entry: contact.de');
+const { Content } = await render(entry);
+const { title, description } = entry.data;
+if (!title || !description) {
+  throw new Error('contact.de editorial entry missing required fields');
+}
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{title}</span>
+    </div>
+  </nav>
+
+  <article class="contact">
+    <div class="contact__container">
+      <h1>{title}</h1>
+      <div class="contact__content">
+        <Content />
+      </div>
+      <ContactForm locale="de" returnTo="/kontakt" />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep { color: var(--color-border); }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .contact { background: var(--color-bg); }
+  .contact__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 6rem 3rem 4rem;
+  }
+  .contact h1 { margin: 0 0 3rem; max-width: 68ch; }
+  .contact__content {
+    max-width: 68ch;
+    margin: 0 0 3rem;
+  }
+  .contact__content p {
+    max-width: 68ch;
+    margin: 0 0 1.5rem;
+  }
+  .contact__content h2 {
+    margin: 3rem 0 1rem;
+    font-size: var(--text-h3);
+    color: var(--color-heading);
+    max-width: 68ch;
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner { padding: 0.875rem 1.25rem; }
+    .contact__container { padding: 2.5rem 1.5rem 3rem; }
+    .contact h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1.5rem;
+      max-width: 14ch;
+    }
+    .contact__content,
+    .contact__content p,
+    .contact__content h2 { max-width: none; }
+  }
+</style>

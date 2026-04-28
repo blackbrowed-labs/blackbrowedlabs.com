@@ -21,6 +21,8 @@ const t = getUiStrings(locale);
 const homeHref = locale === 'de' ? '/' : '/en';
 const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
 const aboutActive = path === aboutHref || path === aboutHref + '/';
+const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
+const contactActive = path === contactHref || path === contactHref + '/';
 ---
 
 <header class="site-header">
@@ -50,6 +52,13 @@ const aboutActive = path === aboutHref || path === aboutHref + '/';
             href={aboutHref}
             aria-current={aboutActive ? 'page' : undefined}
           >{t.nav.about}</a>
+        </li>
+        <li>
+          <a
+            class="site-header__link"
+            href={contactHref}
+            aria-current={contactActive ? 'page' : undefined}
+          >{t.nav.contact}</a>
         </li>
       </ul>
       <div class="site-header__controls">

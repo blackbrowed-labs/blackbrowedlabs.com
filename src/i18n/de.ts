@@ -48,6 +48,45 @@ export const de = {
     legal: 'Impressum',
     privacy: 'Datenschutz',
   },
+
+  contactForm: {
+    ariaLabel: 'Kontaktformular',
+
+    fields: {
+      nameLabel: 'Name',
+      emailLabel: 'E-Mail-Adresse',
+      messageLabel: 'Nachricht',
+      honeypotLabel: 'Website',
+    },
+
+    requiredIndicator: '*',
+    requiredIndicatorAriaLabel: 'Pflichtfeld',
+
+    turnstile: {
+      attribution: 'Geschützt durch Cloudflare Turnstile',
+    },
+
+    privacyNotice: {
+      heading: 'Hinweis zum Datenschutz',
+      linkLabel: 'Datenschutzerklärung',
+    },
+
+    submit: {
+      label: 'Senden',
+      busy: 'Wird gesendet…',
+    },
+
+    success: 'Vielen Dank. Ihre Nachricht ist angekommen.',
+
+    errors: {
+      regionAriaLabel: 'Formularstatus',
+      validation: 'Bitte alle Pflichtfelder korrekt ausfüllen.',
+      turnstile: 'Die Sicherheitsprüfung ist fehlgeschlagen. Bitte erneut versuchen.',
+      rate_limit: 'Zu viele Versuche. Bitte später erneut versuchen.',
+      server: 'Die Nachricht konnte nicht zugestellt werden. Bitte später erneut versuchen oder direkt per E-Mail an lars@blackbrowedlabs.com.',
+      generic: 'Es ist ein Fehler aufgetreten. Bitte später erneut versuchen.',
+    },
+  },
 } as const;
 
 type WidenStrings<T> = {

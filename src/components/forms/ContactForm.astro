@@ -1,0 +1,282 @@
+---
+/**
+ * Contact form component (Phase B.1).
+ *
+ * Renders the visible form submitted to the Cloudflare Worker at
+ * POST /api/contact. The Worker handles honeypot drop, Workers Rate
+ * Limit, Turnstile siteverify, validation, and send_email; on
+ * completion it 303-redirects back to this page with `?ok=1` or
+ * `?error=<code>`. A small inline script reads the URL query at page
+ * load and renders the appropriate status message in an aria-live
+ * region.
+ *
+ * Locale is passed as a prop. The hidden `_returnTo` field carries
+ * the locale-specific path so the Worker knows where to redirect
+ * (validated against an allowlist on the Worker side; see
+ * src/worker/contact.ts).
+ *
+ * Turnstile site key is embedded directly per env via
+ * PUBLIC_ENVIRONMENT. The values mirror
+ * `wrangler.jsonc env.<env>.vars.TURNSTILE_SITE_KEY` because Astro
+ * builds at build time and cannot read wrangler runtime vars; both
+ * sources stay manually in sync. Site keys are public; the matching
+ * TURNSTILE_SECRET_KEY lives only as a Worker secret (set via
+ * `wrangler secret put`) and never enters the repo or page HTML.
+ */
+
+import type { Locale } from '../../i18n';
+import { getUiStrings } from '../../i18n';
+
+interface Props {
+  locale: Locale;
+  returnTo: string;
+}
+
+const { locale, returnTo } = Astro.props;
+const t = getUiStrings(locale).contactForm;
+
+const TURNSTILE_SITE_KEYS = {
+  production: '0x4AAAAAADE4-1cr4L0pjUTs',
+  staging: '0x4AAAAAADE4z9pthsMBK_n7',
+} as const;
+
+const turnstileSiteKey =
+  import.meta.env.PUBLIC_ENVIRONMENT === 'production'
+    ? TURNSTILE_SITE_KEYS.production
+    : TURNSTILE_SITE_KEYS.staging;
+---
+
+<form
+  class="contact-form"
+  action="/api/contact"
+  method="POST"
+  aria-label={t.ariaLabel}
+  novalidate
+>
+  <output
+    id="contact-status"
+    class="contact-form__status"
+    role="status"
+    aria-live="polite"
+    aria-label={t.errors.regionAriaLabel}
+    data-success={t.success}
+    data-error-validation={t.errors.validation}
+    data-error-turnstile={t.errors.turnstile}
+    data-error-rate-limit={t.errors.rate_limit}
+    data-error-server={t.errors.server}
+    data-error-generic={t.errors.generic}
+  ></output>
+
+  <div class="contact-form__field">
+    <label for="contact-name">{t.fields.nameLabel}</label>
+    <input
+      id="contact-name"
+      name="name"
+      type="text"
+      required
+      aria-required="true"
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="contact-form__field">
+    <label for="contact-email">{t.fields.emailLabel}</label>
+    <input
+      id="contact-email"
+      name="email"
+      type="email"
+      required
+      aria-required="true"
+      autocomplete="email"
+    />
+  </div>
+
+  <div class="contact-form__field">
+    <label for="contact-message">{t.fields.messageLabel}</label>
+    <textarea
+      id="contact-message"
+      name="message"
+      rows="6"
+      required
+      aria-required="true"
+    ></textarea>
+  </div>
+
+  {/*
+    Honeypot: visually hidden, AT-hidden, but present in the DOM so
+    naive scrapers fill it. Off-screen positioning rather than
+    display:none — bots routinely skip display:none fields.
+  */}
+  <div class="contact-form__honeypot" aria-hidden="true">
+    <label for="contact-website">{t.fields.honeypotLabel}</label>
+    <input
+      id="contact-website"
+      name="website"
+      type="text"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="contact-form__turnstile">
+    <div
+      class="cf-turnstile"
+      data-sitekey={turnstileSiteKey}
+      data-theme="auto"
+    ></div>
+    <p class="contact-form__turnstile-attribution">{t.turnstile.attribution}</p>
+  </div>
+
+  <input type="hidden" name="_returnTo" value={returnTo} />
+
+  <button type="submit" class="contact-form__submit">{t.submit.label}</button>
+</form>
+
+{/*
+  Turnstile loader — auto-renders any `.cf-turnstile` element on the
+  page after async load. Marked `is:inline` so Astro emits the script
+  tag verbatim without bundling. No-JS visitors skip this entirely
+  and submit without a token; the Worker degrades gracefully
+  (honeypot + rate-limit cover that path).
+*/}
+<script async src="https://challenges.cloudflare.com/turnstile/v0/api.js" is:inline></script>
+
+{/*
+  Status renderer — reads `?ok` / `?error` from the URL on page load
+  and fills the aria-live region with the matching i18n string. The
+  data-* attributes carry the localised text from the editorial
+  collection's UiStrings; this script just maps and assigns.
+*/}
+<script is:inline>
+  (function () {
+    const status = document.getElementById('contact-status');
+    if (!status) return;
+
+    const params = new URLSearchParams(location.search);
+
+    if (params.get('ok') === '1') {
+      status.textContent = status.dataset.success || '';
+      status.classList.add('contact-form__status--ok');
+      return;
+    }
+
+    const error = params.get('error');
+    if (!error) return;
+
+    const map = {
+      validation: status.dataset.errorValidation,
+      turnstile: status.dataset.errorTurnstile,
+      rate_limit: status.dataset.errorRateLimit,
+      server: status.dataset.errorServer,
+    };
+    status.textContent = map[error] || status.dataset.errorGeneric || '';
+    status.classList.add('contact-form__status--error');
+  })();
+</script>
+
+<style>
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 32rem;
+  }
+
+  .contact-form__status:empty { display: none; }
+  .contact-form__status--ok {
+    background: var(--color-surface-card);
+    border-left: 2px solid var(--bbl-primary);
+    padding: 1rem 1.25rem;
+    color: var(--color-text);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+  .contact-form__status--error {
+    background: var(--color-error-bg);
+    border-left: 2px solid var(--bbl-error);
+    padding: 1rem 1.25rem;
+    color: var(--color-error-text);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .contact-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .contact-form__field label {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-small);
+  }
+  .contact-form__field input,
+  .contact-form__field textarea {
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-bbl-2);
+    padding: 0.625rem 0.75rem;
+    font-size: var(--text-body);
+    line-height: 1.4;
+  }
+  .contact-form__field input:focus-visible,
+  .contact-form__field textarea:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 1px;
+    border-color: var(--color-focus-ring);
+  }
+  .contact-form__field textarea {
+    resize: vertical;
+    min-height: 8rem;
+  }
+
+  /*
+    Honeypot: invisible to humans + AT, present in DOM for scrapers.
+    position:absolute + off-screen — NOT display:none, which some
+    bots check to skip. tabindex=-1 keeps keyboard nav clean.
+  */
+  .contact-form__honeypot {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__turnstile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .contact-form__turnstile-attribution {
+    color: var(--color-text-muted);
+    font-size: var(--text-caption);
+    letter-spacing: var(--tracking-caption);
+    margin: 0;
+  }
+
+  .contact-form__submit {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.625rem 1.125rem;
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    border: 1px solid transparent;
+    border-radius: var(--radius-bbl-2);
+    background: var(--color-cta-bg);
+    color: var(--color-cta-text);
+    cursor: pointer;
+    transition: background var(--duration-bbl-fast) var(--ease-bbl);
+  }
+  .contact-form__submit:hover { background: var(--bbl-primary-hover); }
+  .contact-form__submit:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+</style>

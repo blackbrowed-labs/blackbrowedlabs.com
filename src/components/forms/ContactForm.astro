@@ -123,7 +123,6 @@ const turnstileSiteKey =
     <div
       class="cf-turnstile"
       data-sitekey={turnstileSiteKey}
-      data-theme="auto"
     ></div>
     <p class="contact-form__turnstile-attribution">{t.turnstile.attribution}</p>
   </div>
@@ -132,6 +131,25 @@ const turnstileSiteKey =
 
   <button type="submit" class="contact-form__submit">{t.submit.label}</button>
 </form>
+
+{/*
+  Theme bridge: Turnstile's `data-theme="auto"` reads
+  prefers-color-scheme (system-level), not our `data-theme="dark"`
+  attribute on <html>. So if the user toggles the site to dark while
+  the system is light, the widget stays light and looks out of place.
+  This synchronous inline script runs at parse time — before the
+  Turnstile loader's async script can execute — and pre-sets the
+  widget's data-theme to match <html>. BaseLayout's FOUC-prevention
+  script has already set <html data-theme> by the time this runs.
+*/}
+<script is:inline>
+  (function () {
+    const widget = document.querySelector('.cf-turnstile');
+    if (!widget) return;
+    const resolved = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    widget.setAttribute('data-theme', resolved);
+  })();
+</script>
 
 {/*
   Turnstile loader — auto-renders any `.cf-turnstile` element on the

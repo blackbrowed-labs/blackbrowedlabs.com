@@ -51,7 +51,6 @@ const turnstileSiteKey =
   action="/api/contact"
   method="POST"
   aria-label={t.ariaLabel}
-  novalidate
 >
   <output
     id="contact-status"
@@ -142,35 +141,73 @@ const turnstileSiteKey =
 <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js" is:inline></script>
 
 {/*
-  Status renderer — reads `?ok` / `?error` from the URL on page load
-  and fills the aria-live region with the matching i18n string. The
-  data-* attributes carry the localised text from the editorial
-  collection's UiStrings; this script just maps and assigns.
+  Status renderer + draft preservation. Reads `?ok` / `?error` from
+  the URL on page load and fills the aria-live region with the
+  matching i18n string. On `?error=*` it ALSO restores the user's
+  form values from sessionStorage so a server-side rejection
+  (validation, rate-limit, server, turnstile) doesn't wipe a long
+  message. On submit, the current values are saved to sessionStorage
+  under `bbl-contact-form-draft` (cleared on `?ok=1` or fresh visit).
+  The honeypot, Turnstile token, and _returnTo are intentionally NOT
+  preserved.
 */}
 <script is:inline>
   (function () {
+    const STORAGE_KEY = 'bbl-contact-form-draft';
+    const FIELDS = ['name', 'email', 'message'];
+
     const status = document.getElementById('contact-status');
-    if (!status) return;
+    const form = document.querySelector('.contact-form');
+    if (!status || !form) return;
 
     const params = new URLSearchParams(location.search);
+    const okFlag = params.get('ok') === '1';
+    const errorCode = params.get('error');
 
-    if (params.get('ok') === '1') {
-      status.textContent = status.dataset.success || '';
-      status.classList.add('contact-form__status--ok');
-      return;
+    // Restore preserved draft on any error redirect; clear it on success.
+    if (errorCode) {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          FIELDS.forEach(function (name) {
+            const input = form.querySelector('[name="' + name + '"]');
+            if (input && typeof draft[name] === 'string') {
+              input.value = draft[name];
+            }
+          });
+        }
+      } catch (_) { /* ignore restore errors */ }
+    } else if (okFlag) {
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
     }
 
-    const error = params.get('error');
-    if (!error) return;
+    // Render status message from URL params.
+    if (okFlag) {
+      status.textContent = status.dataset.success || '';
+      status.classList.add('contact-form__status--ok');
+    } else if (errorCode) {
+      const map = {
+        validation: status.dataset.errorValidation,
+        turnstile: status.dataset.errorTurnstile,
+        rate_limit: status.dataset.errorRateLimit,
+        server: status.dataset.errorServer,
+      };
+      status.textContent = map[errorCode] || status.dataset.errorGeneric || '';
+      status.classList.add('contact-form__status--error');
+    }
 
-    const map = {
-      validation: status.dataset.errorValidation,
-      turnstile: status.dataset.errorTurnstile,
-      rate_limit: status.dataset.errorRateLimit,
-      server: status.dataset.errorServer,
-    };
-    status.textContent = map[error] || status.dataset.errorGeneric || '';
-    status.classList.add('contact-form__status--error');
+    // Save draft on submit so a server-side error redirect can restore it.
+    form.addEventListener('submit', function () {
+      const draft = {};
+      FIELDS.forEach(function (name) {
+        const input = form.querySelector('[name="' + name + '"]');
+        if (input) draft[name] = input.value;
+      });
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+      } catch (_) { /* ignore quota errors */ }
+    });
   })();
 </script>
 

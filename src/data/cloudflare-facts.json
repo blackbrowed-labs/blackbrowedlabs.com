@@ -1,0 +1,13 @@
+{
+  "verifiedDate": "2026-04-28",
+  "dpf": {
+    "status": "active",
+    "sourceUrl": "https://www.dataprivacyframework.gov/participant/5666",
+    "originalCertificationDate": "2016-11-09",
+    "nextCertificationDue": "2026-09-23"
+  },
+  "cwa": {
+    "retentionAggregatesMonths": 6,
+    "sourceUrl": "https://developers.cloudflare.com/web-analytics/faq/"
+  }
+}

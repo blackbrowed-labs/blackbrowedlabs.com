@@ -13,11 +13,10 @@
  * Cloudflare's native Workers Builds is intentionally NOT connected to
  * this repo — one deploy mechanism at a time (see docs/TECH_STACK.md §3.5).
  *
- * `not_found_handling` is intentionally omitted in Pass 1 — no
- * src/pages/404.astro exists yet, so pointing Cloudflare at a
- * nonexistent /404.html produces ambiguous behaviour. Pass 2 will
- * re-add `"not_found_handling": "404-page"` in the same commit that
- * introduces src/pages/404.astro.
+ * `not_found_handling: "404-page"` is wired Pass 2 / Phase 404:
+ * Cloudflare's nearest-404 walk routes /typo → /404.html (German,
+ * emitted by src/pages/404.astro) and /en/typo → /en/404.html
+ * (English, hand-authored under public/en/). Both serve HTTP 404.
  *
  * `observability` is enabled per environment so Workers Logs and Trace
  * Events are captured from day one. Must be declared inside each `env.*`
@@ -31,7 +30,8 @@
   "name": "blackbrowedlabs-com",
   "compatibility_date": "2026-04-23",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "not_found_handling": "404-page"
   },
   "env": {
     "production": {
@@ -41,7 +41,11 @@
       },
       "routes": [
         { "pattern": "blackbrowedlabs.com", "custom_domain": true }
-      ]
+      ],
+      "assets": {
+        "directory": "./dist",
+        "not_found_handling": "404-page"
+      }
     },
     "staging": {
       "name": "blackbrowedlabs-com-staging",
@@ -50,7 +54,11 @@
       },
       "routes": [
         { "pattern": "dev.blackbrowedlabs.com", "custom_domain": true }
-      ]
+      ],
+      "assets": {
+        "directory": "./dist",
+        "not_found_handling": "404-page"
+      }
     }
   }
 }

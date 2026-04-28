@@ -2,9 +2,8 @@
 /**
  * Site footer — small brand mark, tiny nav, copyright.
  *
- * Nav lists locale-aware About, Contact, Impressum, and an external
- * GitHub link. Products and Datenschutz entries arrive with their
- * respective Pass 2 phases.
+ * Nav lists locale-aware About, Contact, Impressum, Datenschutz, and an
+ * external GitHub link. Products entry arrives with Phase C.
  */
 
 import BrandLogo from './BrandLogo.astro';
@@ -18,6 +17,7 @@ const t = getUiStrings(locale).footer;
 const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
 const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
 const legalHref = locale === 'de' ? '/impressum' : '/en/legal';
+const privacyHref = locale === 'de' ? '/datenschutz' : '/en/privacy';
 ---
 
 <footer class="site-footer">
@@ -31,6 +31,7 @@ const legalHref = locale === 'de' ? '/impressum' : '/en/legal';
         <li><a href={aboutHref}>{t.about}</a></li>
         <li><a href={contactHref}>{t.contact}</a></li>
         <li><a href={legalHref}>{t.legal}</a></li>
+        <li><a href={privacyHref}>{t.privacy}</a></li>
         <li>
           <a
             href="https://github.com/blackbrowed-labs"

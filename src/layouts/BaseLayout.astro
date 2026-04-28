@@ -7,6 +7,10 @@
  * Staging protection triad member 1 of 3 (the <meta name="robots">) is
  * gated here on isStaging(). The robots.txt endpoint and the _headers
  * X-Robots-Tag cover the other two.
+ *
+ * The Cloudflare Web Analytics beacon is emitted only on production
+ * deploys with PUBLIC_CWA_TOKEN populated. Local dev and staging emit
+ * nothing (avoids polluting analytics with non-production traffic).
  */
 
 import '../styles/global.css';
@@ -17,7 +21,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 import { getLocaleFromPath, getHreflangAlternates } from '../lib/i18n';
 import { getUiStrings } from '../i18n';
-import { getSiteUrl, isStaging } from '../lib/env';
+import { getSiteUrl, isStaging, isProduction } from '../lib/env';
 
 interface Props {
   title: string;
@@ -40,6 +44,9 @@ const ogImageUrl = `${siteUrl}${ogImage ?? defaultOgImage}`;
 const alternates = getHreflangAlternates(path, siteUrl);
 const shouldNoindex = isStaging();
 const ogLocale = locale === 'de' ? 'de_DE' : 'en_US';
+
+const cwaToken = import.meta.env.PUBLIC_CWA_TOKEN;
+const showCwaBeacon = isProduction() && Boolean(cwaToken);
 ---
 
 <!DOCTYPE html>
@@ -98,6 +105,15 @@ const ogLocale = locale === 'de' ? 'de_DE' : 'en_US';
         document.documentElement.dataset.themeChoice = choice;
       })();
     </script>
+
+    {showCwaBeacon && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: cwaToken })}
+      ></script>
+    )}
   </head>
   <body>
     <SkipLink label={t.skipLink} />

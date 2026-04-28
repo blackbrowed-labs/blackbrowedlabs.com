@@ -38,6 +38,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
         run: npm run build
 
       - name: Deploy to Cloudflare Workers (production)

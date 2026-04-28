@@ -35,6 +35,8 @@ const counterparts: Record<string, string> = {
   '/en/privacy': '/datenschutz',
   '/produkte': '/en/products',
   '/en/products': '/produkte',
+  '/404': '/en/404',
+  '/en/404': '/404',
 };
 
 export function getLocaleFromPath(path: string): Locale {

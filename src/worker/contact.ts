@@ -28,7 +28,7 @@
  */
 
 import { EmailMessage } from 'cloudflare:email';
-import { createMimeMessage } from 'mimetext';
+import { createMimeMessage, Mailbox } from 'mimetext';
 
 const ALLOWED_RETURN_TO = new Set(['/kontakt', '/en/contact']);
 const DEFAULT_RETURN_TO = '/kontakt';
@@ -101,7 +101,10 @@ export async function handleContactSubmission(
     mime.setSender({ name: 'Blackbrowed Labs', addr: FROM_ADDRESS });
     mime.setRecipient(TO_ADDRESS);
     mime.setSubject(`[blackbrowedlabs.com] Kontaktformular — ${name}`);
-    mime.setHeader('Reply-To', email);
+    // mimetext requires Reply-To as a Mailbox instance (not a bare
+    // string). Omit the visitor's display name from the header to
+    // sidestep header-injection risk; the name is in the body.
+    mime.setHeader('Reply-To', new Mailbox({ addr: email }));
     mime.addMessage({
       contentType: 'text/plain',
       data: [

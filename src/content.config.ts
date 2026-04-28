@@ -14,8 +14,9 @@
  * (per OQ-1/D16).
  */
 
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'zod';
 
 // Glob's default `generateId` strips dots from the filename, so
 // `about.de.md` becomes `aboutde`. Override to preserve the dotted form
@@ -61,7 +62,7 @@ const products = defineCollection({
     lang: z.enum(['de', 'en']),
     tagline: z.string(),
     description: z.string(),
-    externalUrl: z.string().url(),
+    externalUrl: z.url(),
     repo: z.string(),
     logo: z.string().optional(),
     order: z.number().optional(),
@@ -82,7 +83,7 @@ const releases = defineCollection({
     bodyMarkdown: z.string(),
     isPrerelease: z.boolean(),
     isDraft: z.boolean(),
-    htmlUrl: z.string().url(),
+    htmlUrl: z.url(),
   }),
 });
 

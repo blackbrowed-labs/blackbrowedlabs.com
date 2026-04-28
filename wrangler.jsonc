@@ -1,13 +1,19 @@
 /**
- * Wrangler config — Cloudflare Workers Static Assets deployment.
+ * Wrangler config — Cloudflare Workers + Static Assets deployment.
  *
  * Two named environments bound via Custom Domains:
  *   - production: main branch → blackbrowedlabs.com
  *   - staging:    dev branch  → dev.blackbrowedlabs.com
  *
- * Assets-only (no Worker script). The Astro build output (./dist) is
- * served directly; per-environment headers live in ./dist/_headers
- * emitted by scripts/build-headers.mjs.
+ * Hybrid Workers + Static Assets posture (since Phase B.1, 2026-04-28):
+ * Most paths are served directly from ./dist via the Workers Static
+ * Assets binding (ASSETS). One narrow Worker entry at
+ * src/worker/index.ts handles POST /api/contact for the contact form;
+ * everything else falls through to env.ASSETS.fetch(request). The
+ * previous "Assets-only (no Worker script)" framing in CLAUDE.md is
+ * carved out at G B.1.2 to reflect this single addition. Per-
+ * environment headers live in ./dist/_headers emitted by
+ * scripts/build-headers.mjs.
  *
  * Deploy mechanism: GitHub Actions (.github/workflows/deploy-*.yml).
  * Cloudflare's native Workers Builds is intentionally NOT connected to
@@ -18,24 +24,40 @@
  * emitted by src/pages/404.astro) and /en/typo → /en/404.html
  * (English, hand-authored under public/en/). Both serve HTTP 404.
  *
- * `observability` is enabled per environment so Workers Logs and Trace
- * Events are captured from day one. Must be declared inside each `env.*`
- * block — the top-level `observability` setting does NOT inherit into
- * named environments when deploying with `--env` (wrangler gotcha
- * confirmed via Cloudflare dashboard after the first staging deploy
- * showed Logs/Traces as Disabled despite a top-level enable).
+ * Per-env declarations are required for keys that do NOT inherit from
+ * the top level when deploying with `--env`: `main`, `assets`,
+ * `observability`, `routes`, `vars`, `send_email`, `ratelimit`, `name`,
+ * `compatibility_flags`. The top-level entries for `main` / `assets` are
+ * declared for completeness (e.g. `wrangler dev` without an env flag);
+ * the per-env blocks are what actually deploys. Confirmed via
+ * Cloudflare dashboard after the first staging deploy showed Workers
+ * Logs as Disabled despite a top-level `observability` enable.
+ *
+ * Secrets (Turnstile secret keys) are NOT in this file. They are set
+ * via `wrangler secret put TURNSTILE_SECRET_KEY --env <env>` per env
+ * and never enter the repo. The public site keys do live here, in
+ * `vars.TURNSTILE_SITE_KEY`, because the form HTML embeds them.
+ *
+ * `compatibility_flags: ["nodejs_compat"]` per env: enabled because the
+ * Worker uses `cloudflare:email`'s EmailMessage constructor and a MIME
+ * builder that may rely on Node-style APIs. Drop the flag if a future
+ * `wrangler --dry-run` validates without it.
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "blackbrowedlabs-com",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-04-23",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "binding": "ASSETS"
   },
   "env": {
     "production": {
       "name": "blackbrowedlabs-com-production",
+      "main": "src/worker/index.ts",
+      "compatibility_flags": ["nodejs_compat"],
       "observability": {
         "enabled": true
       },
@@ -44,11 +66,30 @@
       ],
       "assets": {
         "directory": "./dist",
-        "not_found_handling": "404-page"
-      }
+        "not_found_handling": "404-page",
+        "binding": "ASSETS"
+      },
+      "vars": {
+        "TURNSTILE_SITE_KEY": "0x4AAAAAADE4-1cr4L0pjUTs"
+      },
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "destination_address": "lars@blackbrowedlabs.com"
+        }
+      ],
+      "ratelimit": [
+        {
+          "name": "CONTACT_RATELIMIT",
+          "namespace_id": "2",
+          "simple": { "limit": 5, "period": 60 }
+        }
+      ]
     },
     "staging": {
       "name": "blackbrowedlabs-com-staging",
+      "main": "src/worker/index.ts",
+      "compatibility_flags": ["nodejs_compat"],
       "observability": {
         "enabled": true
       },
@@ -57,8 +98,25 @@
       ],
       "assets": {
         "directory": "./dist",
-        "not_found_handling": "404-page"
-      }
+        "not_found_handling": "404-page",
+        "binding": "ASSETS"
+      },
+      "vars": {
+        "TURNSTILE_SITE_KEY": "0x4AAAAAADE4z9pthsMBK_n7"
+      },
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "destination_address": "lars@blackbrowedlabs.com"
+        }
+      ],
+      "ratelimit": [
+        {
+          "name": "CONTACT_RATELIMIT",
+          "namespace_id": "1",
+          "simple": { "limit": 5, "period": 60 }
+        }
+      ]
     }
   }
 }

@@ -13,7 +13,8 @@
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^6.1.9"
+    "astro": "^6.1.9",
+    "mimetext": "^3.0.28"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",

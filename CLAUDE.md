@@ -110,7 +110,85 @@ Specific technical lessons worth codifying:
 
 ## Skills
 
+### `frontend-design`
+
 When writing or modifying UI components, invoke the `frontend-design` skill.
+
+### `superpowers:writing-plans` — planning
+
+Use this skill when you have a spec or requirements for a multi-step task,
+before touching code. It produces a bite-sized-task implementation plan that
+the agentic-implementation skill below can execute.
+
+**Project-specific overrides** (these supersede the skill's defaults):
+
+- **File location.** Save plans to `plans/active/<topic>/<gate>/plan.md`
+  (project workspace convention), NOT to the skill's default
+  `docs/superpowers/plans/`. Example from this Pass 2: Phase B.3
+  implementation plan lives at `plans/active/pass-2/g-b-3-2/plan.md`.
+- **Gate overlay.** Layer this project's named gates on top of the skill's
+  task list. A gate (G B.3.2.a, G B.3.2.b, G B.3.3, G B.3.4) is a
+  controller-managed checkpoint; the tasks within a gate map to one
+  commit. Use the gate boundaries to pause for Lars to validate before
+  the next set of tasks runs.
+- **Test discipline.** This is a static-content site with no unit-test
+  framework. Apply TDD where it fits (build scripts, helpers); for Astro
+  pages use `astro check` + `astro build` + curl/grep on built HTML +
+  visual walk on staging as the test substitute. Don't add Vitest just
+  for one helper.
+- **Skip planning for trivial single-file changes.** Typo fix, one-line
+  CSS adjust, a single docstring correction — controller edits inline,
+  brief mention in the commit message, no plan needed.
+
+### `superpowers:subagent-driven-development` — agentic implementation
+
+After writing the plan, use this skill to dispatch a fresh subagent per
+task with two-stage review (spec compliance, then code quality).
+
+**Project-specific overrides:**
+
+- **No worktree.** The skill recommends an isolated git worktree. Skip it:
+  the `dev` branch IS the integration isolation from `main` (per the
+  `protect-main` ruleset and the merge-commit workflow at §8.4 of
+  `docs/TECH_STACK.md`). Subagents run sequentially per the skill, so
+  worktree isolation buys nothing here. Add to that the friction of
+  merging a worktree branch back into `dev`, and the call is to commit
+  directly on `dev`.
+- **Bundle tasks per commit boundary, not per numbered step.** When the
+  plan groups N numbered tasks under one named gate (one commit), dispatch
+  one implementer for the whole gate, not N. Splitting fragments context
+  across subagents (e.g., subagent for Task 1 writes a JSON file, subagent
+  for Task 2 needs to know its shape) and breaks the one-commit-per-gate
+  intent.
+- **Controller handles operational gates.** `git push`, `gh pr create`,
+  `gh run watch`, production smoke greps, `BOOTSTRAP.md` / `INDEX.md`
+  housekeeping — all controller-side, NOT subagent-dispatched. Reserve
+  subagents for the implementation + review work.
+- **Final integration review** runs against the full PR-bound diff
+  (`git diff <base>..<head>`) before opening the PR. Per-task reviews
+  catch local concerns; the final review catches cross-file integration
+  risks (data-shape ↔ type-contract drift, page-pattern divergence
+  between DE/EN siblings, CSS duplication thresholds).
+- **Implementer commits its own work** per the skill template. If a Bash
+  permission boundary blocks the commit (it has happened), the controller
+  verifies the staged state via `git status` + `npm run build` + smoke
+  greps, then commits on the implementer's behalf with the verbatim plan
+  message — same artifact, just a controller-mediated final step. Note
+  this as a known pattern, not a workflow break.
+- **Reviewer minors: defer or fix-up, depending on cost.** If a review
+  flags Minor items below the blocking threshold, surface them to Lars
+  with three options: (a) fix-up commit now, (b) defer to a backlog row,
+  (c) ignore. The reviewer's own verdict ("approved" / "approved with
+  notes" / "needs fixes") is the primary signal. Don't break a gate's
+  one-commit-per-gate intent for purely cosmetic fixes; defer to backlog.
+
+### Standing-rule precedence when skills conflict with project rules
+
+1. **User instructions** (CLAUDE.md, direct Lars requests) — highest.
+2. **Project rules** (gate-based handoff, no mid-flight retrofit, secrets
+   discipline, design bundle as layout source of truth, BASELINE as
+   content source of truth).
+3. **Skill defaults** — apply where they don't conflict with the above.
 
 ## Scope boundaries
 

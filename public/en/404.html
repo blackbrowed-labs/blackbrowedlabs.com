@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 — Blackbrowed Labs</title>
+  <meta name="description" content="The page you're looking for doesn't exist, or has moved on." />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <!--
+    /styles/tokens.css is auto-generated post-build from src/styles/tokens.css
+    by scripts/extract-tokens.mjs. It exposes the brand custom properties
+    (--color-heading, --color-text, --color-link, etc.) plus a
+    prefers-color-scheme dark-mode block so this static page stays in palette
+    without the Astro/Tailwind pipeline.
+  -->
+  <link rel="stylesheet" href="/styles/tokens.css" />
+  <style>
+    :root { color-scheme: light dark; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+      padding: 2rem 1.5rem;
+    }
+
+    main {
+      max-width: 50ch;
+      text-align: center;
+    }
+
+    .nf-code {
+      font-weight: 300;
+      font-size: clamp(5rem, 14vw, 10rem);
+      line-height: 1;
+      letter-spacing: -0.035em;
+      color: var(--color-heading);
+      margin: 0 0 2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    h1 {
+      font-weight: 300;
+      font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin: 0 0 1rem;
+      text-wrap: balance;
+    }
+
+    p {
+      font-size: 1.0625rem;
+      line-height: 1.6;
+      color: var(--color-text-muted);
+      margin: 0 0 2.5rem;
+      text-wrap: pretty;
+    }
+
+    a {
+      color: var(--color-link);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-bottom-color 160ms ease, color 160ms ease;
+    }
+    a:hover {
+      color: var(--color-link-hover);
+      border-bottom-color: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="nf-code" aria-hidden="true">404</div>
+    <h1>Nothing here.</h1>
+    <p>The page you're looking for doesn't exist, or has moved on.</p>
+    <a href="/en/">Back to the homepage →</a>
+  </main>
+</body>
+</html>

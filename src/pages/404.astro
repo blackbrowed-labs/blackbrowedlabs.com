@@ -1,0 +1,143 @@
+---
+/**
+ * 404 — Not found (DE — primary). Astro emits this as dist/404.html
+ * (special-case behaviour for the root 404). Cloudflare's
+ * `not_found_handling: "404-page"` in wrangler.jsonc serves it on miss
+ * for any non-/en/* path; the EN counterpart lives at
+ * public/en/404.html as hand-authored static HTML (Astro can only
+ * emit dist/en/404/index.html, which is not the filename Cloudflare's
+ * nearest-404 walk looks for).
+ *
+ * Copy from docs/BASELINE_COPY.md §11 (DE block) — inline literals
+ * (the 404 is not part of the editorial collection).
+ *
+ * Markup follows design/handoff-bundle/design/jsx/notfound.jsx: the
+ * "404" is a decorative numeral with aria-hidden, and the lead carries
+ * the H1 so the page has one real heading for screen readers.
+ *
+ * Arc carries an explicit aria-label per A13 (Wave 2) — on the 404
+ * the arc is the page's visual anchor, not a brand-mark adjacent to a
+ * wordmark, so it must be announced.
+ *
+ * No Astro.response.status mutation: in `output: 'static'` the call
+ * is a no-op, and Cloudflare sets the 404 status when serving via
+ * not_found_handling.
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrandLogo from '../components/BrandLogo.astro';
+---
+
+<BaseLayout
+  title="404 — Blackbrowed Labs"
+  description="Die Seite, die du suchst, existiert nicht oder ist weitergezogen."
+>
+  <div class="nf-stage">
+    <div class="nf-arc">
+      <BrandLogo variant="mark" ariaLabel="Der Blackbrowed-Labs-Bogen" />
+    </div>
+    <div class="nf-code" aria-hidden="true">404</div>
+    <h1 class="nf-lead">Hier gibt's nichts zu sehen.</h1>
+    <p class="nf-body">Die Seite, die du suchst, existiert nicht oder ist weitergezogen.</p>
+    <a href="/" class="nf-link">
+      <span>Zurück zur Startseite</span>
+      <span class="nf-arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+</BaseLayout>
+
+<style>
+  .nf-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
+    min-height: calc(100vh - 12rem);
+    justify-content: center;
+  }
+
+  .nf-arc {
+    --brand-arc-height: 6rem;
+    margin-bottom: 2.5rem;
+    line-height: 0;
+    opacity: 0.88;
+  }
+
+  .nf-code {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-light);
+    color: var(--color-heading);
+    font-size: clamp(5rem, 14vw, 10rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+    margin: 0 0 3rem;
+  }
+
+  .nf-lead {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-light);
+    color: var(--color-text);
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+
+  .nf-body {
+    color: var(--color-text-muted);
+    max-width: 50ch;
+    margin: 0 0 3rem;
+    text-wrap: pretty;
+  }
+
+  .nf-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.625rem;
+    color: var(--color-link);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid transparent;
+    transition: gap 180ms ease, color 160ms ease, border-bottom-color 160ms ease;
+  }
+  .nf-link:hover {
+    color: var(--color-link-hover);
+    gap: 0.875rem;
+    border-bottom-color: currentColor;
+  }
+  .nf-link .nf-arrow {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-light);
+    font-size: 1.05em;
+    line-height: 1;
+  }
+
+  @media (max-width: 767px) {
+    .nf-stage {
+      padding: 2rem 1.5rem 2.5rem;
+      min-height: calc(100vh - 8rem);
+    }
+    .nf-arc {
+      --brand-arc-height: 3rem;
+      margin-bottom: 1.25rem;
+    }
+    .nf-code {
+      font-size: 5.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .nf-lead {
+      font-size: 1.375rem;
+    }
+    .nf-body {
+      font-size: 0.9375rem;
+      margin-bottom: 1.75rem;
+      max-width: none;
+    }
+  }
+</style>

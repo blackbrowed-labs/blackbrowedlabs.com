@@ -1,0 +1,534 @@
+---
+/**
+ * Privacy Policy (EN — courtesy translation).
+ * Matches design/handoff-bundle/design/pages/07-datenschutz.html (EN artboard).
+ * Long reading page with two-column TOC (single column on mobile),
+ * 11 numbered sections, and an address block in §1 + §10.
+ * Copy held inline (per OQ-1: legal pages stay as .astro, not in the
+ * editorial collection) and verbatim from docs/BASELINE_COPY.md §10
+ * with two build-time substitutions from src/data/cloudflare-facts.json.
+ * Section anchor IDs use #section-N (EN) vs #abschnitt-N (DE); the lang
+ * switcher links page-to-page, not to cross-language anchors.
+ * The German Datenschutzerklärung at /datenschutz is legally authoritative.
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { cloudflareFacts, formatVerifiedDate } from '../../lib/cloudflare-facts';
+
+const title = 'Privacy Policy';
+const description =
+  'Privacy policy for Blackbrowed Labs. Hosting Cloudflare, email IONOS, cookieless Cloudflare Web Analytics, Cloudflare Turnstile on the contact form.';
+const lastUpdated = 'April 2026';
+const cwaMonths = cloudflareFacts.cwa.retentionAggregatesMonths;
+const verifiedHuman = formatVerifiedDate(cloudflareFacts.verifiedDate, 'en');
+
+const tocItems = [
+  { num: '1',  label: 'Controller' },
+  { num: '2',  label: 'General' },
+  { num: '3',  label: 'Hosting and Server Logs' },
+  { num: '4',  label: 'Cloudflare Services: Web Analytics and Turnstile' },
+  { num: '5',  label: 'Email Communication' },
+  { num: '6',  label: 'No Disclosure to Third Parties' },
+  { num: '7',  label: 'No Non-Essential Cookies or Comparable Storage Technologies' },
+  { num: '8',  label: 'No Social Media Plugins or External Embeds' },
+  { num: '9',  label: 'Your Rights' },
+  { num: '10', label: 'Right to Lodge a Complaint' },
+  { num: '11', label: 'Changes to this Privacy Policy' },
+];
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/en">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{title}</span>
+    </div>
+  </nav>
+
+  <article class="datenschutz">
+    <div class="datenschutz__container">
+      <div class="datenschutz__content">
+        <h1>{title}</h1>
+        <p class="datenschutz__courtesy">This is a courtesy translation. The German version is legally authoritative.</p>
+        <p class="datenschutz__stand">Last updated: {lastUpdated}</p>
+
+        <nav class="datenschutz__toc" aria-label="Table of contents">
+          <p class="datenschutz__toc-label">Contents</p>
+          <ol class="datenschutz__toc-list">
+            {tocItems.map((item) => (
+              <li>
+                <a href={`#section-${item.num}`}>
+                  <span class="datenschutz__toc-num">{item.num}.</span>
+                  <span>{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <section class="datenschutz__section" id="section-1">
+          <h3>
+            <span class="datenschutz__num">1.</span>
+            <span class="datenschutz__h-text">Controller</span>
+          </h3>
+          <p class="datenschutz__p">
+            The controller under the General Data Protection Regulation (GDPR) and other national
+            data protection laws is:
+          </p>
+          <address class="datenschutz__address">
+            Lars Weiser<br />
+            Blackbrowed Labs<br />
+            Schröders Stieg 8a<br />
+            21465 Reinbek<br />
+            Germany
+            <br /><br />
+            Email: <a href="mailto:lars@blackbrowedlabs.com">lars@blackbrowedlabs.com</a>
+          </address>
+        </section>
+
+        <section class="datenschutz__section" id="section-2">
+          <h3>
+            <span class="datenschutz__num">2.</span>
+            <span class="datenschutz__h-text">General</span>
+          </h3>
+          <p class="datenschutz__p">
+            This website processes personal data only to the extent necessary to operate the site
+            and to respond to inquiries submitted through the contact form; otherwise, the site can
+            be used without providing personal data. There are no user accounts, no newsletters,
+            and no tracking cookies.
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-3">
+          <h3>
+            <span class="datenschutz__num">3.</span>
+            <span class="datenschutz__h-text">Hosting and Server Logs</span>
+          </h3>
+          <p class="datenschutz__p">
+            This website is hosted on Cloudflare, Inc.'s infrastructure (101 Townsend St, San
+            Francisco, CA 94107, USA). When you access the site, Cloudflare processes technically
+            necessary data, including:
+          </p>
+          <ul class="datenschutz__list">
+            <li>IP address</li>
+            <li>Date and time of access</li>
+            <li>Page requested</li>
+            <li>Browser type and version</li>
+            <li>Operating system</li>
+            <li>Referrer URL</li>
+          </ul>
+          <p class="datenschutz__p">
+            This processing is based on Art. 6 (1) (f) GDPR (legitimate interest in secure and
+            stable operation of the site) and is technically required for delivering the website.
+            Cloudflare stores this data in server logs. Retention is limited to what is technically
+            necessary.
+          </p>
+          <p class="datenschutz__p">
+            Cloudflare is certified under the EU-US Data Privacy Framework, ensuring an adequate
+            level of data protection for transfers to the United States per Art. 45 GDPR. This
+            certification is verified periodically against the official EU-US Data Privacy
+            Framework participant list (last verified on {verifiedHuman}). A Data Processing
+            Addendum under Art. 28 GDPR is in place between the controller and Cloudflare.
+          </p>
+          <p class="datenschutz__p">
+            Cloudflare's privacy policy:{' '}
+            <a href="https://www.cloudflare.com/privacypolicy/">https://www.cloudflare.com/privacypolicy/</a>
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-4">
+          <h3>
+            <span class="datenschutz__num">4.</span>
+            <span class="datenschutz__h-text">Cloudflare Services: Web Analytics and Turnstile</span>
+          </h3>
+          <p class="datenschutz__p">
+            Cloudflare Web Analytics is used to measure site usage. To do this, a script (beacon)
+            is loaded from the Cloudflare host static.cloudflareinsights.com when a page is
+            opened. This service operates without cookies and without fingerprinting. Only
+            aggregate usage statistics are collected (page views, referrer, approximate
+            country-level geolocation). Identification of individual visitors is neither intended
+            nor possible. Aggregated analytics data is retained for {cwaMonths} months. Individual
+            raw events are pre-processed at Cloudflare's edge; no persistent storage of raw
+            individual events takes place under our control. These figures are verified periodically
+            against Cloudflare's public documentation (last verified on {verifiedHuman}).
+          </p>
+          <p class="datenschutz__p">
+            Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in privacy-friendly analytics).
+          </p>
+          <p class="datenschutz__p">
+            Cloudflare Turnstile is used to detect and block automated requests to the contact
+            form — a service from the processor Cloudflare already named in Section 3. According
+            to the provider, Turnstile processes the IP address, a TLS fingerprint, the
+            User-Agent header, and the site key with its associated origin; the "Pre-Clearance"
+            feature is disabled, so Turnstile sets no cookies and writes no entries to Web Storage.
+          </p>
+          <p class="datenschutz__p">
+            Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in protecting the contact form
+            against automated abuse).
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-5">
+          <h3>
+            <span class="datenschutz__num">5.</span>
+            <span class="datenschutz__h-text">Email Communication</span>
+          </h3>
+          <p class="datenschutz__p">
+            If you contact me by email (e.g. using the address on the contact page), your message
+            is stored for processing. The mailbox is operated by IONOS SE (Elgendorfer Straße 57,
+            56410 Montabaur, Germany). A Data Processing Addendum under Art. 28 GDPR is in place
+            between the controller and IONOS.
+          </p>
+          <p class="datenschutz__p">
+            Messages to addresses on the domain blackbrowedlabs.de are received via Cloudflare
+            Email Routing and forwarded to the IONOS mailbox named above. No email address on
+            blackbrowedlabs.de is publicly advertised; the catch-all forwarding serves as a
+            fallback for messages mistakenly sent to this domain. Notifications from the contact
+            form are sent via the same routing path from noreply@blackbrowedlabs.de to the IONOS
+            mailbox lars@blackbrowedlabs.com. The measures described in Section 3 for data
+            transfers to the United States (EU-US Data Privacy Framework per Art. 45 GDPR; Data
+            Processing Addendum per Art. 28 GDPR) apply accordingly to inbound and outbound email
+            processing via Cloudflare Email Routing.
+          </p>
+          <p class="datenschutz__p">
+            When the contact form is submitted, the inputs (name, email address, message) are
+            first received by a Cloudflare Worker and then delivered via the routing path described
+            in paragraph 2 to the IONOS mailbox lars@blackbrowedlabs.com; no further storage of
+            these contents takes place. The protective measures described in Section 3 for
+            Cloudflare (Art. 45 GDPR, Art. 28 GDPR) apply accordingly; bot protection by
+            Cloudflare Turnstile, as described in Section 4, is additionally applied. The Art. 13
+            GDPR information required at the point of collection is shown directly on the contact
+            page (/en/contact).
+          </p>
+          <p class="datenschutz__p">
+            Legal basis: Art. 6 (1) (b) GDPR (pre-contractual measures) or Art. 6 (1) (f) GDPR
+            (legitimate interest in responding to your inquiry). Emails without a business or
+            tax-relevant context are deleted once processing is complete. Where emails qualify as
+            commercial and business correspondence (Handels- und Geschäftsbriefe), they are
+            retained for six years pursuant to § 147 Abs. 1 Nr. 2 und 3 AO; where they constitute
+            accounting records (Buchungsbelege), the retention period is ten years pursuant to
+            § 147 Abs. 1 Nr. 4 AO.
+          </p>
+          <p class="datenschutz__p">
+            IONOS privacy information:{' '}
+            <a href="https://www.ionos.com/terms-gtc/terms-privacy">https://www.ionos.com/terms-gtc/terms-privacy</a>
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-6">
+          <h3>
+            <span class="datenschutz__num">6.</span>
+            <span class="datenschutz__h-text">No Disclosure to Third Parties</span>
+          </h3>
+          <p class="datenschutz__p">
+            Your personal data is not disclosed to third parties beyond the processors listed above
+            (Cloudflare, IONOS).
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-7">
+          <h3>
+            <span class="datenschutz__num">7.</span>
+            <span class="datenschutz__h-text">No Non-Essential Cookies or Comparable Storage Technologies</span>
+          </h3>
+          <p class="datenschutz__p">
+            This website does not set cookies or comparable storage technologies (e.g. Web
+            Storage) for analytics, marketing, or tracking. Technically necessary cookies (e.g.
+            from Cloudflare's security layer) are set on the basis of § 25 (2) no. 2 TDDDG. On
+            the same basis, an entry is written to your browser's Web Storage (key: bbl-theme) to
+            remember your theme preference (Light, Dark, System). This entry is only set when you
+            actively change the theme selection; it contains no personal data and is not used for
+            cross-site recognition.
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-8">
+          <h3>
+            <span class="datenschutz__num">8.</span>
+            <span class="datenschutz__h-text">No Social Media Plugins or External Embeds</span>
+          </h3>
+          <p class="datenschutz__p">
+            Apart from the Cloudflare Web Analytics beacon described in Section 4 (loaded from
+            static.cloudflareinsights.com) and the Cloudflare Turnstile widget described there
+            (loaded from challenges.cloudflare.com), this website embeds no third-party content
+            (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts).
+            All other resources are served from the site's own origin.
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-9">
+          <h3>
+            <span class="datenschutz__num">9.</span>
+            <span class="datenschutz__h-text">Your Rights</span>
+          </h3>
+          <p class="datenschutz__p">
+            Under GDPR, you have the following rights:
+          </p>
+          <ul class="datenschutz__list">
+            <li>Right of access (Art. 15 GDPR)</li>
+            <li>Right to rectification (Art. 16 GDPR)</li>
+            <li>Right to erasure (Art. 17 GDPR)</li>
+            <li>Right to restriction of processing (Art. 18 GDPR)</li>
+            <li>Right to data portability (Art. 20 GDPR)</li>
+            <li>Right to object (Art. 21 GDPR)</li>
+          </ul>
+          <p class="datenschutz__p">
+            To exercise these rights, an informal email to{' '}
+            <a href="mailto:lars@blackbrowedlabs.com">lars@blackbrowedlabs.com</a> is sufficient.
+          </p>
+        </section>
+
+        <section class="datenschutz__section" id="section-10">
+          <h3>
+            <span class="datenschutz__num">10.</span>
+            <span class="datenschutz__h-text">Right to Lodge a Complaint</span>
+          </h3>
+          <p class="datenschutz__p">
+            You have the right to lodge a complaint with a data protection supervisory authority.
+            The authority responsible for the controller is:
+          </p>
+          <address class="datenschutz__address">
+            Unabhängiges Landeszentrum für Datenschutz Schleswig-Holstein (ULD)<br />
+            Holstenstraße 98<br />
+            24103 Kiel<br />
+            Germany<br />
+            Phone: +49 431 988-1200<br />
+            Email: <a href="mailto:mail@datenschutzzentrum.de">mail@datenschutzzentrum.de</a><br />
+            Web: <a href="https://www.datenschutzzentrum.de">https://www.datenschutzzentrum.de</a>
+          </address>
+        </section>
+
+        <section class="datenschutz__section" id="section-11">
+          <h3>
+            <span class="datenschutz__num">11.</span>
+            <span class="datenschutz__h-text">Changes to this Privacy Policy</span>
+          </h3>
+          <p class="datenschutz__p">
+            This privacy policy will be updated if the actual data processing on the site changes
+            (e.g. if a contact form or additional services are introduced). The current version is
+            available at blackbrowedlabs.com/en/privacy.
+          </p>
+        </section>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep {
+    color: var(--color-border);
+  }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .datenschutz {
+    background: var(--color-bg);
+  }
+  .datenschutz__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem 6rem;
+  }
+  .datenschutz__content {
+    max-width: 68ch;
+  }
+
+  .datenschutz__courtesy {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--color-text-muted);
+    margin: 0 0 1.75rem;
+    padding: 0.75rem 0 0;
+    border-top: 1px solid var(--color-border);
+    max-width: 52ch;
+    font-style: italic;
+  }
+
+  .datenschutz__stand {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--color-text-muted);
+    margin: 0 0 2rem;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .datenschutz__toc {
+    margin: 0 0 3rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .datenschutz__toc-label {
+    font-size: var(--text-caption);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0 0 1rem;
+    font-weight: var(--font-weight-medium);
+  }
+  .datenschutz__toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 3rem;
+    row-gap: 0.5rem;
+  }
+  .datenschutz__toc-list li {
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+  .datenschutz__toc-list a {
+    color: var(--color-text);
+    display: grid;
+    grid-template-columns: 2.25em 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .datenschutz__toc-list a:hover {
+    color: var(--color-link);
+  }
+  .datenschutz__toc-list a:hover .datenschutz__toc-num {
+    color: var(--color-link);
+  }
+  .datenschutz__toc-num {
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  .datenschutz__section {
+    margin-top: 2.5rem;
+    scroll-margin-top: 5rem;
+  }
+  .datenschutz__section:first-of-type {
+    margin-top: 0;
+  }
+
+  .datenschutz__content h3 {
+    display: grid;
+    grid-template-columns: 2.5em 1fr;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+  .datenschutz__num {
+    font-weight: var(--font-weight-light);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  .datenschutz__h-text {
+    text-wrap: balance;
+  }
+
+  .datenschutz__p {
+    max-width: 64ch;
+    margin: 0 0 0.75rem;
+  }
+  .datenschutz__p:last-child {
+    margin-bottom: 0;
+  }
+
+  .datenschutz__address {
+    font-size: inherit;
+    line-height: 1.55;
+    color: var(--color-text);
+    margin: 0 0 1rem;
+    font-style: normal;
+    padding: 0.75rem 0 0.75rem 1rem;
+    border-left: 2px solid var(--color-border);
+    max-width: 56ch;
+  }
+
+  .datenschutz__p a,
+  .datenschutz__address a {
+    word-break: break-word;
+  }
+
+  .datenschutz__list {
+    max-width: 60ch;
+    padding-left: 1.25rem;
+    margin: 0 0 1rem;
+  }
+  .datenschutz__list li {
+    margin: 0 0 0.25rem;
+    padding-left: 0.25rem;
+  }
+  .datenschutz__list li::marker {
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .datenschutz__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .datenschutz__content h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1rem;
+    }
+    .datenschutz__toc {
+      margin-bottom: 2rem;
+      padding: 1.25rem 0;
+    }
+    .datenschutz__toc-list {
+      grid-template-columns: 1fr;
+      row-gap: 0.5rem;
+    }
+    .datenschutz__section {
+      margin-top: 2rem;
+    }
+    .datenschutz__content h3 {
+      font-size: 1.125rem;
+      grid-template-columns: 2em 1fr;
+    }
+    .datenschutz__address {
+      padding: 0.625rem 0 0.625rem 0.875rem;
+    }
+    .datenschutz__courtesy {
+      max-width: none;
+    }
+    .datenschutz__p,
+    .datenschutz__address,
+    .datenschutz__list {
+      max-width: none;
+    }
+  }
+</style>

@@ -87,6 +87,8 @@ const turnstileSiteKey =
       required
       aria-required="true"
       autocomplete="email"
+      pattern="\S+@\S+\.\S+"
+      title={t.fields.emailFormatHint}
     />
   </div>
 

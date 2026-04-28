@@ -57,6 +57,7 @@ export const de = {
       emailLabel: 'E-Mail-Adresse',
       messageLabel: 'Nachricht',
       honeypotLabel: 'Website',
+      emailFormatHint: 'Bitte eine vollständige E-Mail-Adresse eingeben (z. B. name@domain.de).',
     },
 
     requiredIndicator: '*',

@@ -56,6 +56,7 @@ export const en: UiStrings = {
       emailLabel: 'Email address',
       messageLabel: 'Message',
       honeypotLabel: 'Website',
+      emailFormatHint: 'Please enter a complete email address (e.g. name@domain.com).',
     },
 
     requiredIndicator: '*',

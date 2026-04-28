@@ -22,7 +22,7 @@
     "playwright": "^1.59.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.5.0",
-    "wrangler": "^4.84.1"
+    "wrangler": "^4.85.0"
   },
   "engines": {
     "node": ">=24"

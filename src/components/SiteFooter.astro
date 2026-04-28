@@ -15,6 +15,7 @@ const locale = getLocaleFromPath(path);
 const t = getUiStrings(locale).footer;
 
 const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
+const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
 ---
 
 <footer class="site-footer">
@@ -23,9 +24,10 @@ const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
       <BrandLogo variant="mark" />
     </div>
 
-    <nav class="site-footer__nav" aria-label={t.about}>
+    <nav class="site-footer__nav" aria-label={t.navAriaLabel}>
       <ul>
         <li><a href={aboutHref}>{t.about}</a></li>
+        <li><a href={contactHref}>{t.contact}</a></li>
         <li>
           <a
             href="https://github.com/blackbrowed-labs"

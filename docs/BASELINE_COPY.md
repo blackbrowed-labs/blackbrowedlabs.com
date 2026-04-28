@@ -137,6 +137,10 @@ Direkt per E-Mail: [lars@blackbrowedlabs.com](mailto:lars@blackbrowedlabs.com)
 
 Code und Produktentwicklung auf GitHub: [blackbrowed-labs](https://github.com/blackbrowed-labs)
 
+**Hinweis zum Datenschutz (am Kontaktformular):**
+
+Die Felder Name, E-Mail-Adresse und Nachricht werden ausschließlich zur Bearbeitung Ihrer Anfrage verarbeitet und an das E-Mail-Postfach lars@blackbrowedlabs.com (IONOS) zugestellt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO bei vorvertraglichen Anfragen bzw. Art. 6 Abs. 1 lit. f DSGVO bei sonstigen Anfragen. Die Speicherung und Aufbewahrung erfolgt gemäß Abschnitt 5 der [Datenschutzerklärung](/datenschutz).
+
 ### EN
 
 **H1:** Contact
@@ -144,6 +148,10 @@ Code und Produktentwicklung auf GitHub: [blackbrowed-labs](https://github.com/bl
 Email directly: [lars@blackbrowedlabs.com](mailto:lars@blackbrowedlabs.com)
 
 Code and product development on GitHub: [blackbrowed-labs](https://github.com/blackbrowed-labs)
+
+**Privacy notice (shown with the contact form):**
+
+The fields Name, Email address, and Message are processed solely to handle your inquiry and are delivered to the email mailbox lars@blackbrowedlabs.com (IONOS). The legal basis is Art. 6 (1) (b) GDPR for pre-contractual inquiries or Art. 6 (1) (f) GDPR for other inquiries. Storage and retention follow Section 5 of the [Privacy Policy](/en/privacy).
 
 ---
 
@@ -240,7 +248,7 @@ E-Mail: lars@blackbrowedlabs.com
 
 2. Allgemeine Hinweise
 
-Diese Website verarbeitet personenbezogene Daten ausschließlich in dem Umfang, der zum technischen Betrieb der Seite notwendig ist. Es werden keine Kontaktformulare angeboten, keine Benutzerkonten geführt, keine Newsletter versendet und keine Tracking-Cookies gesetzt. Die Nutzung der Website ist in der Regel ohne Angabe personenbezogener Daten möglich.
+Diese Website verarbeitet personenbezogene Daten ausschließlich in dem Umfang, der zum technischen Betrieb der Seite und zur Bearbeitung von Anfragen über das Kontaktformular notwendig ist; die Nutzung der Website ist im Übrigen ohne Angabe personenbezogener Daten möglich. Es werden keine Benutzerkonten geführt, keine Newsletter versendet und keine Tracking-Cookies gesetzt.
 
 3. Hosting und Server-Logs
 
@@ -259,17 +267,23 @@ Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert, sodass für D
 
 Weitere Informationen zum Datenschutz bei Cloudflare: https://www.cloudflare.com/privacypolicy/
 
-4. Analyse: Cloudflare Web Analytics
+4. Cloudflare-Dienste: Web Analytics und Turnstile
 
 Zur Reichweitenmessung wird Cloudflare Web Analytics eingesetzt. Hierzu wird beim Aufruf der Website ein Skript (Beacon) vom Cloudflare-Host static.cloudflareinsights.com nachgeladen. Dieser Dienst arbeitet cookiefrei und ohne Fingerprinting. Es werden ausschließlich aggregierte Nutzungsstatistiken erhoben (Seitenaufrufe, Referrer, ungefähre geografische Herkunft auf Länderebene). Eine Identifizierung einzelner Besucher ist weder vorgesehen noch möglich. Aggregierte Auswertungsdaten werden für {{ cwa_retention_aggregates_months }} Monate gespeichert; einzelne Rohereignisse werden innerhalb von {{ cwa_retention_raw_hours }} Stunden aggregiert und anschließend gelöscht. Diese Angaben werden regelmäßig anhand der öffentlichen Dokumentation von Cloudflare geprüft (zuletzt geprüft am {{ cloudflare_facts_verified_date }}).
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer datenschutzfreundlichen Reichweitenmessung).
 
+Zur Erkennung und Abwehr automatisierter Anfragen am Kontaktformular wird Cloudflare Turnstile eingesetzt — ein Dienst des in Abschnitt 3 genannten Auftragsverarbeiters Cloudflare. Turnstile verarbeitet hierzu nach Angaben des Anbieters die IP-Adresse, einen TLS-Fingerabdruck, den User-Agent-Header sowie Sitekey und zugehörige Origin-Angabe; die Funktion „Pre-Clearance" ist deaktiviert, sodass Turnstile keine Cookies und keine Einträge im Web Storage anlegt.
+
+Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am Schutz des Kontaktformulars vor automatisiertem Missbrauch).
+
 5. E-Mail-Kommunikation
 
 Wenn Sie mich per E-Mail kontaktieren (z. B. über die auf der Kontaktseite angegebene Adresse), wird Ihre Nachricht zur Bearbeitung gespeichert. Das zugehörige E-Mail-Postfach wird bei der IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Deutschland) betrieben. Zwischen dem Verantwortlichen und IONOS besteht ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.
 
-Nachrichten an Adressen unter der Domain blackbrowedlabs.de werden über Cloudflare Email Routing entgegengenommen und an das oben genannte IONOS-Postfach weitergeleitet. Es wird keine E-Mail-Adresse unter blackbrowedlabs.de aktiv veröffentlicht; die Catch-all-Weiterleitung dient als Auffangfunktion für versehentlich an diese Domain gerichtete Nachrichten. Die in Abschnitt 3 beschriebenen Maßnahmen für Datenübermittlungen in die USA (EU-US Data Privacy Framework nach Art. 45 DSGVO sowie Auftragsverarbeitungsvertrag nach Art. 28 DSGVO) gelten entsprechend für die E-Mail-Weiterleitung über Cloudflare Email Routing.
+Nachrichten an Adressen unter der Domain blackbrowedlabs.de werden über Cloudflare Email Routing entgegengenommen und an das oben genannte IONOS-Postfach weitergeleitet. Es wird keine E-Mail-Adresse unter blackbrowedlabs.de aktiv veröffentlicht; die Catch-all-Weiterleitung dient als Auffangfunktion für versehentlich an diese Domain gerichtete Nachrichten. Über denselben Routing-Pfad werden Benachrichtigungen aus dem Kontaktformular von noreply@blackbrowedlabs.de an das IONOS-Postfach lars@blackbrowedlabs.com versandt. Die in Abschnitt 3 beschriebenen Maßnahmen für Datenübermittlungen in die USA (EU-US Data Privacy Framework nach Art. 45 DSGVO sowie Auftragsverarbeitungsvertrag nach Art. 28 DSGVO) gelten entsprechend für die ein- und ausgehende E-Mail-Verarbeitung über Cloudflare Email Routing.
+
+Beim Absenden des Kontaktformulars werden die eingegebenen Angaben (Name, E-Mail-Adresse, Nachricht) zunächst von einem Cloudflare Worker entgegengenommen und anschließend über den in Absatz 2 beschriebenen Routing-Pfad an das IONOS-Postfach lars@blackbrowedlabs.com zugestellt; eine darüber hinausgehende Speicherung dieser Inhalte erfolgt nicht. Die in Abschnitt 3 beschriebenen Schutzmaßnahmen für Cloudflare (Art. 45 DSGVO, Art. 28 DSGVO) gelten entsprechend; zusätzlich wird der in Abschnitt 4 beschriebene Bot-Schutz Cloudflare Turnstile eingesetzt. Die unmittelbar am Formular ausgewiesenen Pflichtangaben gemäß Art. 13 DSGVO finden sich auf der Kontaktseite (/kontakt).
 
 Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen) bzw. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung Ihrer Anfrage). E-Mails ohne geschäftlichen oder steuerlichen Bezug werden nach abgeschlossener Bearbeitung gelöscht. Soweit E-Mails als Handels- und Geschäftsbriefe einzuordnen sind, werden sie nach § 147 Abs. 1 Nr. 2 und 3 AO sechs Jahre aufbewahrt; soweit sie Buchungsbelege darstellen, beträgt die Aufbewahrungsfrist nach § 147 Abs. 1 Nr. 4 AO zehn Jahre.
 
@@ -285,7 +299,7 @@ Diese Website setzt keine Cookies oder vergleichbaren Speichertechnologien (z. B
 
 8. Keine Social-Media-Plugins oder externen Einbettungen
 
-Mit Ausnahme des in Abschnitt 4 beschriebenen Cloudflare-Web-Analytics-Beacons (geladen von static.cloudflareinsights.com) bindet diese Website keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine weiteren externen Skripte). Alle übrigen Ressourcen werden vom eigenen Server ausgeliefert.
+Mit Ausnahme des in Abschnitt 4 beschriebenen Cloudflare-Web-Analytics-Beacons (geladen von static.cloudflareinsights.com) sowie des dort beschriebenen Cloudflare-Turnstile-Widgets (geladen von challenges.cloudflare.com) bindet diese Website keine Inhalte von Drittanbietern ein (keine YouTube-Videos, keine Twitter-/X-Einbettungen, keine Google Fonts, keine weiteren externen Skripte). Alle übrigen Ressourcen werden vom eigenen Server ausgeliefert.
 
 9. Ihre Rechte
 
@@ -341,7 +355,7 @@ Email: lars@blackbrowedlabs.com
 
 2. General
 
-This website processes personal data only to the extent necessary to operate the site. There are no contact forms, no user accounts, no newsletters, and no tracking cookies. The site can generally be used without providing personal data.
+This website processes personal data only to the extent necessary to operate the site and to respond to inquiries submitted through the contact form; otherwise, the site can be used without providing personal data. There are no user accounts, no newsletters, and no tracking cookies.
 
 3. Hosting and Server Logs
 
@@ -360,17 +374,23 @@ Cloudflare is certified under the EU-US Data Privacy Framework, ensuring an adeq
 
 Cloudflare's privacy policy: https://www.cloudflare.com/privacypolicy/
 
-4. Analytics: Cloudflare Web Analytics
+4. Cloudflare Services: Web Analytics and Turnstile
 
 Cloudflare Web Analytics is used to measure site usage. To do this, a script (beacon) is loaded from the Cloudflare host static.cloudflareinsights.com when a page is opened. This service operates without cookies and without fingerprinting. Only aggregate usage statistics are collected (page views, referrer, approximate country-level geolocation). Identification of individual visitors is neither intended nor possible. Aggregated analytics data is retained for {{ cwa_retention_aggregates_months }} months; individual raw events are aggregated and then deleted within {{ cwa_retention_raw_hours }} hours. These figures are verified periodically against Cloudflare's public documentation (last verified on {{ cloudflare_facts_verified_date }}).
 
 Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in privacy-friendly analytics).
 
+Cloudflare Turnstile is used to detect and block automated requests to the contact form — a service from the processor Cloudflare already named in Section 3. According to the provider, Turnstile processes the IP address, a TLS fingerprint, the User-Agent header, and the site key with its associated origin; the "Pre-Clearance" feature is disabled, so Turnstile sets no cookies and writes no entries to Web Storage.
+
+Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in protecting the contact form against automated abuse).
+
 5. Email Communication
 
 If you contact me by email (e.g. using the address on the contact page), your message is stored for processing. The mailbox is operated by IONOS SE (Elgendorfer Straße 57, 56410 Montabaur, Germany). A Data Processing Addendum under Art. 28 GDPR is in place between the controller and IONOS.
 
-Inbound messages to addresses on the domain blackbrowedlabs.de are received via Cloudflare Email Routing and forwarded to the IONOS mailbox named above. No email address on blackbrowedlabs.de is publicly advertised; the catch-all forwarding serves as a fallback for messages mistakenly sent to this domain. The measures described in Section 3 for data transfers to the United States (EU-US Data Privacy Framework per Art. 45 GDPR; Data Processing Addendum per Art. 28 GDPR) apply accordingly to email forwarding via Cloudflare Email Routing.
+Messages to addresses on the domain blackbrowedlabs.de are received via Cloudflare Email Routing and forwarded to the IONOS mailbox named above. No email address on blackbrowedlabs.de is publicly advertised; the catch-all forwarding serves as a fallback for messages mistakenly sent to this domain. Notifications from the contact form are sent via the same routing path from noreply@blackbrowedlabs.de to the IONOS mailbox lars@blackbrowedlabs.com. The measures described in Section 3 for data transfers to the United States (EU-US Data Privacy Framework per Art. 45 GDPR; Data Processing Addendum per Art. 28 GDPR) apply accordingly to inbound and outbound email processing via Cloudflare Email Routing.
+
+When the contact form is submitted, the inputs (name, email address, message) are first received by a Cloudflare Worker and then delivered via the routing path described in paragraph 2 to the IONOS mailbox lars@blackbrowedlabs.com; no further storage of these contents takes place. The protective measures described in Section 3 for Cloudflare (Art. 45 GDPR, Art. 28 GDPR) apply accordingly; bot protection by Cloudflare Turnstile, as described in Section 4, is additionally applied. The Art. 13 GDPR information required at the point of collection is shown directly on the contact page (/en/contact).
 
 Legal basis: Art. 6 (1) (b) GDPR (pre-contractual measures) or Art. 6 (1) (f) GDPR (legitimate interest in responding to your inquiry). Emails without a business or tax-relevant context are deleted once processing is complete. Where emails qualify as commercial and business correspondence (Handels- und Geschäftsbriefe), they are retained for six years pursuant to § 147 Abs. 1 Nr. 2 und 3 AO; where they constitute accounting records (Buchungsbelege), the retention period is ten years pursuant to § 147 Abs. 1 Nr. 4 AO.
 
@@ -386,7 +406,7 @@ This website does not set cookies or comparable storage technologies (e.g. Web S
 
 8. No Social Media Plugins or External Embeds
 
-Apart from the Cloudflare Web Analytics beacon described in Section 4 (loaded from static.cloudflareinsights.com), this website embeds no third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts). All other resources are served from the site's own origin.
+Apart from the Cloudflare Web Analytics beacon described in Section 4 (loaded from static.cloudflareinsights.com) and the Cloudflare Turnstile widget described there (loaded from challenges.cloudflare.com), this website embeds no third-party content (no YouTube videos, no Twitter/X embeds, no Google Fonts, no other external scripts). All other resources are served from the site's own origin.
 
 9. Your Rights
 

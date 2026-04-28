@@ -141,20 +141,30 @@ const turnstileSiteKey =
 <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js" is:inline></script>
 
 {/*
-  Status renderer + draft preservation. Reads `?ok` / `?error` from
-  the URL on page load and fills the aria-live region with the
-  matching i18n string. On `?error=*` it ALSO restores the user's
-  form values from sessionStorage so a server-side rejection
-  (validation, rate-limit, server, turnstile) doesn't wipe a long
-  message. On submit, the current values are saved to sessionStorage
-  under `bbl-contact-form-draft` (cleared on `?ok=1` or fresh visit).
-  The honeypot, Turnstile token, and _returnTo are intentionally NOT
-  preserved.
+  Status renderer + draft preservation + per-field error indicator.
+
+  - Reads `?ok` / `?error` from the URL on page load; fills the
+    aria-live region with the matching i18n string.
+  - On `?error=*`, restores the user's form values from sessionStorage
+    (cleared on `?ok=1` or fresh visit) and marks individual invalid
+    fields with `.contact-form__field--error` so the user sees WHICH
+    field the Worker rejected, not just a generic "something failed".
+  - On submit, saves the draft to sessionStorage so a server-side
+    redirect can restore it. Honeypot, Turnstile token, and _returnTo
+    are intentionally NOT preserved.
+  - Live error-class management: the `invalid` event marks a field on
+    blocked submit; `input` events clear the class when the field
+    becomes valid again.
+
+  The local `isLikelyEmail` mirrors the Worker's regex so we can flag
+  Safari-accepted-but-Worker-rejected emails (Safari's built-in
+  type=email validator is lenient about TLD presence).
 */}
 <script is:inline>
   (function () {
     const STORAGE_KEY = 'bbl-contact-form-draft';
     const FIELDS = ['name', 'email', 'message'];
+    const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
     const status = document.getElementById('contact-status');
     const form = document.querySelector('.contact-form');
@@ -163,6 +173,22 @@ const turnstileSiteKey =
     const params = new URLSearchParams(location.search);
     const okFlag = params.get('ok') === '1';
     const errorCode = params.get('error');
+
+    function isFieldInvalid(input) {
+      if (!input.checkValidity()) return true;
+      // Worker-mirroring email check (Safari's type=email is lenient).
+      if (input.name === 'email' && input.value && !EMAIL_RE.test(input.value)) {
+        return true;
+      }
+      return false;
+    }
+
+    function setFieldError(input, isError) {
+      const wrapper = input.closest('.contact-form__field');
+      if (!wrapper) return;
+      if (isError) wrapper.classList.add('contact-form__field--error');
+      else wrapper.classList.remove('contact-form__field--error');
+    }
 
     // Restore preserved draft on any error redirect; clear it on success.
     if (errorCode) {
@@ -178,6 +204,13 @@ const turnstileSiteKey =
           });
         }
       } catch (_) { /* ignore restore errors */ }
+
+      // After restore, mark whichever fields the Worker plausibly
+      // rejected so the user sees which one to fix.
+      FIELDS.forEach(function (name) {
+        const input = form.querySelector('[name="' + name + '"]');
+        if (input) setFieldError(input, isFieldInvalid(input));
+      });
     } else if (okFlag) {
       try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
     }
@@ -196,6 +229,19 @@ const turnstileSiteKey =
       status.textContent = map[errorCode] || status.dataset.errorGeneric || '';
       status.classList.add('contact-form__status--error');
     }
+
+    // Live error-class management: mark on blocked-submit `invalid`
+    // event; clear as the user corrects the field.
+    FIELDS.forEach(function (name) {
+      const input = form.querySelector('[name="' + name + '"]');
+      if (!input) return;
+      input.addEventListener('invalid', function () {
+        setFieldError(input, true);
+      });
+      input.addEventListener('input', function () {
+        if (!isFieldInvalid(input)) setFieldError(input, false);
+      });
+    });
 
     // Save draft on submit so a server-side error redirect can restore it.
     form.addEventListener('submit', function () {
@@ -267,6 +313,24 @@ const turnstileSiteKey =
   .contact-form__field textarea {
     resize: vertical;
     min-height: 8rem;
+  }
+
+  /*
+    Field-level error state. Two triggers — `:user-invalid` (modern
+    pseudo-class that only fires AFTER the user has interacted, so
+    untouched required fields don't go red on first paint) and the
+    explicit `.contact-form__field--error` class set by the inline
+    script on server-error returns. Both produce the same red border
+    and red label.
+  */
+  .contact-form__field input:user-invalid,
+  .contact-form__field textarea:user-invalid,
+  .contact-form__field--error input,
+  .contact-form__field--error textarea {
+    border-color: var(--bbl-error);
+  }
+  .contact-form__field--error label {
+    color: var(--color-error-text);
   }
 
   /*

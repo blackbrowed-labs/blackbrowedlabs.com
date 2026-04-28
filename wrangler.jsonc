@@ -26,12 +26,20 @@
  *
  * Per-env declarations are required for keys that do NOT inherit from
  * the top level when deploying with `--env`: `main`, `assets`,
- * `observability`, `routes`, `vars`, `send_email`, `ratelimit`, `name`,
+ * `observability`, `routes`, `vars`, `send_email`, `unsafe`, `name`,
  * `compatibility_flags`. The top-level entries for `main` / `assets` are
  * declared for completeness (e.g. `wrangler dev` without an env flag);
  * the per-env blocks are what actually deploys. Confirmed via
  * Cloudflare dashboard after the first staging deploy showed Workers
  * Logs as Disabled despite a top-level `observability` enable.
+ *
+ * The rate-limit binding (CONTACT_RATELIMIT) lives under
+ * `env.<env>.unsafe.bindings` with `type: "ratelimit"` because wrangler
+ * 4.85.0 does NOT yet recognise the top-level `ratelimit: [...]` field
+ * in env blocks (it emits "Unexpected fields found"). The
+ * `unsafe.bindings` syntax is documented as experimental but is the
+ * supported shape for rate-limit bindings as of 2026-04-28. Revisit
+ * when wrangler promotes rate-limit to a stable env field.
  *
  * Secrets (Turnstile secret keys) are NOT in this file. They are set
  * via `wrangler secret put TURNSTILE_SECRET_KEY --env <env>` per env
@@ -78,13 +86,16 @@
           "destination_address": "lars@blackbrowedlabs.com"
         }
       ],
-      "ratelimit": [
-        {
-          "name": "CONTACT_RATELIMIT",
-          "namespace_id": "2",
-          "simple": { "limit": 5, "period": 60 }
-        }
-      ]
+      "unsafe": {
+        "bindings": [
+          {
+            "name": "CONTACT_RATELIMIT",
+            "type": "ratelimit",
+            "namespace_id": "2",
+            "simple": { "limit": 5, "period": 60 }
+          }
+        ]
+      }
     },
     "staging": {
       "name": "blackbrowedlabs-com-staging",
@@ -110,13 +121,16 @@
           "destination_address": "lars@blackbrowedlabs.com"
         }
       ],
-      "ratelimit": [
-        {
-          "name": "CONTACT_RATELIMIT",
-          "namespace_id": "1",
-          "simple": { "limit": 5, "period": 60 }
-        }
-      ]
+      "unsafe": {
+        "bindings": [
+          {
+            "name": "CONTACT_RATELIMIT",
+            "type": "ratelimit",
+            "namespace_id": "1",
+            "simple": { "limit": 5, "period": 60 }
+          }
+        ]
+      }
     }
   }
 }

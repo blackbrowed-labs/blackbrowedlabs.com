@@ -3,7 +3,7 @@
  * Datenschutzerklärung (DE — legally authoritative).
  * Matches design/handoff-bundle/design/pages/07-datenschutz.html (DE artboard).
  * Long reading page with two-column TOC (single column on mobile),
- * 11 numbered sections, and an address block in §1 + §5 + §10.
+ * 11 numbered sections, and an address block in §1 + §10.
  * Copy held inline (per OQ-1: legal pages stay as .astro, not in the
  * editorial collection) and verbatim from docs/BASELINE_COPY.md §9
  * with two build-time substitutions from src/data/cloudflare-facts.json.
@@ -466,6 +466,11 @@ const tocItems = [
     padding: 0.75rem 0 0.75rem 1rem;
     border-left: 2px solid var(--color-border);
     max-width: 56ch;
+  }
+
+  .datenschutz__p a,
+  .datenschutz__address a {
+    word-break: break-word;
   }
 
   .datenschutz__list {

@@ -3,7 +3,7 @@
  * Privacy Policy (EN — courtesy translation).
  * Matches design/handoff-bundle/design/pages/07-datenschutz.html (EN artboard).
  * Long reading page with two-column TOC (single column on mobile),
- * 11 numbered sections, and an address block in §1 + §5 + §10.
+ * 11 numbered sections, and an address block in §1 + §10.
  * Copy held inline (per OQ-1: legal pages stay as .astro, not in the
  * editorial collection) and verbatim from docs/BASELINE_COPY.md §10
  * with two build-time substitutions from src/data/cloudflare-facts.json.
@@ -473,6 +473,11 @@ const tocItems = [
     max-width: 56ch;
   }
 
+  .datenschutz__p a,
+  .datenschutz__address a {
+    word-break: break-word;
+  }
+
   .datenschutz__list {
     max-width: 60ch;
     padding-left: 1.25rem;
@@ -516,6 +521,9 @@ const tocItems = [
     }
     .datenschutz__address {
       padding: 0.625rem 0 0.625rem 0.875rem;
+    }
+    .datenschutz__courtesy {
+      max-width: none;
     }
     .datenschutz__p,
     .datenschutz__address,

@@ -549,6 +549,7 @@ All secrets live outside the repo. Never commit real values. The table below sum
 | `PRODUCT_REPOS_PAT` | Worker secret + GH Actions on `blackbrowedlabs.com` repo + local `.env` | Authenticated GitHub API calls for the releases loader (§7). Named `PRODUCT_REPOS_PAT` rather than `GITHUB_TOKEN` because the latter is reserved by GitHub Actions for the workflow's auto-generated token. |
 | `CLOUDFLARE_API_TOKEN` | GH Actions on website repo + local `.env` | Used by `wrangler` for deployments when running from CI or locally. |
 | `WEBSITE_DISPATCH_TOKEN` | GH Actions on each product repo | Permits `repository_dispatch` to the website repo. Not required in v1 (no product repos yet). |
+| `TURNSTILE_SECRET_KEY` | Worker secret per env (set via `wrangler secret put`) | Authenticates the contact-form Worker's Turnstile siteverify call. One secret per env (staging + production); never enters the repo. The matching public site keys live in `wrangler.jsonc` `vars` per env — see "Worker runtime vars" below. |
 
 Environment variables exposed at build time (not secrets):
 
@@ -556,6 +557,12 @@ Environment variables exposed at build time (not secrets):
 |---|---|---|
 | `PUBLIC_ENVIRONMENT` | `production` \| `staging` | Drives noindex/nofollow injection and `robots.txt` variant |
 | `PUBLIC_SITE_URL` | `https://blackbrowedlabs.com` \| `https://dev.blackbrowedlabs.com` | Canonical URLs, OG tags |
+
+**Worker runtime vars** (declared in `wrangler.jsonc` `env.<env>.vars`; embedded in the deployed Worker's `env` at runtime, not secrets):
+
+| Name | Where | Purpose |
+|---|---|---|
+| `TURNSTILE_SITE_KEY` | `wrangler.jsonc` `vars` per env | Public site key for the Cloudflare Turnstile widget on the contact form. Different value per env. The matching secret key (`TURNSTILE_SECRET_KEY`) is in the secrets table above. |
 
 ### Secrets flow — where each secret lives
 

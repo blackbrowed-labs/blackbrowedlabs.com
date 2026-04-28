@@ -495,7 +495,7 @@ The repo's `.gitignore` is at the root and covers three categories of files:
     - Restrict deletions: enabled
     - Block force pushes: enabled
     - Require pull request before merging: enabled (0 required approvals — solo founder; raise if collaborators join)
-    - Require linear history: enabled
+    - Require linear history: **disabled** (dropped 2026-04-28). Initially `enabled` at Pass 1 ruleset config; produced SHA-divergence between `dev` and `main` after every rebase-merge (Phase M PR #4, Phase 404 PR #5, Phase B.1 PR #6 each required a manual `dev` re-alignment: temp-disable `protect-dev` force-push → `git reset --hard origin/main` → force-push → re-enable). Allowing merge commits on `main` removes that friction — original SHAs preserved across both branches; no alignment dance. Trade-off: `main`'s git log gains a merge commit per release. Filter via `git log --first-parent main` for the linear release-only view. Squash and rebase merges remain permitted but are not the default — merge commits (the GitHub default once linear-history is off) are the recommended path.
     - Allow bypass: empty (no one bypasses)
   - **`protect-dev`** (Active):
     - Target: `dev`

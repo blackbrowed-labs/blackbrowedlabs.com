@@ -140,9 +140,12 @@ const releases = defineCollection({
           const m = raw.match(/^---\n([\s\S]*?)\n---/);
           if (!m) return null;
           const fm = m[1];
-          const slugMatch = fm.match(/^slug:\s*"?([^"\n]+)"?/m);
-          const repoMatch = fm.match(/^repo:\s*"?([^"\n]+)"?/m);
-          const langMatch = fm.match(/^lang:\s*"?([a-z]{2})"?/m);
+          // Frontmatter regex tolerates double-quoted, single-quoted, or
+          // unquoted scalars for slug/repo/lang. (`draft` is a YAML literal,
+          // never quoted in practice.)
+          const slugMatch = fm.match(/^slug:\s*["']?([^"'\n]+)["']?/m);
+          const repoMatch = fm.match(/^repo:\s*["']?([^"'\n]+)["']?/m);
+          const langMatch = fm.match(/^lang:\s*["']?([a-z]{2})["']?/m);
           const draftMatch = fm.match(/^draft:\s*(true|false)/m);
           // Dedupe per slug: only DE entries drive a fetch (slug/lang/repo
           // are identical across DE/EN siblings).

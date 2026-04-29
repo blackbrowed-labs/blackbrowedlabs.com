@@ -46,19 +46,25 @@ export async function getVisibleProducts(lang: 'de' | 'en') {
 }
 
 // Cache visibility per build to avoid duplicate API calls when both DE
-// and EN product detail pages render the same product.
-const visibilityCache = new Map<string, RepoMeta | null>();
+// and EN product detail pages render the same product. The cache stores
+// the in-flight Promise (not the resolved value) so concurrent first-call
+// renders for the same repo see the same Promise and only one HTTP request
+// fires — eliminates the duplicate-fetch race that would otherwise occur
+// while the first call is awaiting fetchRepoMeta.
+const visibilityCache = new Map<string, Promise<RepoMeta | null>>();
 
 export async function getProductVisibility(
   repo: string | undefined,
 ): Promise<RepoMeta | null> {
   if (!repo) return null;
-  if (visibilityCache.has(repo)) return visibilityCache.get(repo)!;
+  const cached = visibilityCache.get(repo);
+  if (cached !== undefined) return cached;
   if (!import.meta.env.PRODUCT_REPOS_PAT) {
-    visibilityCache.set(repo, null);
-    return null;
+    const result = Promise.resolve<RepoMeta | null>(null);
+    visibilityCache.set(repo, result);
+    return result;
   }
-  const meta = await fetchRepoMeta(repo);
-  visibilityCache.set(repo, meta);
-  return meta;
+  const result = fetchRepoMeta(repo);
+  visibilityCache.set(repo, result);
+  return result;
 }

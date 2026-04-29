@@ -348,7 +348,7 @@ GET https://api.github.com/repos/{owner}/{repo}/releases
 
 Each release becomes an entry with: `productSlug`, `tagName`, `name`, `publishedAt`, `bodyMarkdown` (rendered with the same pipeline as local content), `isPrerelease`, `isDraft`, `htmlUrl`.
 
-Authentication: a fine-grained GitHub personal access token, `PRODUCT_REPOS_PAT`, stored as a Worker/Actions secret. Required scopes: `Contents: Read` and `Metadata: Read` on each product repo. See §10.1 for full setup procedure.
+Authentication: a fine-grained GitHub personal access token, `PRODUCT_REPOS_PAT`, stored as a GitHub Actions secret on the website repo (and locally in `.env` for development). Required scopes: `Contents: Read` and `Metadata: Read` on each product repo. See §10.1 for full setup procedure.
 
 Release notes are language-neutral (GitHub releases have one version each). They're rendered on both the DE and EN product pages.
 

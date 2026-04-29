@@ -116,9 +116,25 @@ Three redundant mechanisms prevent accidental indexing:
   - Staging: `User-agent: *` / `Disallow: /`
   - Production: normal allow rules.
 
-### 3.4 Cron Trigger (safety net)
+### 3.4 Scheduled rebuild
 
-One scheduled trigger on the production Worker, daily at 03:00 UTC, dispatches a rebuild. Only there to catch missed webhooks from product repos.
+A GitHub Actions scheduled workflow (`.github/workflows/rebuild-nightly.yml`)
+runs daily at 03:00 UTC. Re-runs the production deploy to pick up any
+missed release webhooks from product repos and any other content drift.
+
+**Cloudflare Worker Cron was considered but rejected.** That path would
+have required:
+
+- Expanding the Worker from assets-only to a code-running Worker (against
+  the static-assets-only posture per D2 / D18).
+- A new GitHub PAT secret stored as a Worker secret (additional secret
+  surface vs. the existing GH Actions PAT).
+- A new observability surface (Worker Cron logs vs. unified GH Actions
+  history).
+
+None of these were justified for a safety-net mechanism that runs once
+daily. GH Actions Cron achieves the same outcome with no Worker changes
+and no new secrets.
 
 ### 3.5 Implementation requirements
 

@@ -32,7 +32,7 @@ Blackbrowed Labs builds tools for classroom management. Two areas are in active 
 - An **iPadOS app** for classroom management (grades, student work, observations, without paperwork). Will launch as the first product on its own domain with an independent website and design system.
 - A **Claude Cowork plugin** that helps teachers plan units and lessons.
 
-**Product names are deliberately not referenced on this website** until each product formally launches. The website blackbrowedlabs.com acts as the **studio's home page**, not as marketing surface for individual products. When products launch, they get a **minimal presence** here: name, short description, current version, recent release notes (auto-pulled from GitHub), and a prominent link to the product's own site. The marketing depth lives on each product's own website.
+**Product names are deliberately not surfaced on the production website** until each product formally launches. Dev may carry named product entries marked `draft: true` (or with a future `releaseDate`) for in-progress visual verification; these are filtered out of the production build. The website blackbrowedlabs.com acts as the **studio's home page**, not as marketing surface for individual products. When products launch, they get a **minimal presence** here: name, short description, current version, recent release notes (auto-pulled from GitHub), and a prominent link to the product's own site. The marketing depth lives on each product's own website.
 
 ### 1.3 Editorial profile
 
@@ -323,7 +323,18 @@ Frontmatter:
 
 The body of the Markdown file is the long-form description rendered under the product header.
 
-**Auto-generation:** the route file `src/pages/produkte/[slug].astro` (and its English mirror `src/pages/en/products/[slug].astro`) uses `getStaticPaths()` to emit one page per `products` entry matching the file's language. Adding a Markdown file is the only action needed to publish a new product page. No component changes. No config changes.
+**Visibility gates** (added in Phase C, G C.2.a). Two complementary fields modulate when a product surfaces:
+
+- `draft: boolean` (optional) — when `true`, the product is hidden on production. Use for in-progress entries the operator wants to test on dev before public release.
+- `releaseDate: Date` (optional, ISO-8601 string at file authoring time, coerced to `Date` by Zod) — when set to a future date, the product is hidden on production until the next build runs after that date. Once Phase D.3 ships the nightly cron, scheduled publishing fires automatically within ~24h of the release date.
+
+Both gates are enforced by the env-aware filter in `src/lib/products.ts` (`getVisibleProducts(lang)`), which is called by the index pages and the detail-template `getStaticPaths()`. On dev / staging the filter returns all products regardless of `draft` or `releaseDate` — the operator sees in-progress and scheduled entries on `dev.blackbrowedlabs.com` for visual verification.
+
+**Schema refine.** `externalUrl` and `repo` are both optional on the schema, but a `.refine()` on the `products` collection schema requires at least one to be set. The detail template renders the primary CTA against `externalUrl` if present.
+
+**GitHub fallback CTA — opt-in via `showGithubLink: boolean`** (added in Phase C, G C.2.b fix-up). When `externalUrl` is not set, the detail template renders a ghost-button GitHub CTA only if `showGithubLink: true` is also set on the product entry AND `repo` is populated. Default behaviour (no `showGithubLink` field) is to render no fallback CTA. The opt-in default is intentionally conservative: it prevents broken CTAs that point at private or otherwise unreachable repositories. Set `showGithubLink: true` only when the repo is publicly accessible and you want it to be the product's surfaced public link until a dedicated marketing site lands. Phase D's release-loader work is expected to supersede this manual flag with auto-detection from the GitHub API (`GET /repos/{owner}/{repo}` returns `private: boolean`); the flag becomes either redundant or a force-show/force-hide override at that point.
+
+**Auto-generation:** the route file `src/pages/produkte/[slug].astro` (and its English mirror `src/pages/en/products/[slug].astro`) uses `getStaticPaths()` to emit one page per visible product entry matching the file's language. Adding a Markdown file is the only action needed to publish a new product page. No component changes. No config changes.
 
 **Collection is empty in v1.** When the collection is empty, the Products index renders a "coming soon" empty state (copy in `BASELINE_COPY.md` §5).
 
@@ -699,7 +710,7 @@ All fonts, images, and scripts served from the Worker (same origin). No `fonts.g
    11. `wrangler.jsonc` with named environments and Custom Domain bindings.
 3. **Use the `frontend-design` skill** whenever writing UI components.
 4. **Do not invent** company copy, product names, Impressum details, or Datenschutz text. Use exactly what's in `BASELINE_COPY.md`.
-5. **Do not reference specific product names** (such as product working titles you may learn from other sources) in any generated copy. The website does not name products until they launch.
+5. **Do not reference specific product names** in editorial copy or page templates. Per-product Markdown files under `src/content/products/` carry the product's name and surface on production only when `draft: false` and any `releaseDate` is in the past (see §1.2 + §5.2).
 6. **Do not install a CMS.** v1 is Git-only editing.
 7. **Do not swap the palette or typography.** If the design bundle from Claude Design contradicts the brief, stop and surface the conflict.
 8. **Do not imply Lars is a teacher** in any generated copy. He's a developer who builds for teachers.

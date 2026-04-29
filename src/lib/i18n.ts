@@ -45,7 +45,26 @@ export function getLocaleFromPath(path: string): Locale {
 }
 
 export function getCounterpartUrl(path: string): string | null {
-  return counterparts[canonicalise(path)] ?? null;
+  const canonical = canonicalise(path);
+
+  // Static map for named pages (homepage, about, legal, products index, etc.).
+  const mapped = counterparts[canonical];
+  if (mapped !== undefined) return mapped;
+
+  // Dynamic: product detail pages share a slug across locales (per
+  // TECH_STACK §5.2 — `slug` is the same in DE and EN). Pattern-match
+  // /produkte/<slug> ↔ /en/products/<slug> so the language switcher and
+  // hreflang alternates resolve without per-product map entries.
+  if (canonical.startsWith('/produkte/')) {
+    const slug = canonical.slice('/produkte/'.length);
+    return slug ? `/en/products/${slug}` : null;
+  }
+  if (canonical.startsWith('/en/products/')) {
+    const slug = canonical.slice('/en/products/'.length);
+    return slug ? `/produkte/${slug}` : null;
+  }
+
+  return null;
 }
 
 /**
@@ -59,7 +78,7 @@ export function getHreflangAlternates(
 ): Array<{ hreflang: 'de' | 'en' | 'x-default'; href: string }> {
   const currentLocale = getLocaleFromPath(path);
   const canonical = canonicalise(path);
-  const counterpart = counterparts[canonical];
+  const counterpart = getCounterpartUrl(canonical);
 
   const dePath = currentLocale === 'de' ? canonical : counterpart;
   const enPath = currentLocale === 'en' ? canonical : counterpart;

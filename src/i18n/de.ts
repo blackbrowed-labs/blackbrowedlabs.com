@@ -15,6 +15,10 @@ export const de = {
     ariaLabel: 'Blackbrowed Labs — zur Startseite',
   },
 
+  breadcrumb: {
+    ariaLabel: 'Brotkrümelnavigation',
+  },
+
   nav: {
     ariaLabel: 'Hauptnavigation',
     about: 'Über',
@@ -35,6 +39,13 @@ export const de = {
     light: 'Hell',
     dark: 'Dunkel',
     system: 'System',
+  },
+
+  productsIndex: {
+    breadcrumb: 'Produkte',
+    h1: 'Produkte',
+    populatedArrowLabel: 'Mehr erfahren →',
+    arcAriaLabel: 'Der Blackbrowed-Labs-Bogen',
   },
 
   footer: {

@@ -1,0 +1,282 @@
+---
+/**
+ * Products index — DE.
+ *
+ * Empty-state branch: BASELINE_COPY.md §5 verbatim, single-column centered,
+ * atmospheric arc bottom-right at low opacity. Source of truth for layout
+ * is design/handoff-bundle/design/styles/products.css for the arc + closing
+ * line treatment; the `.prod-meta` asymmetric-grid rules are not used (spec
+ * §6.1 — Path 2 decision dropped the Status meta block).
+ *
+ * Populated-state branch: stacked product entries (H2 name link + tagline +
+ * description + arrow link to detail page). Renders on dev once G C.2.b
+ * lands the Thalura entry; on prod it stays empty as long as no non-draft
+ * non-future-dated products exist.
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getUiStrings } from '../../i18n';
+import { getVisibleProducts } from '../../lib/products';
+
+const t = getUiStrings('de');
+const products = await getVisibleProducts('de');
+
+const title = t.productsIndex.h1;
+const description =
+  'Hier entstehen die Produkte von Blackbrowed Labs. Schwerpunkt: Werkzeuge für die Klassenführung.';
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
+    <div class="breadcrumb__inner">
+      <a href="/">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{t.productsIndex.breadcrumb}</span>
+    </div>
+  </nav>
+
+  <article class="products-index">
+    <div class="products-index__container">
+      {products.length === 0 ? (
+        <div class="products-index__empty">
+          <h1>{title}</h1>
+          <p class="products-index__lead">
+            Hier entstehen die Produkte von Blackbrowed Labs. Der Schwerpunkt liegt auf der
+            Klassenführung: eine iPad-App, die Noten, Schülerleistungen und Beobachtungen
+            ohne Papierkram verwaltet, sowie ein Claude-Cowork-Plugin für die
+            Unterrichtsplanung.
+          </p>
+          <p class="products-index__lead">
+            Sobald das erste Werkzeug veröffentlicht ist, findet sich an dieser Stelle eine
+            kurze Beschreibung, die aktuelle Version und die jüngsten Release Notes — dazu
+            ein Link zur jeweiligen Produktwebsite.
+          </p>
+          <div class="products-index__closing">
+            <p>Bis dahin: Geduld. Gute Werkzeuge brauchen Zeit.</p>
+          </div>
+        </div>
+      ) : (
+        <div class="products-index__populated">
+          <h1>{title}</h1>
+          <ul class="products-index__list" role="list">
+            {products.map((entry) => (
+              <li class="products-index__item">
+                <h2 class="products-index__name">
+                  <a href={`/produkte/${entry.data.slug}`}>{entry.data.name}</a>
+                </h2>
+                <p class="products-index__tagline">{entry.data.tagline}</p>
+                <p class="products-index__description">{entry.data.description}</p>
+                <a class="products-index__more" href={`/produkte/${entry.data.slug}`}>
+                  {t.productsIndex.populatedArrowLabel}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+
+    <svg
+      class="products-index__atmos"
+      viewBox="0 0 300 120"
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-label={t.productsIndex.arcAriaLabel}
+    >
+      <path
+        fill="currentColor"
+        d="M 14 96 C 60 82, 100 56, 138 36 C 152 28, 166 25, 180 28 C 208 40, 244 64, 286 86 C 244 78, 214 60, 190 48 C 178 45, 168 45, 158 48 C 138 54, 114 68, 84 80 C 62 93, 40 99, 20 102 L 14 96 Z"
+      />
+    </svg>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Breadcrumb — same pattern as impressum.astro */
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep { color: var(--color-border); }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Page shell */
+  .products-index {
+    position: relative;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+  .products-index__container {
+    position: relative;
+    z-index: 2;
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 8rem 3rem 6rem;
+  }
+
+  /* Empty-state branch — single-column centered, narrow */
+  .products-index__empty {
+    max-width: 50ch;
+    margin: 0 auto;
+  }
+  .products-index__empty h1 {
+    margin: 0 0 3rem;
+  }
+  .products-index__lead {
+    font-size: var(--text-lead);
+    line-height: 1.6;
+    color: var(--color-text);
+    margin: 0 0 1.5rem;
+  }
+  .products-index__lead:last-of-type {
+    margin-bottom: 0;
+  }
+  .products-index__closing {
+    margin-top: 4rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .products-index__closing p {
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* Populated-state branch — single-column wider, stacked entries */
+  .products-index__populated {
+    max-width: 70ch;
+  }
+  .products-index__populated h1 {
+    margin: 0 0 3rem;
+  }
+  .products-index__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .products-index__item {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .products-index__item:first-of-type {
+    padding-top: 0;
+  }
+  .products-index__item:last-of-type {
+    border-bottom: 0;
+  }
+  .products-index__name {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-h2);
+    line-height: 1.2;
+    font-weight: var(--font-weight-light);
+    letter-spacing: -0.01em;
+  }
+  .products-index__name a {
+    color: var(--color-heading);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .products-index__name a:hover {
+    border-bottom-color: currentColor;
+  }
+  .products-index__tagline {
+    font-size: var(--text-lead);
+    line-height: 1.5;
+    color: var(--color-text);
+    margin: 0 0 1rem;
+    font-style: italic;
+  }
+  .products-index__description {
+    font-size: var(--text-body);
+    line-height: 1.65;
+    color: var(--color-text);
+    margin: 0 0 1.25rem;
+    max-width: 70ch;
+  }
+  .products-index__more {
+    color: var(--color-link);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-block: 0.5rem;
+  }
+  .products-index__more:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+
+  /* Atmospheric arc — bottom-right, low opacity */
+  .products-index__atmos {
+    position: absolute;
+    bottom: -120px;
+    right: -160px;
+    width: 900px;
+    height: 360px;
+    color: var(--bbl-primary);
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+    display: block;
+  }
+  :root[data-theme="dark"] .products-index__atmos { opacity: 0.14; }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .products-index__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .products-index__empty h1,
+    .products-index__populated h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 1.5rem;
+    }
+    .products-index__empty,
+    .products-index__populated,
+    .products-index__lead,
+    .products-index__description {
+      max-width: none;
+    }
+    .products-index__closing {
+      margin-top: 2.5rem;
+    }
+    .products-index__atmos {
+      bottom: -60px;
+      right: -120px;
+      width: 420px;
+      height: 170px;
+      opacity: 0.06;
+    }
+    :root[data-theme="dark"] .products-index__atmos { opacity: 0.12; }
+  }
+</style>

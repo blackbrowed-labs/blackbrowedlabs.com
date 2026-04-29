@@ -19,6 +19,8 @@ const locale = getLocaleFromPath(path);
 const t = getUiStrings(locale);
 
 const homeHref = locale === 'de' ? '/' : '/en';
+const productsHref = locale === 'de' ? '/produkte' : '/en/products';
+const productsActive = path === productsHref || path.startsWith(productsHref + '/');
 const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
 const aboutActive = path === aboutHref || path === aboutHref + '/';
 const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
@@ -46,6 +48,13 @@ const contactActive = path === contactHref || path === contactHref + '/';
 
     <nav class="site-header__nav" id="primary-nav" aria-label={t.nav.ariaLabel}>
       <ul class="site-header__list">
+        <li>
+          <a
+            class="site-header__link"
+            href={productsHref}
+            aria-current={productsActive ? 'page' : undefined}
+          >{t.nav.products}</a>
+        </li>
         <li>
           <a
             class="site-header__link"

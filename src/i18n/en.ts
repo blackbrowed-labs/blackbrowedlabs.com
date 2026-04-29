@@ -14,6 +14,10 @@ export const en: UiStrings = {
     ariaLabel: 'Blackbrowed Labs — back to home',
   },
 
+  breadcrumb: {
+    ariaLabel: 'Breadcrumb',
+  },
+
   nav: {
     ariaLabel: 'Main navigation',
     about: 'About',
@@ -34,6 +38,13 @@ export const en: UiStrings = {
     light: 'Light',
     dark: 'Dark',
     system: 'System',
+  },
+
+  productsIndex: {
+    breadcrumb: 'Products',
+    h1: 'Products',
+    populatedArrowLabel: 'Learn more →',
+    arcAriaLabel: 'The Blackbrowed Labs arc',
   },
 
   footer: {

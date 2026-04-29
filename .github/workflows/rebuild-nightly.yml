@@ -1,0 +1,48 @@
+name: rebuild-nightly
+
+# Daily safety-net rebuild at 03:00 UTC. Catches missed dispatches from
+# product repos and any other content drift. workflow_dispatch enabled
+# for manual testing without waiting 24 hours.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild-nightly:
+    name: Nightly rebuild and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        env:
+          PUBLIC_ENVIRONMENT: production
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
+          PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
+        run: npm run build
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env production

@@ -1,25 +1,48 @@
 ---
 /**
- * Product detail page — DE. Minimal stub composition per spec §6.3:
- * eyebrow + H1 + tagline + description + CTA. Version chip + release-history
- * stack are deliberately not in this gate (Phase D's release-pipeline work
- * introduces them with real release data).
+ * Product detail page — DE.
+ *
+ * Hero stack (in order): eyebrow → H1 → version chip pair (when populated)
+ * → tagline → description → CTA → markdown body → release history (when
+ * populated). The version chip pair and the release-history section both
+ * hide entirely when this product has zero releases (Decision 8).
  *
  * `getStaticPaths()` calls `getVisibleProducts('de')` so that:
  * - On prod with no non-draft products: returns []. No detail pages built.
- * - On dev with the Thalura plugin entry (G C.2.b): returns one entry.
- *   /produkte/thalura-plugin renders.
+ * - On dev with non-draft products (e.g. Thalura, fake-fixture): returns
+ *   one entry per product. /produkte/<slug> renders.
  *
  * CTA logic: prefer `externalUrl` (primary button); fall back to a GitHub
- * URL derived from `repo` (ghost button). Schema refine guarantees at least
- * one is set.
+ * URL derived from `repo` (ghost button) only when the repo is publicly
+ * visible. Visibility is auto-detected at build time via the GitHub API
+ * (`getProductVisibility` → `GET /repos/{owner}/{repo}`); this replaces
+ * the old manual `showGithubLink` opt-in flag (Phase D, G D.4). Schema
+ * refine guarantees `externalUrl` OR `repo` is set, so at least one CTA
+ * branch is eligible whenever the repo turns out to be public.
+ *
+ * Release-history rendering (Phase D, G D.9): the `releases` content
+ * collection (G D.4 loader) carries non-draft GitHub releases. We filter
+ * to this product's slug, sort newest first, and render each release's
+ * `bodyMarkdown` via Astro's own markdown processor
+ * (`@astrojs/markdown-remark`'s `createMarkdownProcessor`). That's the
+ * SAME processor Astro uses for `.md` files in editorial/products
+ * collections, so a release body renders consistently with the rest of
+ * the site — no new dependency needed.
+ *
+ * Threat model for `set:html` injection: `bodyMarkdown` originates from
+ * GitHub Releases authored on `blackbrowed-labs/*` repos we control.
+ * Trust posture is medium — the renderer's HTML output is trusted because
+ * we trust the upstream authors. If that trust posture changes (third-
+ * party contributor releases), revisit with a sanitization layer.
  */
 
 import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getVisibleProducts } from '../../lib/products';
+import { getVisibleProducts, getProductVisibility } from '../../lib/products';
 import { getUiStrings } from '../../i18n';
+import { formatLocaleDate } from '../../lib/date';
 
 export const getStaticPaths = (async () => {
   const products = await getVisibleProducts('de');
@@ -32,10 +55,25 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
+// Render the .product-detail__body wrapper only when the entry's
+// markdown body actually contains visible content. v1 products keep
+// the body empty (just a placeholder HTML comment) and rely on the
+// `description` frontmatter field for hero copy; the wrapper would
+// otherwise render an empty bordered block stacked on top of the
+// release-history section's own border, producing two horizontal lines.
+const hasBodyContent = Boolean(
+  entry.body && entry.body.replace(/<!--[\s\S]*?-->/g, '').trim().length > 0,
+);
+
 const t = getUiStrings('de');
 
+const visibility = await getProductVisibility(entry.data.repo);
 const ctaIsExternal = Boolean(entry.data.externalUrl);
-const showGithubFallback = entry.data.showGithubLink === true && Boolean(entry.data.repo);
+const showGithubFallback =
+  visibility !== null
+  && !visibility.isPrivate
+  && !visibility.notFound
+  && Boolean(entry.data.repo);
 const ctaVisible = ctaIsExternal || showGithubFallback;
 const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
 const ctaLabel = ctaIsExternal ? 'Zur Produktwebsite →' : 'Auf GitHub ansehen →';
@@ -43,6 +81,26 @@ const ctaClass = ctaIsExternal ? 'cta cta--primary' : 'cta cta--ghost';
 
 const title = entry.data.name;
 const description = entry.data.tagline;
+
+// Release-history data — newest first.
+const productReleases = (await getCollection('releases'))
+  .filter((r) => r.data.productSlug === entry.data.slug)
+  .sort((a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt));
+
+const latestRelease = productReleases[0];
+const hasReleases = productReleases.length > 0;
+
+// Pre-render every release body once so the template stays synchronous.
+// Astro's own markdown pipeline; no new dependency added — see the file
+// header for the rationale.
+const markdownProcessor = await createMarkdownProcessor();
+const renderedReleaseBodies: string[] = await Promise.all(
+  productReleases.map(async (r) =>
+    r.data.bodyMarkdown.trim().length > 0
+      ? (await markdownProcessor.render(r.data.bodyMarkdown)).code
+      : '',
+  ),
+);
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
@@ -60,6 +118,16 @@ const description = entry.data.tagline;
     <div class="product-detail__container">
       <p class="product-detail__eyebrow">Produkt</p>
       <h1 class="product-detail__name">{entry.data.name}</h1>
+
+      {hasReleases && latestRelease && (
+        <div class="version-chip-row" aria-label="Aktuelle Version">
+          <span class="version-chip">{latestRelease.data.tagName}</span>
+          {latestRelease.data.isPrerelease && (
+            <span class="version-chip version-chip--pre-release">{t.productDetail.preReleaseBadge}</span>
+          )}
+        </div>
+      )}
+
       <p class="product-detail__tagline">{entry.data.tagline}</p>
       <p class="product-detail__description">{entry.data.description}</p>
 
@@ -69,9 +137,34 @@ const description = entry.data.tagline;
         </a>
       )}
 
-      <div class="product-detail__body">
-        <Content />
-      </div>
+      {hasBodyContent && (
+        <div class="product-detail__body">
+          <Content />
+        </div>
+      )}
+
+      {hasReleases && (
+        <section class="release-history" aria-labelledby="release-history-heading">
+          <h2 id="release-history-heading" class="product-detail__h2">{t.productDetail.releaseHistory.heading}</h2>
+          {productReleases.map((release, idx) => (
+            <>
+              <article class="release">
+                <header class="release__header">
+                  <h3 class="release__version">{release.data.tagName}</h3>
+                  <span class="release__meta">
+                    {formatLocaleDate(release.data.publishedAt, 'de')}
+                    {release.data.isPrerelease && ` · ${t.productDetail.preReleaseBadge}`}
+                  </span>
+                </header>
+                {renderedReleaseBodies[idx] && (
+                  <div class="release__body" set:html={renderedReleaseBodies[idx]} />
+                )}
+              </article>
+              {idx < productReleases.length - 1 && <hr class="release__divider" />}
+            </>
+          ))}
+        </section>
+      )}
     </div>
   </article>
 </BaseLayout>
@@ -142,6 +235,37 @@ const description = entry.data.tagline;
     max-width: 70ch;
   }
 
+  /* Version chip pair — sits between H1 and tagline. AAA-safe: chip text
+     uses --color-text (Volcanic Stone) on --color-surface-card per the
+     design brief §4.8 ("Body text always uses Volcanic Stone, which
+     remains AAA on every surface, 10.09:1 or higher"). The 0.875rem chip
+     is small enough to require AAA 7:1; --color-text-muted (70% alpha)
+     would land below threshold here, so we keep --color-text. */
+  .version-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+  .version-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-bbl-2);
+    background: var(--color-surface-card);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.01em;
+    font-family: var(--font-mono);
+  }
+  /* No --color-warning-soft / --color-warning-text in tokens.css, so we
+     fall back to italics + same neutral colors per Decision 3 of G D.9. */
+  .version-chip--pre-release {
+    font-style: italic;
+  }
+
   .cta {
     display: inline-block;
     font-weight: var(--font-weight-medium);
@@ -180,6 +304,90 @@ const description = entry.data.tagline;
     color: var(--color-text);
     font-size: var(--text-body);
     line-height: 1.65;
+  }
+
+  /* Release-history section. <h2> inherits its size/weight/color from
+     global.css's base h2 rule; this class only handles section spacing. */
+  .release-history {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .product-detail__h2 {
+    color: var(--color-heading);
+    margin: 0 0 2rem;
+  }
+  .release {
+    margin: 0;
+  }
+  .release__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+  }
+  .release__version {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-h3);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-h3);
+  }
+  .release__meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-small);
+    font-style: italic;
+  }
+  .release__body {
+    color: var(--color-text);
+    font-size: var(--text-body);
+    line-height: 1.65;
+  }
+  .release__body :global(h1),
+  .release__body :global(h2),
+  .release__body :global(h3),
+  .release__body :global(h4) {
+    color: var(--color-heading);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .release__body :global(h3) { font-size: var(--text-h4); }
+  .release__body :global(h4) { font-size: var(--text-body); font-weight: var(--font-weight-semibold); }
+  .release__body :global(p) { margin: 0 0 0.75rem; }
+  .release__body :global(ul),
+  .release__body :global(ol) { margin: 0 0 0.75rem 1.25rem; padding: 0; }
+  .release__body :global(li) { margin: 0.25rem 0; }
+  .release__body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface-card);
+    padding: 0.05em 0.3em;
+    border-radius: var(--radius-bbl-1);
+  }
+  .release__body :global(pre) {
+    background: var(--color-surface-card);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-bbl-2);
+    overflow-x: auto;
+    margin: 0 0 0.75rem;
+  }
+  .release__body :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+  .release__body :global(a) {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+  .release__body :global(a:hover) {
+    color: var(--color-link-hover);
+  }
+  .release__divider {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 2.5rem 0;
   }
 
   @media (max-width: 767px) {

@@ -116,9 +116,25 @@ Three redundant mechanisms prevent accidental indexing:
   - Staging: `User-agent: *` / `Disallow: /`
   - Production: normal allow rules.
 
-### 3.4 Cron Trigger (safety net)
+### 3.4 Scheduled rebuild
 
-One scheduled trigger on the production Worker, daily at 03:00 UTC, dispatches a rebuild. Only there to catch missed webhooks from product repos.
+A GitHub Actions scheduled workflow (`.github/workflows/rebuild-nightly.yml`)
+runs daily at 03:00 UTC. Re-runs the production deploy to pick up any
+missed release webhooks from product repos and any other content drift.
+
+**Cloudflare Worker Cron was considered but rejected.** That path would
+have required:
+
+- Expanding the Worker from assets-only to a code-running Worker (against
+  the static-assets-only posture per D2 / D18).
+- A new GitHub PAT secret stored as a Worker secret (additional secret
+  surface vs. the existing GH Actions PAT).
+- A new observability surface (Worker Cron logs vs. unified GH Actions
+  history).
+
+None of these were justified for a safety-net mechanism that runs once
+daily. GH Actions Cron achieves the same outcome with no Worker changes
+and no new secrets.
 
 ### 3.5 Implementation requirements
 
@@ -332,7 +348,7 @@ Both gates are enforced by the env-aware filter in `src/lib/products.ts` (`getVi
 
 **Schema refine.** `externalUrl` and `repo` are both optional on the schema, but a `.refine()` on the `products` collection schema requires at least one to be set. The detail template renders the primary CTA against `externalUrl` if present.
 
-**GitHub fallback CTA — opt-in via `showGithubLink: boolean`** (added in Phase C, G C.2.b fix-up). When `externalUrl` is not set, the detail template renders a ghost-button GitHub CTA only if `showGithubLink: true` is also set on the product entry AND `repo` is populated. Default behaviour (no `showGithubLink` field) is to render no fallback CTA. The opt-in default is intentionally conservative: it prevents broken CTAs that point at private or otherwise unreachable repositories. Set `showGithubLink: true` only when the repo is publicly accessible and you want it to be the product's surfaced public link until a dedicated marketing site lands. Phase D's release-loader work is expected to supersede this manual flag with auto-detection from the GitHub API (`GET /repos/{owner}/{repo}` returns `private: boolean`); the flag becomes either redundant or a force-show/force-hide override at that point.
+**GitHub fallback CTA — auto-detected from repo visibility (Phase D).** The detail page renders a GitHub CTA when the product's `repo` field is set AND the repo is publicly visible. The build-time loader makes one extra API call per product (`GET /repos/{owner}/{repo}`) to check visibility; the auto-detected value drives the CTA visibility. Manual override via `showGithubLink` field was retired in G D.4; if a future use case requires forcing the CTA off on a public repo, add a `hideGithubLink` override field then. Conservative defaults: visibility unknown (PAT unset) → suppressed; 404 (repo not found) → suppressed; 403 → build fails loudly (config error); private repo → suppressed; public repo → CTA renders.
 
 **Auto-generation:** the route file `src/pages/produkte/[slug].astro` (and its English mirror `src/pages/en/products/[slug].astro`) uses `getStaticPaths()` to emit one page per visible product entry matching the file's language. Adding a Markdown file is the only action needed to publish a new product page. No component changes. No config changes.
 
@@ -348,7 +364,7 @@ GET https://api.github.com/repos/{owner}/{repo}/releases
 
 Each release becomes an entry with: `productSlug`, `tagName`, `name`, `publishedAt`, `bodyMarkdown` (rendered with the same pipeline as local content), `isPrerelease`, `isDraft`, `htmlUrl`.
 
-Authentication: a fine-grained GitHub personal access token, `PRODUCT_REPOS_PAT`, stored as a Worker/Actions secret. Required scopes: `Contents: Read` and `Metadata: Read` on each product repo. See §10.1 for full setup procedure.
+Authentication: a fine-grained GitHub personal access token, `PRODUCT_REPOS_PAT`, stored as a GitHub Actions secret on the website repo (and locally in `.env` for development). Required scopes: `Contents: Read` and `Metadata: Read` on each product repo. See §10.1 for full setup procedure.
 
 Release notes are language-neutral (GitHub releases have one version each). They're rendered on both the DE and EN product pages.
 
@@ -557,7 +573,7 @@ All secrets live outside the repo. Never commit real values. The table below sum
 
 | Name | Where it lives | Purpose |
 |---|---|---|
-| `PRODUCT_REPOS_PAT` | Worker secret + GH Actions on `blackbrowedlabs.com` repo + local `.env` | Authenticated GitHub API calls for the releases loader (§7). Named `PRODUCT_REPOS_PAT` rather than `GITHUB_TOKEN` because the latter is reserved by GitHub Actions for the workflow's auto-generated token. |
+| `PRODUCT_REPOS_PAT` | GH Actions on `blackbrowedlabs.com` repo + local `.env` | Authenticated GitHub API calls for the releases loader and the visibility auto-detect (§7). Build-time only; not a Worker secret because the deploy is static-assets-only (no runtime Worker fetch). Named `PRODUCT_REPOS_PAT` rather than `GITHUB_TOKEN` because the latter is reserved by GitHub Actions for the workflow's auto-generated token. |
 | `CLOUDFLARE_API_TOKEN` | GH Actions on website repo + local `.env` | Used by `wrangler` for deployments when running from CI or locally. |
 | `WEBSITE_DISPATCH_TOKEN` | GH Actions on each product repo | Permits `repository_dispatch` to the website repo. Not required in v1 (no product repos yet). |
 | `TURNSTILE_SECRET_KEY` | Worker secret per env (set via `wrangler secret put`) | Authenticates the contact-form Worker's Turnstile siteverify call. One secret per env (staging + production); never enters the repo. The matching public site keys live in `wrangler.jsonc` `vars` per env — see "Worker runtime vars" below. |
@@ -580,17 +596,21 @@ Environment variables exposed at build time (not secrets):
 ```
 ┌─ Local machine ─────────────┐      ┌─ GitHub Actions ──────────┐      ┌─ Cloudflare Workers ──┐
 │  .env  (gitignored)         │      │  Repository secrets       │      │  wrangler secrets     │
-│                             │      │                           │      │                       │
-│  PRODUCT_REPOS_PAT      ────┼──┬──▶│  PRODUCT_REPOS_PAT    ────┼──┬──▶│  PRODUCT_REPOS_PAT    │
-│  CLOUDFLARE_API_TOKEN   ────┼──┤   │  CLOUDFLARE_API_TOKEN ────┼──┘   │  (set via `wrangler   │
-│                             │  │   │                           │      │   secret put`)        │
-└─────────────────────────────┘  │   └───────────────────────────┘      └───────────────────────┘
-                                 │
-                                 │        ┌─ Each product repo ──────┐
-                                 └───────▶│  WEBSITE_DISPATCH_TOKEN  │
-                                          │  (not needed in v1)      │
-                                          └──────────────────────────┘
+│                             │      │                           │      │  (contact Worker only)│
+│  PRODUCT_REPOS_PAT      ────┼─────▶│  PRODUCT_REPOS_PAT        │      │                       │
+│  CLOUDFLARE_API_TOKEN   ────┼─────▶│  CLOUDFLARE_API_TOKEN ────┼─────▶│  TURNSTILE_SECRET_KEY │
+│                             │      │                           │      │  (set via `wrangler   │
+└─────────────────────────────┘      └───────────────────────────┘      │   secret put`)        │
+                                           ▲                            └───────────────────────┘
+                                           │
+                                           │     ┌─ Each product repo ──────┐
+                                           └─────│  WEBSITE_DISPATCH_TOKEN  │
+                                                 │  (cross-repo dispatch    │
+                                                 │   back to website)       │
+                                                 └──────────────────────────┘
 ```
+
+`PRODUCT_REPOS_PAT` flows to GH Actions and local `.env` only. The deploy is static-assets-only; the build-time loader and visibility auto-detect run inside `astro build` on the GH Actions runner, and the resulting HTML is shipped as static assets. There is no runtime Worker fetch that would need the PAT, so it is not a Worker secret. (The contact Worker uses `TURNSTILE_SECRET_KEY` — that is the only `wrangler secret put` value in the deploy.)
 
 ### 10.1 `PRODUCT_REPOS_PAT` — fine-grained PAT for the releases loader
 
@@ -611,13 +631,16 @@ Environment variables exposed at build time (not secrets):
 
 **Where the token lives after generation:**
 
-- **Local `.env`** on your development machine (gitignored) for local `wrangler dev` sessions. Variable name: `PRODUCT_REPOS_PAT`.
-- **Cloudflare Worker secret:** `wrangler secret put PRODUCT_REPOS_PAT` under both the production and staging environments.
-- **GitHub Actions secret** on `blackbrowed-labs/blackbrowedlabs.com`: Settings → Secrets and variables → Actions → New repository secret. Name: `PRODUCT_REPOS_PAT`.
+- **Local `.env`** on your development machine (gitignored) for local `astro build` / `wrangler dev` sessions that exercise the releases loader. Variable name: `PRODUCT_REPOS_PAT`.
+- **GitHub Actions secret** on `blackbrowed-labs/blackbrowedlabs.com`: Settings → Secrets and variables → Actions → New repository secret. Name: `PRODUCT_REPOS_PAT`. The deploy workflow exposes it as a build-time env var to `astro build`.
+
+The PAT is **not** a Cloudflare Worker secret. The deploy posture is static-assets-only (the build runs on the GH Actions runner; the resulting `dist/` is served by Workers Static Assets via `env.ASSETS.fetch`). The releases loader and the visibility auto-detect both run at build time, so there is no runtime Worker code path that would need the PAT.
 
 **Why not name it `GITHUB_TOKEN`?** GitHub Actions auto-generates a secret called `GITHUB_TOKEN` for every workflow run — scoped to that run, with permissions for the current repo only. Using a custom PAT named `GITHUB_TOKEN` would shadow the auto-generated one and cause confusion. Naming the custom PAT `PRODUCT_REPOS_PAT` disambiguates and makes its purpose self-evident.
 
-**Rotation:** Before the token expires, generate a new one with the same permissions, update all three locations above, and revoke the old token.
+**Cross-repo dispatch PAT.** A separate per-product-repo PAT, `WEBSITE_DISPATCH_TOKEN`, is used by each product repo's `release.yml` workflow to dispatch back to this repo on release publication. Provisioning steps live in `docs/PRODUCT_REPO_CONVENTIONS.md` §5; only the website-side PAT (`PRODUCT_REPOS_PAT`) is documented here.
+
+**Rotation:** Before the token expires, generate a new one with the same permissions, update both locations above, and revoke the old token.
 
 ### 10.2 `CLOUDFLARE_API_TOKEN` — Worker deployment token
 

@@ -1,13 +1,22 @@
 {
-  "verifiedDate": "2026-04-28",
+  "_meta": {
+    "schema_version": 1,
+    "last_check_attempt": "2026-04-29T00:00:00Z",
+    "freshness_threshold_days": 30
+  },
   "dpf": {
     "status": "active",
-    "sourceUrl": "https://www.dataprivacyframework.gov/participant/5666",
-    "originalCertificationDate": "2016-11-09",
-    "nextCertificationDue": "2026-09-23"
+    "organization_name": "Cloudflare, Inc.",
+    "source_url": "https://www.dataprivacyframework.gov/list",
+    "verified_at": "2026-04-29T00:00:00Z",
+    "last_known_good_at": "2026-04-29T00:00:00Z"
   },
-  "cwa": {
-    "retentionAggregatesMonths": 6,
-    "sourceUrl": "https://developers.cloudflare.com/web-analytics/faq/"
+  "cwa_retention": {
+    "status": "active",
+    "raw_events_retention_months": null,
+    "aggregated_retention_months": 6,
+    "source_url": "https://developers.cloudflare.com/web-analytics/data-retention/",
+    "verified_at": "2026-04-29T00:00:00Z",
+    "last_known_good_at": "2026-04-29T00:00:00Z"
   }
 }

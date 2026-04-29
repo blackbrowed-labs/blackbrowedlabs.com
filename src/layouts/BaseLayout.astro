@@ -114,6 +114,12 @@ const showCwaBeacon = isProduction() && Boolean(cwaToken);
         data-cf-beacon={JSON.stringify({ token: cwaToken })}
       ></script>
     )}
+
+    {/* Page-level <head> extension point. Used by the privacy pages to
+        emit hidden ISO-date markers consumed by the verifier workflow's
+        post-deploy smoke step (mode #8 v1). Renders nothing when the
+        slot is empty. */}
+    <slot name="head" />
   </head>
   <body>
     <SkipLink label={t.skipLink} />

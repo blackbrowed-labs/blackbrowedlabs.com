@@ -17,6 +17,11 @@ concurrency:
   group: deploy-staging
   cancel-in-progress: false
 
+env:
+  # Force JS-based actions to run on Node 24 (forward-defense for Node 20 deprecation
+  # — GitHub: 2026-06-02 default flip, 2026-09-16 removal). Closes backlog #6.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   deploy:
     name: Deploy to dev.blackbrowedlabs.com
@@ -27,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -39,6 +44,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
         run: npm run build
 
       - name: Deploy to Cloudflare Workers (staging)

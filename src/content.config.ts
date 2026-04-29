@@ -68,6 +68,7 @@ const products = defineCollection({
     order: z.number().optional(),
     draft: z.boolean().optional(),
     releaseDate: z.coerce.date().optional(),
+    showGithubLink: z.boolean().optional(),
   }).refine(
     (data) => Boolean(data.externalUrl || data.repo),
     {

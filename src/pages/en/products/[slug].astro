@@ -24,6 +24,8 @@ const { Content } = await render(entry);
 const t = getUiStrings('en');
 
 const ctaIsExternal = Boolean(entry.data.externalUrl);
+const showGithubFallback = entry.data.showGithubLink === true && Boolean(entry.data.repo);
+const ctaVisible = ctaIsExternal || showGithubFallback;
 const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
 const ctaLabel = ctaIsExternal ? 'Visit website →' : 'View on GitHub →';
 const ctaClass = ctaIsExternal ? 'cta cta--primary' : 'cta cta--ghost';
@@ -50,9 +52,11 @@ const description = entry.data.tagline;
       <p class="product-detail__tagline">{entry.data.tagline}</p>
       <p class="product-detail__description">{entry.data.description}</p>
 
-      <a class={ctaClass} href={ctaHref} rel={ctaIsExternal ? 'noopener' : 'noopener external'}>
-        {ctaLabel}
-      </a>
+      {ctaVisible && (
+        <a class={ctaClass} href={ctaHref} rel={ctaIsExternal ? 'noopener' : 'noopener external'}>
+          {ctaLabel}
+        </a>
+      )}
 
       <div class="product-detail__body">
         <Content />

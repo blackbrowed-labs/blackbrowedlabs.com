@@ -45,6 +45,7 @@ jobs:
       - name: Build
         env:
           PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
         run: npm run build
 
       - name: Deploy to Cloudflare Workers (production)

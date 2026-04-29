@@ -44,6 +44,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
         run: npm run build
 
       - name: Deploy to Cloudflare Workers (staging)

@@ -1,13 +1,15 @@
 ---
 /**
  * Product detail page — EN. Mirror of src/pages/produkte/[slug].astro with
- * EN copy in eyebrow, breadcrumb, and CTA labels.
+ * EN copy in eyebrow, breadcrumb, and CTA labels. CTA visibility is
+ * auto-detected via `getProductVisibility` (Phase D, G D.4); see the DE
+ * sibling for full rationale.
  */
 
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getVisibleProducts } from '../../../lib/products';
+import { getVisibleProducts, getProductVisibility } from '../../../lib/products';
 import { getUiStrings } from '../../../i18n';
 
 export const getStaticPaths = (async () => {
@@ -23,8 +25,13 @@ const { Content } = await render(entry);
 
 const t = getUiStrings('en');
 
+const visibility = await getProductVisibility(entry.data.repo);
 const ctaIsExternal = Boolean(entry.data.externalUrl);
-const showGithubFallback = entry.data.showGithubLink === true && Boolean(entry.data.repo);
+const showGithubFallback =
+  visibility !== null
+  && !visibility.isPrivate
+  && !visibility.notFound
+  && Boolean(entry.data.repo);
 const ctaVisible = ctaIsExternal || showGithubFallback;
 const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
 const ctaLabel = ctaIsExternal ? 'Visit website →' : 'View on GitHub →';

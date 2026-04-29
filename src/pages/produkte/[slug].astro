@@ -11,14 +11,18 @@
  *   /produkte/thalura-plugin renders.
  *
  * CTA logic: prefer `externalUrl` (primary button); fall back to a GitHub
- * URL derived from `repo` (ghost button). Schema refine guarantees at least
- * one is set.
+ * URL derived from `repo` (ghost button) only when the repo is publicly
+ * visible. Visibility is auto-detected at build time via the GitHub API
+ * (`getProductVisibility` → `GET /repos/{owner}/{repo}`); this replaces
+ * the old manual `showGithubLink` opt-in flag (Phase D, G D.4). Schema
+ * refine guarantees `externalUrl` OR `repo` is set, so at least one CTA
+ * branch is eligible whenever the repo turns out to be public.
  */
 
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getVisibleProducts } from '../../lib/products';
+import { getVisibleProducts, getProductVisibility } from '../../lib/products';
 import { getUiStrings } from '../../i18n';
 
 export const getStaticPaths = (async () => {
@@ -34,8 +38,13 @@ const { Content } = await render(entry);
 
 const t = getUiStrings('de');
 
+const visibility = await getProductVisibility(entry.data.repo);
 const ctaIsExternal = Boolean(entry.data.externalUrl);
-const showGithubFallback = entry.data.showGithubLink === true && Boolean(entry.data.repo);
+const showGithubFallback =
+  visibility !== null
+  && !visibility.isPrivate
+  && !visibility.notFound
+  && Boolean(entry.data.repo);
 const ctaVisible = ctaIsExternal || showGithubFallback;
 const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
 const ctaLabel = ctaIsExternal ? 'Zur Produktwebsite →' : 'Auf GitHub ansehen →';

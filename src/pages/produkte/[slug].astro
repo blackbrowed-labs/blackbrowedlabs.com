@@ -1,0 +1,196 @@
+---
+/**
+ * Product detail page — DE. Minimal stub composition per spec §6.3:
+ * eyebrow + H1 + tagline + description + CTA. Version chip + release-history
+ * stack are deliberately not in this gate (Phase D's release-pipeline work
+ * introduces them with real release data).
+ *
+ * `getStaticPaths()` calls `getVisibleProducts('de')` so that:
+ * - On prod with no non-draft products: returns []. No detail pages built.
+ * - On dev with the Thalura plugin entry (G C.2.b): returns one entry.
+ *   /produkte/thalura-plugin renders.
+ *
+ * CTA logic: prefer `externalUrl` (primary button); fall back to a GitHub
+ * URL derived from `repo` (ghost button). Schema refine guarantees at least
+ * one is set.
+ */
+
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getVisibleProducts } from '../../lib/products';
+
+export const getStaticPaths = (async () => {
+  const products = await getVisibleProducts('de');
+  return products.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const ctaIsExternal = Boolean(entry.data.externalUrl);
+const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
+const ctaLabel = ctaIsExternal ? 'Zur Produktwebsite →' : 'Auf GitHub ansehen →';
+const ctaClass = ctaIsExternal ? 'cta cta--primary' : 'cta cta--ghost';
+
+const title = entry.data.name;
+const description = entry.data.tagline;
+---
+
+<BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="breadcrumb__inner">
+      <a href="/">Blackbrowed Labs</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="/produkte">Produkte</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="breadcrumb__current" aria-current="page">{entry.data.name}</span>
+    </div>
+  </nav>
+
+  <article class="product-detail">
+    <div class="product-detail__container">
+      <p class="product-detail__eyebrow">Produkt</p>
+      <h1 class="product-detail__name">{entry.data.name}</h1>
+      <p class="product-detail__tagline">{entry.data.tagline}</p>
+      <p class="product-detail__description">{entry.data.description}</p>
+
+      <a class={ctaClass} href={ctaHref} rel={ctaIsExternal ? undefined : 'noopener external'}>
+        {ctaLabel}
+      </a>
+
+      <div class="product-detail__body">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .breadcrumb__inner {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    border-bottom: 1px solid transparent;
+  }
+  .breadcrumb a:hover {
+    color: var(--color-link-hover);
+    border-bottom-color: currentColor;
+  }
+  .breadcrumb__sep { color: var(--color-border); }
+  .breadcrumb__current {
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .product-detail {
+    background: var(--color-bg);
+  }
+  .product-detail__container {
+    max-width: var(--max-width-site);
+    margin: 0 auto;
+    padding: 6rem 3rem 6rem;
+    max-width: 70ch;
+  }
+  .product-detail__eyebrow {
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bbl-primary);
+    margin: 0 0 1rem;
+  }
+  .product-detail__name {
+    margin: 0 0 1rem;
+  }
+  .product-detail__tagline {
+    font-size: var(--text-lead);
+    line-height: 1.5;
+    color: var(--color-text);
+    margin: 0 0 1.5rem;
+    font-style: italic;
+    max-width: 60ch;
+  }
+  .product-detail__description {
+    font-size: var(--text-body);
+    line-height: 1.65;
+    color: var(--color-text);
+    margin: 0 0 2.5rem;
+    max-width: 70ch;
+  }
+
+  .cta {
+    display: inline-block;
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-bbl-2, 0.375rem);
+    border: 1px solid currentColor;
+    transition:
+      background var(--duration-bbl-fast) var(--ease-bbl),
+      color var(--duration-bbl-fast) var(--ease-bbl);
+  }
+  .cta--primary {
+    background: var(--bbl-primary);
+    color: white;
+    border-color: var(--bbl-primary);
+  }
+  .cta--primary:hover {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+  }
+  .cta--ghost {
+    background: transparent;
+    color: var(--color-link);
+    border-color: var(--color-link);
+  }
+  .cta--ghost:hover {
+    background: var(--color-bg-card);
+    color: var(--color-link-hover);
+    border-color: var(--color-link-hover);
+  }
+
+  .product-detail__body {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: var(--text-body);
+    line-height: 1.65;
+  }
+
+  @media (max-width: 767px) {
+    .breadcrumb__inner {
+      padding: 0.875rem 1.25rem;
+    }
+    .product-detail__container {
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .product-detail__name {
+      font-size: 2.25rem;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+    }
+    .product-detail__tagline,
+    .product-detail__description {
+      max-width: none;
+    }
+  }
+</style>

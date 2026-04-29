@@ -323,7 +323,16 @@ Frontmatter:
 
 The body of the Markdown file is the long-form description rendered under the product header.
 
-**Auto-generation:** the route file `src/pages/produkte/[slug].astro` (and its English mirror `src/pages/en/products/[slug].astro`) uses `getStaticPaths()` to emit one page per `products` entry matching the file's language. Adding a Markdown file is the only action needed to publish a new product page. No component changes. No config changes.
+**Visibility gates** (added in Phase C, G C.2.a). Two complementary fields modulate when a product surfaces:
+
+- `draft: boolean` (optional) — when `true`, the product is hidden on production. Use for in-progress entries the operator wants to test on dev before public release.
+- `releaseDate: Date` (optional, ISO-8601 string at file authoring time, coerced to `Date` by Zod) — when set to a future date, the product is hidden on production until the next build runs after that date. Once Phase D.3 ships the nightly cron, scheduled publishing fires automatically within ~24h of the release date.
+
+Both gates are enforced by the env-aware filter in `src/lib/products.ts` (`getVisibleProducts(lang)`), which is called by the index pages and the detail-template `getStaticPaths()`. On dev / staging the filter returns all products regardless of `draft` or `releaseDate` — the operator sees in-progress and scheduled entries on `dev.blackbrowedlabs.com` for visual verification.
+
+**Schema refine.** `externalUrl` and `repo` are both optional on the schema, but a `.refine()` on the `products` collection schema requires at least one to be set. The detail template renders the primary CTA against `externalUrl` if present; otherwise it falls back to a GitHub-derived URL built from `repo` styled as a ghost button. This accommodates products at varying levels of marketing maturity — GitHub-only at the start, dedicated site once available.
+
+**Auto-generation:** the route file `src/pages/produkte/[slug].astro` (and its English mirror `src/pages/en/products/[slug].astro`) uses `getStaticPaths()` to emit one page per visible product entry matching the file's language. Adding a Markdown file is the only action needed to publish a new product page. No component changes. No config changes.
 
 **Collection is empty in v1.** When the collection is empty, the Products index renders a "coming soon" empty state (copy in `BASELINE_COPY.md` §5).
 

@@ -62,12 +62,19 @@ const products = defineCollection({
     lang: z.enum(['de', 'en']),
     tagline: z.string(),
     description: z.string(),
-    externalUrl: z.url(),
-    repo: z.string(),
+    externalUrl: z.url().optional(),
+    repo: z.string().optional(),
     logo: z.string().optional(),
     order: z.number().optional(),
     draft: z.boolean().optional(),
-  }),
+    releaseDate: z.coerce.date().optional(),
+  }).refine(
+    (data) => Boolean(data.externalUrl || data.repo),
+    {
+      message: 'Either externalUrl or repo must be set on a product',
+      path: ['externalUrl'],
+    },
+  ),
 });
 
 // Stub loader — returns no entries. Phase D replaces with a real GitHub-API

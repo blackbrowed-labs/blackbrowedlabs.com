@@ -1,0 +1,52 @@
+name: rebuild-on-dispatch
+
+# Triggered by product repos publishing a new release. The product repo's
+# release.yml workflow dispatches `product-release-published` here, which
+# rebuilds and re-deploys the website to pick up the new release data.
+
+on:
+  repository_dispatch:
+    types: [product-release-published]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    name: Rebuild and deploy production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log dispatch payload
+        run: |
+          echo "Dispatched by product: ${{ github.event.client_payload.productSlug }}"
+          echo "Tag: ${{ github.event.client_payload.tagName }}"
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        env:
+          PUBLIC_ENVIRONMENT: production
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
+          PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
+        run: npm run build
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env production

@@ -70,6 +70,9 @@ export function getEffectiveVerifiedDate(facts: CloudflareFacts): string {
  * formatting — the verifier writes datetimes; the legal pages display dates.
  */
 export function formatVerifiedDate(isoDate: string, locale: 'de' | 'en'): string {
+  if (!isoDate || typeof isoDate !== 'string') {
+    throw new Error(`formatVerifiedDate: invalid input ${JSON.stringify(isoDate)}`);
+  }
   const datePortion = isoDate.slice(0, 10);
   const [year, month, day] = datePortion.split('-').map(Number);
   return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-US', {

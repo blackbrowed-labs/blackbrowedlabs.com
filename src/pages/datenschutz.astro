@@ -21,6 +21,13 @@ const description =
 const standDate = 'April 2026';
 const cwaMonths = cloudflareFacts.cwa_retention.aggregated_retention_months;
 const verifiedHuman = formatVerifiedDate(getEffectiveVerifiedDate(cloudflareFacts), 'de');
+// ISO-date markers for the verifier workflow's post-deploy smoke step
+// (mode #8 v1). Locale-independent; invisible to users; greppable from
+// the deployed HTML. Format: YYYY-MM-DD. See
+// .github/workflows/verify-cloudflare-facts.yml ("Post-deploy smoke").
+const verifiedAtEffective = getEffectiveVerifiedDate(cloudflareFacts).slice(0, 10);
+const verifiedAtDpf = cloudflareFacts.dpf.verified_at.slice(0, 10);
+const verifiedAtCwa = cloudflareFacts.cwa_retention.verified_at.slice(0, 10);
 
 const tocItems = [
   { num: '1', label: 'Verantwortlicher' },
@@ -38,6 +45,12 @@ const tocItems = [
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
+  <Fragment slot="head">
+    <meta name="bbl-verified-at" content={verifiedAtEffective} />
+    <meta name="bbl-verified-at-dpf" content={verifiedAtDpf} />
+    <meta name="bbl-verified-at-cwa" content={verifiedAtCwa} />
+  </Fragment>
+
   <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
       <a href="/">Blackbrowed Labs</a>

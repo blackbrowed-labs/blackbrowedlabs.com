@@ -2,28 +2,50 @@
 /**
  * Verifier orchestrator. Runs every registered check, aggregates the
  * results, persists them into src/data/cloudflare-facts.json, and
- * decides whether the workflow should open an auto-PR (all-ok) or an
- * Issue (any non-ok status).
+ * surfaces two flags (`has_diff`, `has_attention`) so the workflow can
+ * decide whether to open an auto-PR, an Issue, or both.
  *
  * Source-of-truth: plans/active/pass-2/g-d-2/spec.md (full design) +
  * plans/active/pass-2/g-d/plan.md Task 7 step 8.
  *
  * Usage:
  *   node scripts/run-verifier.mjs                 # production: writes JSON
- *   node scripts/run-verifier.mjs --dry-run       # no writes, no exit-1 on non-ok
+ *   node scripts/run-verifier.mjs --dry-run       # no writes; logs would-be flags
  *   MOCK_SCENARIO=dpf-absent node scripts/run-verifier.mjs --dry-run
  *
  * Exit codes:
- *   0 — all checks 'ok' (or any outcome in --dry-run mode).
- *   1 — at least one check returned non-ok status (workflow opens Issue).
- *   2 — orchestrator threw (config error / unhandled exception).
+ *   0 — JSON write (or skipped write in --dry-run) succeeded; per-fact
+ *       outcomes are surfaced via has_diff / has_attention flags rather
+ *       than via exit code, so mode #6 (status='changed') can drive both
+ *       a PR (has_diff) AND an Issue (has_attention) on the same run.
+ *   2 — orchestrator threw (config error / validation failure / I/O error).
+ *
+ * GITHUB_OUTPUT flags (only when GITHUB_OUTPUT is set):
+ *   has_diff       — true if `git diff --quiet src/data/cloudflare-facts.json`
+ *                    would be non-empty (any value or timestamp field changed).
+ *                    Drives the auto-PR step.
+ *   has_attention  — true if any check returned a non-ok status (changed,
+ *                    parser-broken, unreachable, absent). Drives the Issue
+ *                    step. Both flags can be true on the same run (mode #6).
  *
  * ⚠ Status-enum rename (per spec §6.2): CheckResult `'ok'` → JSON
  * `'active'` when persisted. The privacy-page banner logic depends on
  * the JSON enum being `'active'` for the green-path state.
+ *
+ * ⚠ Per-fact field-update semantics (per spec §1.3 + §2.6 / §3.6 / §4.6):
+ *   - status === 'ok'      : advance verified_at AND last_known_good_at;
+ *                            update value fields to current observed.
+ *   - status === 'changed' : advance verified_at + value fields (so the
+ *                            companion auto-PR ships the new value);
+ *                            leave last_known_good_at pinned (the "good"
+ *                            value is still the previous one until Lars
+ *                            approves the change in BASELINE_COPY).
+ *   - other failures       : leave verified_at, last_known_good_at, and
+ *                            value fields all pinned (we did not
+ *                            successfully verify anything new).
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import * as dpf from './checks/dpf.mjs';
@@ -135,19 +157,26 @@ async function main() {
   const nowIso = new Date().toISOString();
   data._meta.last_check_attempt = nowIso;
 
-  // Per-fact updates. Status enum rename: 'ok' (CheckResult) → 'active'
-  // (JSON). On 'ok', also bump verified_at + last_known_good_at and
-  // refresh value fields. On non-ok, status is persisted as-is and the
-  // verified_at / last_known_good_at fields are LEFT UNTOUCHED — so
-  // consumers (privacy pages) keep showing the last successful date
-  // until a fresh run lands.
+  // Per-fact updates per spec §1.3 + §2.6 / §3.6 / §4.6. Status enum
+  // rename: 'ok' (CheckResult) → 'active' (JSON).
+  //
+  // - 'ok':      advance verified_at + last_known_good_at; refresh value fields.
+  // - 'changed': advance verified_at + value fields (so the auto-PR ships
+  //              the new value to Lars); leave last_known_good_at pinned.
+  // - other:     leave verified_at, last_known_good_at, and value fields
+  //              alone — we did not successfully verify anything new.
+  //              Only `status` is persisted, so consumers (privacy pages)
+  //              keep showing the last successful date alongside the new
+  //              status enum and can render their warning banner.
   for (const { factKey } of CHECKS) {
     const r = results[factKey];
     data[factKey].status = r.status === 'ok' ? 'active' : r.status;
 
-    if (r.status === 'ok') {
+    if (r.status === 'ok' || r.status === 'changed') {
       data[factKey].verified_at = r.checked_at;
-      data[factKey].last_known_good_at = r.checked_at;
+      if (r.status === 'ok') {
+        data[factKey].last_known_good_at = r.checked_at;
+      }
 
       if (factKey === 'dpf' && typeof r.value === 'string') {
         data[factKey].organization_name = r.value;
@@ -161,29 +190,68 @@ async function main() {
 
   validateCloudflareFacts(data);
 
-  const allOk = Object.values(results).every((r) => r.status === 'ok');
+  // has_attention: any non-ok per-fact status (changed, parser-broken,
+  // unreachable, absent) — drives the workflow's Issue step.
+  // has_diff: the JSON we are about to write differs from the previous
+  // on-disk content — drives the workflow's auto-PR step. Both flags can
+  // be true on the same run (mode #6: changed value AND alert-worthy).
+  const hasAttention = Object.values(results).some((r) => r.status !== 'ok');
+  const previousJson = await readFile(DATA_PATH, 'utf8');
+  const nextJson = JSON.stringify(data, null, 2) + '\n';
+  const hasDiff = previousJson !== nextJson;
+
+  // Emit GH outputs only on real (non-dry-run) execution. Dry-run is the
+  // synthetic / dispatch path; the workflow explicitly pins flags to
+  // false in that branch so live PR / Issue steps stay quiet.
+  if (!DRY_RUN) {
+    await emitGithubOutput('has_diff', hasDiff);
+    await emitGithubOutput('has_attention', hasAttention);
+  }
+
+  console.log(
+    `[verifier:orchestrator] summary: has_diff=${hasDiff} has_attention=${hasAttention}`,
+  );
 
   if (DRY_RUN) {
     console.log('\n[verifier:orchestrator] [DRY-RUN] would write src/data/cloudflare-facts.json:');
-    console.log(JSON.stringify(data, null, 2));
+    console.log(nextJson);
+    const wouldDo = [];
+    if (hasDiff) wouldDo.push('open auto-PR');
+    if (hasAttention) wouldDo.push('open verifier-alert Issue');
     console.log(
-      `\n[verifier:orchestrator] [DRY-RUN] would ${allOk ? 'open auto-PR (or no-op if no diff)' : 'open verifier-alert Issue'}`,
+      `\n[verifier:orchestrator] [DRY-RUN] would ${wouldDo.length ? wouldDo.join(' AND ') : 'do nothing (no diff, no attention)'}`,
     );
     return; // exit 0
   }
 
-  await writeFile(DATA_PATH, JSON.stringify(data, null, 2) + '\n');
+  await writeFile(DATA_PATH, nextJson);
   console.log(
     `[verifier:orchestrator] wrote ${DATA_PATH} (${Object.keys(results).length} fact(s) updated)`,
   );
 
-  if (!allOk) {
+  if (hasAttention) {
     console.error(
       '[verifier:orchestrator] at least one check returned non-ok status; workflow will open an Issue',
     );
-    process.exit(1);
   }
-  console.log('[verifier:orchestrator] all checks ok');
+  if (hasDiff) {
+    console.log(
+      '[verifier:orchestrator] JSON content changed; workflow will open an auto-PR',
+    );
+  }
+  if (!hasAttention && !hasDiff) {
+    console.log('[verifier:orchestrator] all checks ok and no diff — nothing further to do');
+  }
+}
+
+/**
+ * Append a single key=value line to $GITHUB_OUTPUT so the workflow can
+ * gate steps off it. No-op when GITHUB_OUTPUT is not set (local runs).
+ */
+async function emitGithubOutput(key, value) {
+  const outPath = process.env.GITHUB_OUTPUT;
+  if (!outPath) return;
+  await appendFile(outPath, `${key}=${value ? 'true' : 'false'}\n`);
 }
 
 main().catch((err) => {

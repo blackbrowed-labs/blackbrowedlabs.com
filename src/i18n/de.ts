@@ -15,6 +15,10 @@ export const de = {
     ariaLabel: 'Blackbrowed Labs — zur Startseite',
   },
 
+  breadcrumb: {
+    ariaLabel: 'Brotkrümelnavigation',
+  },
+
   nav: {
     ariaLabel: 'Hauptnavigation',
     about: 'Über',

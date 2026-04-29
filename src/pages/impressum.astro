@@ -7,6 +7,9 @@
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getUiStrings } from '../i18n';
+
+const t = getUiStrings('de');
 
 const title = 'Impressum';
 const description =
@@ -14,7 +17,7 @@ const description =
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
-  <nav class="breadcrumb" aria-label="Breadcrumb">
+  <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
       <a href="/">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>

@@ -14,6 +14,10 @@ export const en: UiStrings = {
     ariaLabel: 'Blackbrowed Labs — back to home',
   },
 
+  breadcrumb: {
+    ariaLabel: 'Breadcrumb',
+  },
+
   nav: {
     ariaLabel: 'Main navigation',
     about: 'About',

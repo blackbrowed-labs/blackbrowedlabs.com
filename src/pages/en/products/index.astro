@@ -18,7 +18,7 @@ const description =
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
-  <nav class="breadcrumb" aria-label="Breadcrumb">
+  <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
       <a href="/en">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>
@@ -212,6 +212,10 @@ const description =
     font-weight: var(--font-weight-medium);
     text-decoration: none;
     border-bottom: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-block: 0.5rem;
   }
   .products-index__more:hover {
     color: var(--color-link-hover);
@@ -230,7 +234,7 @@ const description =
     z-index: 1;
     display: block;
   }
-  :global([data-theme="dark"]) .products-index__atmos { opacity: 0.14; }
+  :root[data-theme="dark"] .products-index__atmos { opacity: 0.14; }
 
   @media (max-width: 767px) {
     .breadcrumb__inner {
@@ -262,6 +266,6 @@ const description =
       height: 170px;
       opacity: 0.06;
     }
-    :global([data-theme="dark"]) .products-index__atmos { opacity: 0.12; }
+    :root[data-theme="dark"] .products-index__atmos { opacity: 0.12; }
   }
 </style>

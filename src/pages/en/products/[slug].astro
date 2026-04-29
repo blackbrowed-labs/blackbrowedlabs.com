@@ -8,6 +8,7 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getVisibleProducts } from '../../../lib/products';
+import { getUiStrings } from '../../../i18n';
 
 export const getStaticPaths = (async () => {
   const products = await getVisibleProducts('en');
@@ -20,6 +21,8 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
+const t = getUiStrings('en');
+
 const ctaIsExternal = Boolean(entry.data.externalUrl);
 const ctaHref = entry.data.externalUrl ?? `https://github.com/${entry.data.repo}`;
 const ctaLabel = ctaIsExternal ? 'Visit website →' : 'View on GitHub →';
@@ -30,7 +33,7 @@ const description = entry.data.tagline;
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
-  <nav class="breadcrumb" aria-label="Breadcrumb">
+  <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
       <a href="/en">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>

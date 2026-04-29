@@ -10,6 +10,7 @@
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactForm from '../components/forms/ContactForm.astro';
+import { getUiStrings } from '../i18n';
 
 const entry = await getEntry('editorial', 'contact.de');
 if (!entry) throw new Error('Missing editorial entry: contact.de');
@@ -18,10 +19,12 @@ const { title, description } = entry.data;
 if (!title || !description) {
   throw new Error('contact.de editorial entry missing required fields');
 }
+
+const t = getUiStrings('de');
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
-  <nav class="breadcrumb" aria-label="Breadcrumb">
+  <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
       <a href="/">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>

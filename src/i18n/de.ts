@@ -37,6 +37,13 @@ export const de = {
     system: 'System',
   },
 
+  productsIndex: {
+    breadcrumb: 'Produkte',
+    h1: 'Produkte',
+    populatedArrowLabel: 'Mehr erfahren →',
+    arcAriaLabel: 'Der Blackbrowed-Labs-Bogen',
+  },
+
   footer: {
     copyright: '© 2026 Blackbrowed Labs. Lars Weiser, Reinbek.',
     about: 'Über',

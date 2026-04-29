@@ -32,7 +32,7 @@ Blackbrowed Labs builds tools for classroom management. Two areas are in active 
 - An **iPadOS app** for classroom management (grades, student work, observations, without paperwork). Will launch as the first product on its own domain with an independent website and design system.
 - A **Claude Cowork plugin** that helps teachers plan units and lessons.
 
-**Product names are deliberately not referenced on this website** until each product formally launches. The website blackbrowedlabs.com acts as the **studio's home page**, not as marketing surface for individual products. When products launch, they get a **minimal presence** here: name, short description, current version, recent release notes (auto-pulled from GitHub), and a prominent link to the product's own site. The marketing depth lives on each product's own website.
+Product names are deliberately not surfaced on the production website until each product formally launches. Dev may carry named product entries marked `draft: true` (or with a future `releaseDate`) for in-progress visual verification; these are filtered out of the production build. The website blackbrowedlabs.com acts as the studio's home page, not as marketing surface for individual products. When products launch, they get a **minimal presence** here: name, short description, current version, recent release notes (auto-pulled from GitHub), and a prominent link to the product's own site. The marketing depth lives on each product's own website.
 
 ### 1.3 Editorial profile
 
@@ -699,7 +699,7 @@ All fonts, images, and scripts served from the Worker (same origin). No `fonts.g
    11. `wrangler.jsonc` with named environments and Custom Domain bindings.
 3. **Use the `frontend-design` skill** whenever writing UI components.
 4. **Do not invent** company copy, product names, Impressum details, or Datenschutz text. Use exactly what's in `BASELINE_COPY.md`.
-5. **Do not reference specific product names** (such as product working titles you may learn from other sources) in any generated copy. The website does not name products until they launch.
+5. Do not reference specific product names in editorial copy or page templates. Per-product Markdown files under `src/content/products/` carry the product's name and surface on production only when `draft: false` and any `releaseDate` is in the past (see §1.2 + §5.2).
 6. **Do not install a CMS.** v1 is Git-only editing.
 7. **Do not swap the palette or typography.** If the design bundle from Claude Design contradicts the brief, stop and surface the conflict.
 8. **Do not imply Lars is a teacher** in any generated copy. He's a developer who builds for teachers.

@@ -255,7 +255,7 @@ Do not: add a container, tilt, outline, gradient, color-fill with anything outsi
 
 - **First person singular, never plural.** "We" implies a team; this is one person. "I" on authored content; brand name everywhere else.
 - **Lars is not a teacher.** Copy should position him as a developer who builds for teachers, based on listening to them. Do not fabricate classroom experience. The honest framing is more distinctive than the faked one.
-- **No product names** until products launch. Reference them by area of focus, not by name.
+- No product names in the production website's editorial copy until products formally launch. (Dev may carry drafted/scheduled named entries for in-progress verification.) Reference products by area of focus in editorial text.
 - **German copy:** clear Hochdeutsch, no buzzwords, no Anglizismen unless the English term is genuinely the term of art (e.g., "Release Notes" is acceptable; "Solution Provider" is not).
 - **English copy:** plain English. Short sentences. British or American are both fine; be consistent per page.
 - **Never call teachers "users."** Call them "teachers" or "Lehrkräfte" or address them directly.

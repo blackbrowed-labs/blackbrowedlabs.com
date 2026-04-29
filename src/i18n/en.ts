@@ -36,6 +36,13 @@ export const en: UiStrings = {
     system: 'System',
   },
 
+  productsIndex: {
+    breadcrumb: 'Products',
+    h1: 'Products',
+    populatedArrowLabel: 'Learn more →',
+    arcAriaLabel: 'The Blackbrowed Labs arc',
+  },
+
   footer: {
     copyright: '© 2026 Blackbrowed Labs. Lars Weiser, Reinbek.',
     about: 'About',

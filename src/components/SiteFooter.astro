@@ -14,6 +14,7 @@ const path = Astro.url.pathname;
 const locale = getLocaleFromPath(path);
 const t = getUiStrings(locale).footer;
 
+const productsHref = locale === 'de' ? '/produkte' : '/en/products';
 const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
 const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
 const legalHref = locale === 'de' ? '/impressum' : '/en/legal';
@@ -28,6 +29,7 @@ const privacyHref = locale === 'de' ? '/datenschutz' : '/en/privacy';
 
     <nav class="site-footer__nav" aria-label={t.navAriaLabel}>
       <ul>
+        <li><a href={productsHref}>{t.products}</a></li>
         <li><a href={aboutHref}>{t.about}</a></li>
         <li><a href={contactHref}>{t.contact}</a></li>
         <li><a href={legalHref}>{t.legal}</a></li>

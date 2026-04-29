@@ -58,7 +58,7 @@ const description = entry.data.tagline;
       <p class="product-detail__tagline">{entry.data.tagline}</p>
       <p class="product-detail__description">{entry.data.description}</p>
 
-      <a class={ctaClass} href={ctaHref} rel={ctaIsExternal ? undefined : 'noopener external'}>
+      <a class={ctaClass} href={ctaHref} rel={ctaIsExternal ? 'noopener' : 'noopener external'}>
         {ctaLabel}
       </a>
 
@@ -104,7 +104,6 @@ const description = entry.data.tagline;
     background: var(--color-bg);
   }
   .product-detail__container {
-    max-width: var(--max-width-site);
     margin: 0 auto;
     padding: 6rem 3rem 6rem;
     max-width: 70ch;
@@ -149,12 +148,12 @@ const description = entry.data.tagline;
   }
   .cta--primary {
     background: var(--bbl-primary);
-    color: white;
+    color: var(--color-cta-text);
     border-color: var(--bbl-primary);
   }
   .cta--primary:hover {
-    background: var(--color-primary-hover);
-    border-color: var(--color-primary-hover);
+    background: var(--color-bbl-primary-hover);
+    border-color: var(--color-bbl-primary-hover);
   }
   .cta--ghost {
     background: transparent;
@@ -162,7 +161,7 @@ const description = entry.data.tagline;
     border-color: var(--color-link);
   }
   .cta--ghost:hover {
-    background: var(--color-bg-card);
+    background: var(--color-surface-card);
     color: var(--color-link-hover);
     border-color: var(--color-link-hover);
   }

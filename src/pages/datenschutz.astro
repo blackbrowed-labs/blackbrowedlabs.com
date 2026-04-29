@@ -11,7 +11,8 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getUiStrings } from '../i18n';
-import { cloudflareFacts, formatVerifiedDate, getEffectiveVerifiedDate } from '../lib/cloudflare-facts';
+import { cloudflareFacts, getEffectiveVerifiedDate } from '../lib/cloudflare-facts';
+import { formatLocaleDate } from '../lib/date';
 
 const t = getUiStrings('de');
 
@@ -20,7 +21,7 @@ const description =
   'Datenschutzerklärung von Blackbrowed Labs. Hosting Cloudflare, E-Mail IONOS, cookielose Cloudflare Web Analytics, Cloudflare Turnstile am Kontaktformular.';
 const standDate = 'April 2026';
 const cwaMonths = cloudflareFacts.cwa_retention.aggregated_retention_months;
-const verifiedHuman = formatVerifiedDate(getEffectiveVerifiedDate(cloudflareFacts), 'de');
+const verifiedHuman = formatLocaleDate(getEffectiveVerifiedDate(cloudflareFacts), 'de');
 // ISO-date markers for the verifier workflow's post-deploy smoke step
 // (mode #8 v1). Locale-independent; invisible to users; greppable from
 // the deployed HTML. Format: YYYY-MM-DD. See

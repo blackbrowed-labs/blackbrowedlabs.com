@@ -19,6 +19,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'zod';
 import { fetchReleases, type ReleaseEntry } from './lib/github-api';
+import { isProduction } from './lib/env';
 
 // Minimal ambient typing for the Node APIs the releases loader uses at
 // build time. `@types/node` is intentionally not a project dependency
@@ -150,9 +151,12 @@ const releases = defineCollection({
           // Dedupe per slug: only DE entries drive a fetch (slug/lang/repo
           // are identical across DE/EN siblings).
           if (!slugMatch || !repoMatch || langMatch?.[1] !== 'de') return null;
-          // Skip drafts: no point fetching releases for products that
-          // won't render on prod and don't need release data on dev either.
-          if (draftMatch?.[1] === 'true') return null;
+          // Skip drafts only in production: drafts are excluded from prod
+          // pages anyway (see `getVisibleProducts` in src/lib/products.ts),
+          // so fetching their releases would be wasted work. On dev/staging
+          // drafts DO render — and their populated-state UI needs releases
+          // to be verifiable end-to-end against the fake-fixture repo.
+          if (isProduction() && draftMatch?.[1] === 'true') return null;
           return { slug: slugMatch[1], repo: repoMatch[1] };
         }),
     );

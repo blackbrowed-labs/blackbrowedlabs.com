@@ -48,6 +48,13 @@ export const de = {
     arcAriaLabel: 'Der Blackbrowed-Labs-Bogen',
   },
 
+  productDetail: {
+    preReleaseBadge: 'Pre-Release',
+    releaseHistory: {
+      heading: 'Versionsverlauf',
+    },
+  },
+
   footer: {
     copyright: '© 2026 Blackbrowed Labs. Lars Weiser, Reinbek.',
     about: 'Über',

@@ -60,24 +60,6 @@ export function getEffectiveVerifiedDate(facts: CloudflareFacts): string {
   return a < b ? a : b;
 }
 
-/**
- * Format an ISO 8601 date or datetime as a long-form locale-specific
- * string for legal-prose rendering. German uses "28. April 2026"; English
- * uses "April 28, 2026". Run at build time only.
- *
- * Accepts either a bare date (YYYY-MM-DD) or a full ISO datetime
- * (YYYY-MM-DDTHH:MM:SSZ). Internally truncates to the date portion before
- * formatting — the verifier writes datetimes; the legal pages display dates.
- */
-export function formatVerifiedDate(isoDate: string, locale: 'de' | 'en'): string {
-  if (!isoDate || typeof isoDate !== 'string') {
-    throw new Error(`formatVerifiedDate: invalid input ${JSON.stringify(isoDate)}`);
-  }
-  const datePortion = isoDate.slice(0, 10);
-  const [year, month, day] = datePortion.split('-').map(Number);
-  return new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
+// `formatVerifiedDate` removed in G D.9: locale-formatting is now a single
+// shared helper at `src/lib/date.ts` (`formatLocaleDate`). The privacy
+// pages and the product detail templates both import it directly.

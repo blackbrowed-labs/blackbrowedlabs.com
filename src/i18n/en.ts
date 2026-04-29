@@ -47,6 +47,13 @@ export const en: UiStrings = {
     arcAriaLabel: 'The Blackbrowed Labs arc',
   },
 
+  productDetail: {
+    preReleaseBadge: 'pre-release',
+    releaseHistory: {
+      heading: 'Release history',
+    },
+  },
+
   footer: {
     copyright: '© 2026 Blackbrowed Labs. Lars Weiser, Reinbek.',
     about: 'About',

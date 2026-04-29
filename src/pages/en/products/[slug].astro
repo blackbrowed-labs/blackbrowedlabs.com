@@ -1,16 +1,18 @@
 ---
 /**
  * Product detail page — EN. Mirror of src/pages/produkte/[slug].astro with
- * EN copy in eyebrow, breadcrumb, and CTA labels. CTA visibility is
- * auto-detected via `getProductVisibility` (Phase D, G D.4); see the DE
- * sibling for full rationale.
+ * EN copy in eyebrow, breadcrumb, CTA labels, and aria-labels. CTA
+ * visibility auto-detect, release-history rendering rationale, and
+ * scoped-style duplication are all documented in the DE sibling.
  */
 
 import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getVisibleProducts, getProductVisibility } from '../../../lib/products';
 import { getUiStrings } from '../../../i18n';
+import { formatLocaleDate } from '../../../lib/date';
 
 export const getStaticPaths = (async () => {
   const products = await getVisibleProducts('en');
@@ -39,6 +41,24 @@ const ctaClass = ctaIsExternal ? 'cta cta--primary' : 'cta cta--ghost';
 
 const title = entry.data.name;
 const description = entry.data.tagline;
+
+// Release-history data — newest first.
+const productReleases = (await getCollection('releases'))
+  .filter((r) => r.data.productSlug === entry.data.slug)
+  .sort((a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt));
+
+const latestRelease = productReleases[0];
+const hasReleases = productReleases.length > 0;
+
+// Pre-render every release body once so the template stays synchronous.
+const markdownProcessor = await createMarkdownProcessor();
+const renderedReleaseBodies: string[] = await Promise.all(
+  productReleases.map(async (r) =>
+    r.data.bodyMarkdown.trim().length > 0
+      ? (await markdownProcessor.render(r.data.bodyMarkdown)).code
+      : '',
+  ),
+);
 ---
 
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
@@ -56,6 +76,16 @@ const description = entry.data.tagline;
     <div class="product-detail__container">
       <p class="product-detail__eyebrow">Product</p>
       <h1 class="product-detail__name">{entry.data.name}</h1>
+
+      {hasReleases && latestRelease && (
+        <div class="version-chip-row" aria-label="Current version">
+          <span class="version-chip">{latestRelease.data.tagName}</span>
+          {latestRelease.data.isPrerelease && (
+            <span class="version-chip version-chip--pre-release">{t.productDetail.preReleaseBadge}</span>
+          )}
+        </div>
+      )}
+
       <p class="product-detail__tagline">{entry.data.tagline}</p>
       <p class="product-detail__description">{entry.data.description}</p>
 
@@ -68,6 +98,29 @@ const description = entry.data.tagline;
       <div class="product-detail__body">
         <Content />
       </div>
+
+      {hasReleases && (
+        <section class="release-history" aria-labelledby="release-history-heading">
+          <h2 id="release-history-heading" class="product-detail__h2">{t.productDetail.releaseHistory.heading}</h2>
+          {productReleases.map((release, idx) => (
+            <>
+              <article class="release">
+                <header class="release__header">
+                  <h3 class="release__version">{release.data.tagName}</h3>
+                  <span class="release__meta">
+                    {formatLocaleDate(release.data.publishedAt, 'en')}
+                    {release.data.isPrerelease && ` · ${t.productDetail.preReleaseBadge}`}
+                  </span>
+                </header>
+                {renderedReleaseBodies[idx] && (
+                  <div class="release__body" set:html={renderedReleaseBodies[idx]} />
+                )}
+              </article>
+              {idx < productReleases.length - 1 && <hr class="release__divider" />}
+            </>
+          ))}
+        </section>
+      )}
     </div>
   </article>
 </BaseLayout>
@@ -141,6 +194,37 @@ const description = entry.data.tagline;
     max-width: 70ch;
   }
 
+  /* Version chip pair — sits between H1 and tagline. AAA-safe: chip text
+     uses --color-text (Volcanic Stone) on --color-surface-card per the
+     design brief §4.8 ("Body text always uses Volcanic Stone, which
+     remains AAA on every surface, 10.09:1 or higher"). The 0.875rem chip
+     is small enough to require AAA 7:1; --color-text-muted (70% alpha)
+     would land below threshold here, so we keep --color-text. */
+  .version-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+  .version-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-bbl-2, 4px);
+    background: var(--color-surface-card);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.01em;
+    font-family: var(--font-mono);
+  }
+  /* No --color-warning-soft / --color-warning-text in tokens.css, so we
+     fall back to italics + same neutral colors per Decision 3 of G D.9. */
+  .version-chip--pre-release {
+    font-style: italic;
+  }
+
   .cta {
     display: inline-block;
     font-weight: var(--font-weight-medium);
@@ -179,6 +263,90 @@ const description = entry.data.tagline;
     color: var(--color-text);
     font-size: var(--text-body);
     line-height: 1.65;
+  }
+
+  /* Release-history section. <h2> inherits its size/weight/color from
+     global.css's base h2 rule; this class only handles section spacing. */
+  .release-history {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .product-detail__h2 {
+    color: var(--color-heading);
+    margin: 0 0 2rem;
+  }
+  .release {
+    margin: 0;
+  }
+  .release__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+  }
+  .release__version {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-h3);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-h3);
+  }
+  .release__meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-small);
+    font-style: italic;
+  }
+  .release__body {
+    color: var(--color-text);
+    font-size: var(--text-body);
+    line-height: 1.65;
+  }
+  .release__body :global(h1),
+  .release__body :global(h2),
+  .release__body :global(h3),
+  .release__body :global(h4) {
+    color: var(--color-heading);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .release__body :global(h3) { font-size: var(--text-h4); }
+  .release__body :global(h4) { font-size: var(--text-body); font-weight: var(--font-weight-semibold); }
+  .release__body :global(p) { margin: 0 0 0.75rem; }
+  .release__body :global(ul),
+  .release__body :global(ol) { margin: 0 0 0.75rem 1.25rem; padding: 0; }
+  .release__body :global(li) { margin: 0.25rem 0; }
+  .release__body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface-card);
+    padding: 0.05em 0.3em;
+    border-radius: var(--radius-bbl-1, 2px);
+  }
+  .release__body :global(pre) {
+    background: var(--color-surface-card);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-bbl-2, 4px);
+    overflow-x: auto;
+    margin: 0 0 0.75rem;
+  }
+  .release__body :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+  .release__body :global(a) {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+  .release__body :global(a:hover) {
+    color: var(--color-link-hover);
+  }
+  .release__divider {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    margin: 2.5rem 0;
   }
 
   @media (max-width: 767px) {

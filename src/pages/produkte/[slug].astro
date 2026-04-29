@@ -55,6 +55,16 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
+// Render the .product-detail__body wrapper only when the entry's
+// markdown body actually contains visible content. v1 products keep
+// the body empty (just a placeholder HTML comment) and rely on the
+// `description` frontmatter field for hero copy; the wrapper would
+// otherwise render an empty bordered block stacked on top of the
+// release-history section's own border, producing two horizontal lines.
+const hasBodyContent = Boolean(
+  entry.body && entry.body.replace(/<!--[\s\S]*?-->/g, '').trim().length > 0,
+);
+
 const t = getUiStrings('de');
 
 const visibility = await getProductVisibility(entry.data.repo);
@@ -127,9 +137,11 @@ const renderedReleaseBodies: string[] = await Promise.all(
         </a>
       )}
 
-      <div class="product-detail__body">
-        <Content />
-      </div>
+      {hasBodyContent && (
+        <div class="product-detail__body">
+          <Content />
+        </div>
+      )}
 
       {hasReleases && (
         <section class="release-history" aria-labelledby="release-history-heading">

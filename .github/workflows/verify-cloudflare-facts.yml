@@ -1,0 +1,180 @@
+name: verify-cloudflare-facts
+
+# Weekly Cloudflare-fact verifier per Phase D design (g-d-2/spec.md).
+# Runs scripts/run-verifier.mjs against the published DPF list and
+# Cloudflare's CWA data-retention page; writes results into
+# src/data/cloudflare-facts.json. On success with a diff, opens an
+# auto-PR to dev. On failure, opens a verifier-alert Issue.
+#
+# Cron: Monday 02:00 UTC weekly (spec §7.1). Workflow timeout: 30 min
+# (spec §7.5) — comfortably absorbs the 1/5/15-min retry budget.
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"  # Monday 02:00 UTC weekly
+  workflow_dispatch:
+    inputs:
+      mock_scenario:
+        description: "Mock scenario for testing (e.g. 'dpf-absent', 'cwa-changed-figure'). When set, runs --dry-run with the matching fixture."
+        required: false
+        default: ""
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  verify:
+    name: Run verifier checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v6
+        with:
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run verifier
+        id: run
+        env:
+          MOCK_SCENARIO: ${{ github.event.inputs.mock_scenario }}
+        run: |
+          set +e
+          if [ -n "$MOCK_SCENARIO" ]; then
+            echo "[workflow] dispatch mock_scenario=$MOCK_SCENARIO; running --dry-run"
+            node scripts/run-verifier.mjs --dry-run
+            EXIT=$?
+            echo "exit=$EXIT" >> "$GITHUB_OUTPUT"
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/run-verifier.mjs
+          EXIT=$?
+          echo "exit=$EXIT" >> "$GITHUB_OUTPUT"
+          echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: On success — open auto-PR if JSON changed
+        if: ${{ steps.run.outputs.exit == '0' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet src/data/cloudflare-facts.json; then
+            echo "[workflow] verifier ran clean; no JSON diff — nothing to PR"
+            exit 0
+          fi
+          DATE_TAG=$(date -u +%Y-%m-%d)
+          BRANCH="verifier/cloudflare-facts-${DATE_TAG}"
+          git config user.name "verifier-bot"
+          git config user.email "verifier@blackbrowedlabs.com"
+          git checkout -b "$BRANCH"
+          git add src/data/cloudflare-facts.json
+          git commit -m "chore(verifier): refresh cloudflare-facts.json (${DATE_TAG})"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base dev \
+            --head "$BRANCH" \
+            --title "chore(verifier): refresh cloudflare-facts.json (${DATE_TAG})" \
+            --body "Automated update from verify-cloudflare-facts.yml. Each fact's verified_at / last_known_good_at and any changed values are refreshed. Review the diff before merging — the privacy pages render this data verbatim."
+
+      - name: On failure — open verifier-alert Issue
+        if: ${{ steps.run.outputs.exit != '0' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          DATE_TAG=$(date -u +%Y-%m-%d)
+          gh issue create \
+            --title "[verifier] Cloudflare-facts check failed (${DATE_TAG})" \
+            --body "$(cat <<EOF
+          The Cloudflare-fact verifier returned at least one non-ok status.
+
+          - Run logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - Triggered by: ${{ github.event_name }}
+          - Branch checked: dev
+
+          ## Recommended action
+
+          1. Open the run logs above; identify which check failed and the status (parser-broken / unreachable / changed / absent).
+          2. If parser-broken: inspect the source URL; update the regex in scripts/checks/<fact>.mjs.
+          3. If unreachable: confirm the source URL is up; if transient, re-run the workflow.
+          4. If changed: review the diff; if intentional, merge the auto-PR (none was opened on failure — re-run after fixing).
+          5. If absent: HIGH PRIORITY — Cloudflare may have dropped off the DPF list. Audit the privacy pages and consider banner.
+          EOF
+          )" \
+            --label "verifier-alert" \
+            --assignee "${{ github.repository_owner }}"
+
+      - name: Post-deploy smoke — JSON-vs-rendered alignment (mode #8 v1)
+        if: ${{ steps.run.outputs.exit == '0' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # v1-coverage smoke: only catches verifier-triggered mismatches
+          # (deploy-triggered mismatches are out of scope per spec §3.8 /
+          # §9.5). Compares JSON's effective verified date to what the
+          # live /datenschutz page renders. Best-effort: if the live URL
+          # isn't reachable, log + continue.
+          JSON_DATE=$(node -e "
+            const f = JSON.parse(require('fs').readFileSync('src/data/cloudflare-facts.json','utf8'));
+            const a = f.dpf.verified_at, b = f.cwa_retention.verified_at;
+            console.log((a < b ? a : b).slice(0,10));
+          ")
+          echo "[workflow] JSON effective verified date: $JSON_DATE"
+          echo "[workflow] (smoke is best-effort; mode #8 v1 limitation noted in spec §3.8)"
+          if curl -fsS -o /tmp/datenschutz.html https://blackbrowedlabs.com/datenschutz/; then
+            if grep -q "$JSON_DATE" /tmp/datenschutz.html; then
+              echo "[workflow] smoke OK — live page contains JSON date $JSON_DATE"
+            else
+              echo "[workflow] smoke MISMATCH — live page does not contain JSON date $JSON_DATE"
+              gh issue create \
+                --title "[verifier] Smoke mismatch: JSON-vs-deploy ($(date -u +%Y-%m-%d))" \
+                --body "Verifier ran clean but the live /datenschutz page does not show JSON's effective verified date ($JSON_DATE). Likely a deploy hasn't run yet since the verifier's auto-PR merged. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+                --label "verifier-alert" \
+                --assignee "${{ github.repository_owner }}" || true
+            fi
+          else
+            echo "[workflow] smoke skipped — live page not reachable from runner"
+          fi
+
+      - name: Stale verifier-alert escalation
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Stale-PR / stale-issue escalation per spec §7.4: 14 / 30 / 60
+          # day comment cadence. Best-effort: if the loop body errors on
+          # any single issue, the loop continues.
+          gh issue list --label "verifier-alert" --state open --json number,createdAt --jq '.[] | "\(.number) \(.createdAt)"' | while read -r num created; do
+            [ -z "$num" ] && continue
+            created_ts=$(date -u -d "$created" +%s 2>/dev/null || echo "")
+            if [ -z "$created_ts" ]; then
+              echo "[workflow] could not parse createdAt for issue #$num; skipping"
+              continue
+            fi
+            now_ts=$(date -u +%s)
+            age=$(( (now_ts - created_ts) / 86400 ))
+            if [ "$age" -ge 60 ]; then
+              gh issue comment "$num" --body "Stale verifier alert — open for $age days. Class-of-failure: review whether the verifier design needs adjustment." || true
+            elif [ "$age" -ge 30 ]; then
+              gh issue comment "$num" --body "Stale verifier alert — open for $age days. The privacy-page verified_at field has been stale for the same duration." || true
+            elif [ "$age" -ge 14 ]; then
+              gh issue comment "$num" --body "Stale verifier alert — open for $age days." || true
+            fi
+          done

@@ -2,29 +2,32 @@
 /**
  * Build-time freshness guard for src/data/cloudflare-facts.json.
  *
- * Manual-era "no silent failures" mechanism per backlog item #8.
- * Fails the build if `verifiedDate` is older than MAX_AGE_DAYS, forcing
- * either a fresh hand-verification or the Phase D automated verifier
- * before another deploy can ship.
+ * Verifier-era "no silent failures" mechanism per backlog item #8 and the
+ * Phase D verifier design at plans/active/pass-2/g-d-2/spec.md.
  *
- * MAX_AGE_DAYS=90 matches the future verifier's verification cadence.
- * Tighter than the post-verifier 120-day threshold (which factors in a
- * grace window on top of the cadence) — manual processes need stronger
- * forcing functions than automated ones.
+ * Reads `_meta.last_check_attempt` (the timestamp of the most recent
+ * verifier run, success OR failure). Fails the build if it's older than
+ * `_meta.freshness_threshold_days` (default 30). The threshold is
+ * tightened from the Phase B.3.2.a manual-era 90 days to 30 days now
+ * that an automated weekly verifier runs — 30 days is ~4 missed weekly
+ * runs, well past "transient cron blip".
+ *
+ * This is the detection mechanism for failure modes #1 (workflow doesn't
+ * run) and #10 (cron silently disabled by GHA inactive-repo policy).
  *
  * Exit codes:
- *   0 — verifiedDate is at most MAX_AGE_DAYS old.
- *   1 — verifiedDate is missing, malformed, or older than MAX_AGE_DAYS.
+ *   0 — last_check_attempt is at most threshold days old.
+ *   1 — _meta block missing/malformed, or last_check_attempt too old.
  */
 
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const MAX_AGE_DAYS = 90;
 const DATA_PATH = resolve('src/data/cloudflare-facts.json');
+const DEFAULT_THRESHOLD_DAYS = 30;
 
 function fail(message) {
-  process.stderr.write(`[cloudflare-facts] ${message}\n`);
+  process.stderr.write(`[freshness-gate] ${message}\n`);
   process.exit(1);
 }
 
@@ -39,24 +42,37 @@ try {
   fail(`invalid JSON in ${DATA_PATH}: ${err.message}`);
 }
 
-const verifiedDate = data?.verifiedDate;
-if (typeof verifiedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(verifiedDate)) {
-  fail(`verifiedDate missing or not ISO YYYY-MM-DD: ${JSON.stringify(verifiedDate)}`);
+if (!data || typeof data !== 'object' || !data._meta || typeof data._meta !== 'object') {
+  fail(`missing or malformed _meta block in ${DATA_PATH}`);
 }
 
-const verifiedMs = Date.parse(`${verifiedDate}T00:00:00Z`);
-if (Number.isNaN(verifiedMs)) {
-  fail(`verifiedDate not a parseable date: ${verifiedDate}`);
+const lastCheckAttempt = data._meta.last_check_attempt;
+if (typeof lastCheckAttempt !== 'string') {
+  fail(`_meta.last_check_attempt missing or not a string: ${JSON.stringify(lastCheckAttempt)}`);
 }
 
-const ageDays = Math.floor((Date.now() - verifiedMs) / (24 * 60 * 60 * 1000));
-if (ageDays > MAX_AGE_DAYS) {
+const lastCheckMs = Date.parse(lastCheckAttempt);
+if (Number.isNaN(lastCheckMs)) {
+  fail(`_meta.last_check_attempt not a parseable ISO datetime: ${lastCheckAttempt}`);
+}
+
+const thresholdDays =
+  typeof data._meta.freshness_threshold_days === 'number'
+    ? data._meta.freshness_threshold_days
+    : DEFAULT_THRESHOLD_DAYS;
+
+const ageDays = (Date.now() - lastCheckMs) / (24 * 60 * 60 * 1000);
+const ageDaysRounded = Math.floor(ageDays);
+
+if (ageDays > thresholdDays) {
   fail(
-    `verifiedDate ${verifiedDate} is ${ageDays} days old (max ${MAX_AGE_DAYS}). ` +
-    `Re-verify Cloudflare facts at ${data.dpf?.sourceUrl ?? '<dpf source>'} ` +
-    `and ${data.cwa?.sourceUrl ?? '<cwa source>'}, then update src/data/cloudflare-facts.json. ` +
-    `Or land Phase D Cloudflare-fact-verifier (backlog #8).`,
+    `BLOCKING BUILD: cloudflare-facts.json _meta.last_check_attempt is ${ageDays.toFixed(1)} days old (threshold: ${thresholdDays} days).\n` +
+      `  This is verifier failure mode #1 (workflow doesn't run) or #10 (cron silently disabled).\n` +
+      `  Fix: trigger verify-cloudflare-facts.yml manually via GitHub Actions UI workflow_dispatch.\n` +
+      `  Or: investigate why the weekly cron isn't firing (GHA inactive-repo policy?).`,
   );
 }
 
-process.stdout.write(`[cloudflare-facts] verifiedDate ${verifiedDate} OK (${ageDays} days old)\n`);
+process.stdout.write(
+  `[freshness-gate] OK — _meta.last_check_attempt ${lastCheckAttempt} is ${ageDaysRounded} days old (threshold: ${thresholdDays}).\n`,
+);

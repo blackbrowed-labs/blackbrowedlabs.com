@@ -14,7 +14,7 @@
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getUiStrings } from '../../i18n';
-import { cloudflareFacts, formatVerifiedDate } from '../../lib/cloudflare-facts';
+import { cloudflareFacts, formatVerifiedDate, getEffectiveVerifiedDate } from '../../lib/cloudflare-facts';
 
 const t = getUiStrings('en');
 
@@ -22,8 +22,8 @@ const title = 'Privacy Policy';
 const description =
   'Privacy policy for Blackbrowed Labs. Hosting Cloudflare, email IONOS, cookieless Cloudflare Web Analytics, Cloudflare Turnstile on the contact form.';
 const lastUpdated = 'April 2026';
-const cwaMonths = cloudflareFacts.cwa.retentionAggregatesMonths;
-const verifiedHuman = formatVerifiedDate(cloudflareFacts.verifiedDate, 'en');
+const cwaMonths = cloudflareFacts.cwa_retention.aggregated_retention_months;
+const verifiedHuman = formatVerifiedDate(getEffectiveVerifiedDate(cloudflareFacts), 'en');
 
 const tocItems = [
   { num: '1',  label: 'Controller' },

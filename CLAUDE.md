@@ -78,7 +78,7 @@ possible; Pass 2 should follow it.
 - Surface uncertainty as explicit open questions in plans, not resolved
   silently.
 
-## Process rules from Pass 1
+## Process rules from Pass 1+2
 
 Specific technical lessons worth codifying:
 
@@ -107,6 +107,7 @@ Specific technical lessons worth codifying:
   carve-out only when a static page genuinely cannot serve the use case.
   The `wrangler.jsonc` comment block carries the same posture statement
   alongside its env-inheritance gotcha.
+- **Workflow-permission verification for non-standard API endpoints (Pass 2 lesson).** When a GitHub Actions workflow change asserts that a `permissions:` scope (`actions: write`, `contents: write`, etc.) unlocks a given REST API endpoint, the assertion needs runtime verification — not just doc-reading. GitHub Actions' `permissions:` YAML enumerates a fixed list of scopes; not every API endpoint maps cleanly to one of those scopes. Variables in particular are not in the permissions list at all, and the default `GITHUB_TOKEN` returns HTTP 403 on `PATCH /repos/{owner}/{repo}/actions/variables/{name}` regardless of the declared scope. For any workflow change involving an API endpoint outside the well-known set (issues, pull-requests, contents), one of the following is required before merge: (a) runtime dispatch of the workflow against a real auth setup, (b) explicit citation of GitHub docs showing the endpoint accepts the declared token scope, or (c) a runbook step in the plan calling out "this requires a PAT, not `GITHUB_TOKEN`, because <reason>." The Pass 2 G D.10/11 chain shipped a 403-on-first-run bug because none of the three was performed.
 
 ## Skills
 

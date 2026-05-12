@@ -49,12 +49,30 @@ export interface CloudflareFacts {
 export const cloudflareFacts: CloudflareFacts = facts as CloudflareFacts;
 
 /**
- * Worst-case freshness signal: the older of the two per-fact `verified_at`
- * values. The privacy pages render ONE date (matching the
- * Phase-B.3.2.a single-date contract), and the older fact is the
- * conservative choice — "the data is at most this stale".
+ * Effective verified-date for the privacy pages' single-date contract.
+ *
+ * Resolution order (G D.11):
+ *   1. `import.meta.env.VERIFIED_AT` — set from the `VERIFIER_LAST_OK_AT`
+ *      GitHub Actions repo variable by every build workflow. Wins when
+ *      present and parseable so prod/staging refresh the displayed date
+ *      from the verifier's last clean run without any git operations.
+ *      (Astro/Vite exposes non-public env vars at build time through
+ *      `import.meta.env`; this is the project-wide pattern — see
+ *      `src/lib/github-api.ts`, `src/lib/env.ts`.)
+ *   2. Otherwise, the older of the two per-fact `verified_at` values in
+ *      `src/data/cloudflare-facts.json` (worst-case freshness signal:
+ *      "the data is at most this stale"). This is the local-dev path and
+ *      the safe fallback for any first-deploy / reset scenario before
+ *      the verifier has run.
+ *
+ * The `Date.parse()` guard ensures malformed env input falls through to
+ * JSON rather than rendering a literal "Invalid Date" string.
  */
 export function getEffectiveVerifiedDate(facts: CloudflareFacts): string {
+  const envValue = import.meta.env.VERIFIED_AT as string | undefined;
+  if (envValue && !Number.isNaN(Date.parse(envValue))) {
+    return envValue;
+  }
   const a = facts.dpf.verified_at;
   const b = facts.cwa_retention.verified_at;
   return a < b ? a : b;

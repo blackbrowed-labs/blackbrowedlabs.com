@@ -41,14 +41,30 @@ export const expectedValue = 'Cloudflare, Inc.';
 export const fixtureExtension = 'json';
 
 // Verifier-only endpoint. Anonymous, no cookies, no Origin/Referer
-// gating today (verified in g-d-10-2/dpf-investigation.md). Substring
-// `Search: "Cloudflare"` filter is a verifier-side optimisation — the
-// active-status check happens server-side via `Status: "Active"` and is
-// independent of the search term. If Cloudflare ever rebrands or the
-// upstream changes their search semantics to exact-match, the verifier
-// flips to `absent` (mode #4) loudly; deliberate trade per the
-// investigation doc.
+// gating today (verified in g-d-10-2/dpf-investigation.md). Phase G.3
+// widened the filter from `Search: "Cloudflare"` + `RowsPerPage: 10`
+// to `Search: ""` + `RowsPerPage: 5000` (one request that returns the
+// full active list, currently ~3,600 rows / ~1.8 MB / ~2.7 s) plus an
+// in-process substring filter on 'cloudflare' inside parseActiveOrgs.
+// This survives a Cloudflare rebrand or any upstream change in
+// `Search` semantics — provided the new name still contains the
+// substring 'cloudflare'. Trade: ~5 KB payload + ~0.8 s becomes
+// ~1.8 MB + ~2.7 s per weekly cron run, in exchange for rebrand
+// robustness. Pagination is supported but not used — the API returns
+// the whole active list in one response. See
+// plans/active/pass-3/g/dpf-pagination-investigation.md for the
+// probe-by-probe evidence and the EUCert.PublicStatus distribution
+// (Active=2,960; Active-Re-cert=638 — the verifier still treats only
+// strict "Active" as live).
 const API_ENDPOINT = 'https://dpfapi.azurewebsites.net/api/participants';
+// Investigation: plans/active/pass-3/g/dpf-pagination-investigation.md
+// confirms RowsPerPage values >= SumCount return the complete active
+// list in a single ~2.7 s request (SumCount ~3,600 at probe time).
+// 5000 gives ~40% headroom for active-list growth before the verifier
+// would need to revisit. Search:'' returns the unfiltered list; the
+// substring match for 'cloudflare' happens in parseActiveOrgs()
+// below — rebrand-robust within the constraint that the new name
+// still contains the substring 'cloudflare'.
 const REQUEST_BODY = {
   DataCovered: [],
   Frameworks: [],
@@ -56,8 +72,8 @@ const REQUEST_BODY = {
   PageNumber: 0,
   RecourseMechanisms: [],
   StatutoryBody: [],
-  RowsPerPage: 10,
-  Search: 'Cloudflare',
+  RowsPerPage: 5000,
+  Search: '',
   StartLetter: '',
   Status: 'Active',
   States: [],

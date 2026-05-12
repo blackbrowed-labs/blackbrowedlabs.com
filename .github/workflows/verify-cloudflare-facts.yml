@@ -1,15 +1,21 @@
 name: verify-cloudflare-facts
 
-# Weekly Cloudflare-fact verifier per Phase D design (g-d-2/spec.md).
-# Runs scripts/run-verifier.mjs against the published DPF list and
-# Cloudflare's CWA data-retention page; writes results into
-# src/data/cloudflare-facts.json. The orchestrator surfaces two flags
-# via $GITHUB_OUTPUT — has_diff and has_attention — that gate the
-# auto-PR and Issue steps independently. Mode #6 (status='changed') is
-# the case both fire on the same run.
+# Weekly Cloudflare-fact verifier — three-channel alert model
+# (g-d-10/plan.md G D.11.1).
 #
-# Cron: Monday 02:00 UTC weekly (spec §7.1). Workflow timeout: 30 min
-# (spec §7.5) — comfortably absorbs the 1/5/15-min retry budget.
+# Runs scripts/run-verifier.mjs against the published DPF list and
+# Cloudflare's CWA data-retention page. The orchestrator surfaces three
+# independent flags via $GITHUB_OUTPUT — `all_ok`, `has_value_diff`,
+# `has_failure` — each gating its own channel:
+#   - all_ok          → updates the VERIFIER_LAST_OK_AT repo variable.
+#                       No PR, no Issue (silent-when-healthy).
+#   - has_value_diff  → opens a PR on `dev` with the value diff.
+#   - has_failure     → opens a verifier-alert Issue.
+# Channels are independent — a single run can fire >1 (e.g. CWA changed
+# AND DPF unreachable).
+#
+# Cron: Monday 02:00 UTC weekly. Workflow timeout: 30 min — comfortably
+# absorbs the 1/5/15-min retry budget.
 
 on:
   schedule:
@@ -28,6 +34,10 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  # Note: the VERIFIER_LAST_OK_AT variable update uses a separate
+  # fine-grained PAT (secret VERIFIER_VARIABLE_TOKEN) — GITHUB_TOKEN
+  # with `actions: write` is not sufficient for the Actions Variables
+  # API (HTTP 403 on PATCH). See G D.10/11 fix-up commit.
 
 jobs:
   verify:
@@ -60,18 +70,35 @@ jobs:
             echo "[workflow] dispatch mock_scenario=$MOCK_SCENARIO; running --dry-run"
             node scripts/run-verifier.mjs --dry-run
             echo "dry_run=true" >> "$GITHUB_OUTPUT"
-            # In dry-run the orchestrator does not write JSON nor advance
-            # GH outputs that gate live PR / Issue steps; explicitly pin
-            # both flags to false so downstream gates are skipped.
-            echo "has_diff=false" >> "$GITHUB_OUTPUT"
-            echo "has_attention=false" >> "$GITHUB_OUTPUT"
+            # In dry-run the orchestrator does not advance GH outputs that
+            # gate live channel steps; explicitly pin all three flags to
+            # false so the variable-update, PR, and Issue gates are skipped.
+            echo "all_ok=false" >> "$GITHUB_OUTPUT"
+            echo "has_value_diff=false" >> "$GITHUB_OUTPUT"
+            echo "has_failure=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           node scripts/run-verifier.mjs
           echo "dry_run=false" >> "$GITHUB_OUTPUT"
 
-      - name: Open auto-PR if JSON changed
-        if: ${{ steps.run.outputs.has_diff == 'true' && steps.run.outputs.dry_run == 'false' }}
+      - name: Update VERIFIER_LAST_OK_AT (clean run only)
+        if: ${{ steps.run.outputs.all_ok == 'true' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          # Fine-grained PAT with Variables: read/write on this repo
+          # only. GITHUB_TOKEN with `actions: write` returns HTTP 403
+          # on the Actions Variables API; the workflow-permissions YAML
+          # does not expose a `variables` scope.
+          GH_TOKEN: ${{ secrets.VERIFIER_VARIABLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "[workflow] updating VERIFIER_LAST_OK_AT to $NOW"
+          gh api -X PATCH \
+            "/repos/${{ github.repository }}/actions/variables/VERIFIER_LAST_OK_AT" \
+            -f name=VERIFIER_LAST_OK_AT -f value="$NOW"
+
+      - name: Open auto-PR for value change
+        if: ${{ steps.run.outputs.has_value_diff == 'true' && steps.run.outputs.dry_run == 'false' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -87,11 +114,11 @@ jobs:
           gh pr create \
             --base dev \
             --head "$BRANCH" \
-            --title "chore(verifier): refresh cloudflare-facts.json (${DATE_TAG})" \
-            --body "Automated update from verify-cloudflare-facts.yml. Each fact's verified_at / last_known_good_at and any changed values are refreshed. Review the diff before merging — the privacy pages render this data verbatim."
+            --title "chore(verifier): cloudflare-facts value change (${DATE_TAG})" \
+            --body "Automated PR from verify-cloudflare-facts.yml — at least one verified fact changed or went absent at the upstream source. Review the diff; the privacy pages render this data verbatim. The BASELINE prose in docs/BASELINE_COPY.md may need a paired update."
 
-      - name: Open verifier-alert Issue on non-ok status
-        if: ${{ steps.run.outputs.has_attention == 'true' && steps.run.outputs.dry_run == 'false' }}
+      - name: Open verifier-alert Issue on failure
+        if: ${{ steps.run.outputs.has_failure == 'true' && steps.run.outputs.dry_run == 'false' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -102,15 +129,11 @@ jobs:
           DATE_TAG=$(date -u +%Y-%m-%d)
           # Build the Issue body with printf — avoids the bash-heredoc /
           # YAML-block-scalar interaction that the reviewer flagged in
-          # G D.7 (MAJOR 1). Heredocs need their EOF terminator at
-          # column 0 in bash's view, but YAML's `run: |` block strips
-          # leading indent uniformly, so reasoning about "column 0" is
-          # split between the YAML source and the bash post-strip view.
-          # printf with explicit \n separators sidesteps the question
-          # entirely: each argument is one line, the result is plain
-          # markdown, and the YAML stays valid without surprises.
+          # G D.7 (MAJOR 1). printf with explicit \n separators sidesteps
+          # the "column 0" question entirely: each argument is one line,
+          # the result is plain markdown, and the YAML stays valid.
           BODY=$(printf '%s\n' \
-            "The Cloudflare-fact verifier returned at least one non-ok status." \
+            "The Cloudflare-fact verifier could not complete one or more checks." \
             "" \
             "- Run logs: ${RUN_URL}" \
             "- Triggered by: ${DISPATCH_EVENT}" \
@@ -118,61 +141,14 @@ jobs:
             "" \
             "## Recommended action" \
             "" \
-            "1. Open the run logs above; identify which check failed and the status (parser-broken / unreachable / changed / absent)." \
-            "2. If parser-broken: inspect the source URL; update the regex in scripts/checks/<fact>.mjs." \
-            "3. If unreachable: confirm the source URL is up; if transient, re-run the workflow." \
-            "4. If changed: a companion auto-PR was opened on this same run with the new value. Review the source URL manually, reconcile docs/BASELINE_COPY.md if surrounding prose needs adjustment, then merge the PR and close this Issue." \
-            "5. If absent: HIGH PRIORITY — Cloudflare may have dropped off the DPF list. Audit the privacy pages and consider a banner.")
+            "1. Open the run logs above; identify which check failed and the status (parser-broken / unreachable)." \
+            "2. If parser-broken: inspect the source URL; update the regex in scripts/checks/<fact>.mjs (or refresh fixtures if upstream restructured)." \
+            "3. If unreachable: confirm the source URL is up; if transient, re-run the workflow.")
           gh issue create \
-            --title "[verifier] Cloudflare-facts check failed (${DATE_TAG})" \
+            --title "[verifier] Cloudflare-facts check could not complete (${DATE_TAG})" \
             --body "$BODY" \
             --label "verifier-alert" \
             --assignee "$ASSIGNEE"
-
-      - name: Post-deploy smoke — JSON-vs-rendered alignment (mode #8 v1)
-        if: ${{ steps.run.outputs.dry_run == 'false' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          ASSIGNEE: ${{ github.repository_owner }}
-        run: |
-          set -euo pipefail
-          # v1-coverage smoke: only catches verifier-triggered mismatches
-          # (deploy-triggered mismatches are out of scope per spec §3.8 /
-          # §9.5). Compares JSON's effective verified date to the hidden
-          # ISO marker the privacy pages emit (locale-independent — see
-          # G D.7 fix-up: MAJOR 3 / privacy pages' <meta name="bbl-verified-at">).
-          # Best-effort: if the live URL isn't reachable, log + continue.
-          JSON_DATE=$(node -e "
-            const f = JSON.parse(require('fs').readFileSync('src/data/cloudflare-facts.json','utf8'));
-            const a = f.dpf.verified_at;
-            const b = f.cwa_retention.verified_at;
-            if (Number.isNaN(Date.parse(a)) || Number.isNaN(Date.parse(b))) {
-              console.error('[smoke] one of the verified_at values is not parseable:', { a, b });
-              process.exit(1);
-            }
-            console.log((a < b ? a : b).slice(0,10));
-          ")
-          echo "[workflow] JSON effective verified date: $JSON_DATE"
-          echo "[workflow] (smoke is best-effort; mode #8 v1 limitation noted in spec §3.8)"
-          if curl -fsS -o /tmp/datenschutz.html https://blackbrowedlabs.com/datenschutz/; then
-            # Look for the locale-independent marker. The page emits
-            # <meta name="bbl-verified-at" content="YYYY-MM-DD"> — the
-            # ISO content is greppable directly.
-            EXPECTED="content=\"$JSON_DATE\""
-            if grep -q "bbl-verified-at" /tmp/datenschutz.html && grep -q "$EXPECTED" /tmp/datenschutz.html; then
-              echo "[workflow] smoke OK — live page exposes ISO marker $JSON_DATE"
-            else
-              echo "[workflow] smoke MISMATCH — live page's bbl-verified-at marker does not match $JSON_DATE"
-              gh issue create \
-                --title "[verifier] Smoke mismatch: JSON-vs-deploy ($(date -u +%Y-%m-%d))" \
-                --body "Verifier ran clean but the live /datenschutz page's bbl-verified-at marker does not match JSON's effective verified date ($JSON_DATE). Likely a deploy hasn't run yet since the verifier's auto-PR merged. See run: $RUN_URL" \
-                --label "verifier-alert" \
-                --assignee "$ASSIGNEE" || true
-            fi
-          else
-            echo "[workflow] smoke skipped — live page not reachable from runner"
-          fi
 
       - name: Stale verifier-alert escalation
         env:

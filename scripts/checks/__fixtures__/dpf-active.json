@@ -1,0 +1,56 @@
+{
+  "RecordCount": 5,
+  "Items": [
+    {
+      "OrganizationId": 3727,
+      "OrganizationPublicDisplayName": "C2FO",
+      "City": "Kansas City ",
+      "State": "MO",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    },
+    {
+      "OrganizationId": 5710,
+      "OrganizationPublicDisplayName": "Cadence Communications & Research",
+      "City": "Thousand Oaks",
+      "State": "CA",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    },
+    {
+      "OrganizationId": 5666,
+      "OrganizationPublicDisplayName": "Cloudflare, Inc.",
+      "City": "San Francisco",
+      "State": "CA",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": true, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": true, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": true, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    },
+    {
+      "OrganizationId": 5841,
+      "OrganizationPublicDisplayName": "CAKE",
+      "City": "Hunt Valley",
+      "State": "MD",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    },
+    {
+      "OrganizationId": 8169,
+      "OrganizationPublicDisplayName": "Calabrio, Inc.",
+      "City": "Minneapolis",
+      "State": "MN",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": true, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": true, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    }
+  ],
+  "SumCount": 3599
+}

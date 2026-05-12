@@ -12,6 +12,16 @@
  *   the date users see on the privacy pages.
  * - Per-fact `last_known_good_at` mirrors `verified_at` on success and is
  *   left untouched on failure — useful for "stale" detection.
+ *
+ * G D.11 display-date sourcing note: the top-level `bbl-verified-at`
+ * meta marker + visible "zuletzt geprüft am ..." prose on the privacy
+ * pages flows through `getEffectiveVerifiedDate()` (env-preferred, JSON
+ * fallback). The per-fact `bbl-verified-at-dpf` / `bbl-verified-at-cwa`
+ * markers in `<head>` deliberately read JSON's per-fact `verified_at`
+ * fields directly, NOT this helper — they're diagnostic markers
+ * tracking the JSON-side ground truth per fact, separate from the
+ * unified display date. Don't "fix" the asymmetry without revisiting
+ * the verifier post-deploy smoke design.
  */
 
 import facts from '../data/cloudflare-facts.json';
@@ -49,12 +59,30 @@ export interface CloudflareFacts {
 export const cloudflareFacts: CloudflareFacts = facts as CloudflareFacts;
 
 /**
- * Worst-case freshness signal: the older of the two per-fact `verified_at`
- * values. The privacy pages render ONE date (matching the
- * Phase-B.3.2.a single-date contract), and the older fact is the
- * conservative choice — "the data is at most this stale".
+ * Effective verified-date for the privacy pages' single-date contract.
+ *
+ * Resolution order (G D.11):
+ *   1. `import.meta.env.VERIFIED_AT` — set from the `VERIFIER_LAST_OK_AT`
+ *      GitHub Actions repo variable by every build workflow. Wins when
+ *      present and parseable so prod/staging refresh the displayed date
+ *      from the verifier's last clean run without any git operations.
+ *      (Astro/Vite exposes non-public env vars at build time through
+ *      `import.meta.env`; this is the project-wide pattern — see
+ *      `src/lib/github-api.ts`, `src/lib/env.ts`.)
+ *   2. Otherwise, the older of the two per-fact `verified_at` values in
+ *      `src/data/cloudflare-facts.json` (worst-case freshness signal:
+ *      "the data is at most this stale"). This is the local-dev path and
+ *      the safe fallback for any first-deploy / reset scenario before
+ *      the verifier has run.
+ *
+ * The `Date.parse()` guard ensures malformed env input falls through to
+ * JSON rather than rendering a literal "Invalid Date" string.
  */
 export function getEffectiveVerifiedDate(facts: CloudflareFacts): string {
+  const envValue = import.meta.env.VERIFIED_AT as string | undefined;
+  if (envValue && !Number.isNaN(Date.parse(envValue))) {
+    return envValue;
+  }
   const a = facts.dpf.verified_at;
   const b = facts.cwa_retention.verified_at;
   return a < b ? a : b;

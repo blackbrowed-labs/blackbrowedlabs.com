@@ -1,13 +1,9 @@
-name: rebuild-nightly
+name: rebuild-nightly-staging
 
-# Daily safety-net rebuild at 03:00 UTC. Catches missed dispatches from
-# product repos and any other content drift. workflow_dispatch enabled
-# for manual testing without waiting 24 hours.
-#
-# G D.11: also picks up fresh VERIFIER_LAST_OK_AT updates within ~25h of
-# the verifier's clean run, refreshing the displayed verified-at date on
-# the privacy pages without any git operations. The pre-build freshness
-# gate fails if the verifier hasn't logged a clean run in over 90 days.
+# Daily 03:00 UTC safety-net rebuild of dev → staging. Mirrors
+# rebuild-nightly.yml (prod equivalent) so staging picks up fresh
+# VERIFIER_LAST_OK_AT updates within ~25h of the verifier's clean run.
+# workflow_dispatch enabled for manual testing without waiting 24 hours.
 
 on:
   schedule:
@@ -21,14 +17,14 @@ permissions:
   contents: read
 
 jobs:
-  rebuild-nightly:
-    name: Nightly rebuild and deploy
+  rebuild-nightly-staging:
+    name: Nightly rebuild and deploy (staging)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout dev
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: dev
 
       - name: Setup Node 24
         uses: actions/setup-node@v6
@@ -56,9 +52,9 @@ jobs:
           fi
           echo "[workflow] verifier freshness OK ($AGE_DAYS days since last clean run)"
 
-      - name: Build for production
+      - name: Build for staging
         env:
-          PUBLIC_ENVIRONMENT: production
+          PUBLIC_ENVIRONMENT: staging
           PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
           PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
           VERIFIED_AT: ${{ vars.VERIFIER_LAST_OK_AT }}
@@ -68,4 +64,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --env production
+          command: deploy --env staging

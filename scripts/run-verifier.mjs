@@ -1,32 +1,36 @@
 #!/usr/bin/env node
 /**
  * Verifier orchestrator. Runs every registered check, aggregates the
- * results, persists them into src/data/cloudflare-facts.json, and
- * surfaces two flags (`has_diff`, `has_attention`) so the workflow can
- * decide whether to open an auto-PR, an Issue, or both.
+ * results, and surfaces three independent flags (`all_ok`,
+ * `has_value_diff`, `has_failure`) so the workflow can route to the
+ * matching notification channel (silent variable refresh, PR, or Issue).
  *
- * Source-of-truth: plans/active/pass-2/g-d-2/spec.md (full design) +
- * plans/active/pass-2/g-d/plan.md Task 7 step 8.
+ * Source-of-truth: plans/active/pass-2/g-d-2/spec.md (original design) +
+ * plans/active/pass-2/g-d-10/plan.md G D.11.1 (alert-model rewrite).
  *
  * Usage:
- *   node scripts/run-verifier.mjs                 # production: writes JSON
+ *   node scripts/run-verifier.mjs                 # production: maybe writes JSON
  *   node scripts/run-verifier.mjs --dry-run       # no writes; logs would-be flags
  *   MOCK_SCENARIO=dpf-absent node scripts/run-verifier.mjs --dry-run
  *
  * Exit codes:
- *   0 — JSON write (or skipped write in --dry-run) succeeded; per-fact
- *       outcomes are surfaced via has_diff / has_attention flags rather
- *       than via exit code, so mode #6 (status='changed') can drive both
- *       a PR (has_diff) AND an Issue (has_attention) on the same run.
+ *   0 — orchestrator completed; per-fact outcomes are surfaced via the
+ *       three flags below rather than via exit code, so a single run can
+ *       drive >1 channel (e.g. CWA changed AND DPF unreachable → both PR
+ *       and Issue fire independently).
  *   2 — orchestrator threw (config error / validation failure / I/O error).
  *
  * GITHUB_OUTPUT flags (only when GITHUB_OUTPUT is set):
- *   has_diff       — true if `git diff --quiet src/data/cloudflare-facts.json`
- *                    would be non-empty (any value or timestamp field changed).
- *                    Drives the auto-PR step.
- *   has_attention  — true if any check returned a non-ok status (changed,
- *                    parser-broken, unreachable, absent). Drives the Issue
- *                    step. Both flags can be true on the same run (mode #6).
+ *   all_ok          — true if every check returned 'ok'. Drives the
+ *                     workflow's variable-refresh step (silent channel).
+ *   has_value_diff  — true if any check returned 'changed' or 'absent'.
+ *                     Drives the workflow's auto-PR step.
+ *   has_failure     — true if any check returned 'parser-broken' or
+ *                     'unreachable'. Drives the workflow's Issue step.
+ *
+ * JSON disk write is gated on `has_value_diff`. Clean runs leave the
+ * JSON untouched in the runner workspace; the displayed `verified_at`
+ * is refreshed via the VERIFIER_LAST_OK_AT repo variable instead.
  *
  * ⚠ Status-enum rename (per spec §6.2): CheckResult `'ok'` → JSON
  * `'active'` when persisted. The privacy-page banner logic depends on
@@ -68,8 +72,8 @@ const CHECKS = [
   { factKey: 'cwa_retention', mod: cwaRetention, scenarioPrefix: 'cwa-', defaultFixture: 'cwa-active' },
 ];
 
-function fixturePathFor(scenario) {
-  return resolve(FIXTURES_DIR, `${scenario}.html`);
+function fixturePathFor(scenario, ext = 'html') {
+  return resolve(FIXTURES_DIR, `${scenario}.${ext}`);
 }
 
 /**
@@ -136,9 +140,10 @@ async function main() {
       const fixtureName = MOCK_SCENARIO.startsWith(scenarioPrefix)
         ? MOCK_SCENARIO
         : defaultFixture;
-      opts = { fixture: fixturePathFor(fixtureName) };
+      const ext = mod.fixtureExtension ?? 'html';
+      opts = { fixture: fixturePathFor(fixtureName, ext) };
       console.log(
-        `[verifier:orchestrator] ${mod.factName}: routing to fixture ${fixtureName}.html`,
+        `[verifier:orchestrator] ${mod.factName}: routing to fixture ${fixtureName}.${ext}`,
       );
     }
 
@@ -190,57 +195,78 @@ async function main() {
 
   validateCloudflareFacts(data);
 
-  // has_attention: any non-ok per-fact status (changed, parser-broken,
-  // unreachable, absent) — drives the workflow's Issue step.
-  // has_diff: the JSON we are about to write differs from the previous
-  // on-disk content — drives the workflow's auto-PR step. Both flags can
-  // be true on the same run (mode #6: changed value AND alert-worthy).
-  const hasAttention = Object.values(results).some((r) => r.status !== 'ok');
+  // G D.11 three-channel model:
+  //   all_ok          — every check returned 'ok'; updates the
+  //                     VERIFIER_LAST_OK_AT repo variable. No PR, no Issue.
+  //   has_value_diff  — at least one check returned 'changed' or 'absent';
+  //                     drives the PR step.
+  //   has_failure     — at least one check returned 'parser-broken' or
+  //                     'unreachable'; drives the Issue step.
+  // has_value_diff and has_failure can both be true on the same run
+  // (e.g. CWA changed AND DPF unreachable). The two channels fire
+  // independently.
+  const statuses = Object.values(results).map((r) => r.status);
+  const allOk = statuses.every((s) => s === 'ok');
+  const hasValueDiff = statuses.some((s) => s === 'changed' || s === 'absent');
+  const hasFailure = statuses.some((s) => s === 'parser-broken' || s === 'unreachable');
   const previousJson = await readFile(DATA_PATH, 'utf8');
   const nextJson = JSON.stringify(data, null, 2) + '\n';
-  const hasDiff = previousJson !== nextJson;
 
   // Emit GH outputs only on real (non-dry-run) execution. Dry-run is the
   // synthetic / dispatch path; the workflow explicitly pins flags to
   // false in that branch so live PR / Issue steps stay quiet.
   if (!DRY_RUN) {
-    await emitGithubOutput('has_diff', hasDiff);
-    await emitGithubOutput('has_attention', hasAttention);
+    await emitGithubOutput('all_ok', allOk);
+    await emitGithubOutput('has_value_diff', hasValueDiff);
+    await emitGithubOutput('has_failure', hasFailure);
   }
 
   console.log(
-    `[verifier:orchestrator] summary: has_diff=${hasDiff} has_attention=${hasAttention}`,
+    `[verifier:orchestrator] summary: all_ok=${allOk} has_value_diff=${hasValueDiff} has_failure=${hasFailure}`,
   );
 
   if (DRY_RUN) {
     console.log('\n[verifier:orchestrator] [DRY-RUN] would write src/data/cloudflare-facts.json:');
     console.log(nextJson);
     const wouldDo = [];
-    if (hasDiff) wouldDo.push('open auto-PR');
-    if (hasAttention) wouldDo.push('open verifier-alert Issue');
+    if (allOk) wouldDo.push('update VERIFIER_LAST_OK_AT variable');
+    if (hasValueDiff) wouldDo.push('open auto-PR');
+    if (hasFailure) wouldDo.push('open verifier-alert Issue');
     console.log(
-      `\n[verifier:orchestrator] [DRY-RUN] would ${wouldDo.length ? wouldDo.join(' AND ') : 'do nothing (no diff, no attention)'}`,
+      `\n[verifier:orchestrator] [DRY-RUN] would ${wouldDo.length ? wouldDo.join(' AND ') : 'do nothing'}`,
     );
     return; // exit 0
   }
 
-  await writeFile(DATA_PATH, nextJson);
-  console.log(
-    `[verifier:orchestrator] wrote ${DATA_PATH} (${Object.keys(results).length} fact(s) updated)`,
-  );
-
-  if (hasAttention) {
-    console.error(
-      '[verifier:orchestrator] at least one check returned non-ok status; workflow will open an Issue',
-    );
-  }
-  if (hasDiff) {
+  // JSON disk write is gated on has_value_diff. On clean runs (all_ok)
+  // there's nothing to persist beyond _meta.last_check_attempt, and the
+  // variable channel carries the freshness signal — leaving a mutated
+  // JSON file in the runner workspace would be noise. On failure-only
+  // runs there's nothing meaningful to write either (value fields stay
+  // pinned per the per-fact update rules above).
+  if (hasValueDiff) {
+    await writeFile(DATA_PATH, nextJson);
     console.log(
-      '[verifier:orchestrator] JSON content changed; workflow will open an auto-PR',
+      `[verifier:orchestrator] wrote ${DATA_PATH} (${Object.keys(results).length} fact(s) updated)`,
+    );
+  } else {
+    console.log(
+      `[verifier:orchestrator] no value diff; skipping JSON write (variable refresh handled by workflow)`,
     );
   }
-  if (!hasAttention && !hasDiff) {
-    console.log('[verifier:orchestrator] all checks ok and no diff — nothing further to do');
+
+  if (hasFailure) {
+    console.error(
+      '[verifier:orchestrator] at least one check returned parser-broken/unreachable; workflow will open an Issue',
+    );
+  }
+  if (hasValueDiff) {
+    console.log(
+      '[verifier:orchestrator] at least one value changed/absent; workflow will open an auto-PR',
+    );
+  }
+  if (allOk) {
+    console.log('[verifier:orchestrator] all checks ok — workflow will refresh VERIFIER_LAST_OK_AT variable');
   }
 }
 

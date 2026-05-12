@@ -24,7 +24,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 export const factName = 'cwa-retention';
-export const sourceUrl = 'https://developers.cloudflare.com/web-analytics/data-retention/';
+export const sourceUrl = 'https://developers.cloudflare.com/web-analytics/faq/';
 
 // Same retry budget as DPF (1/5/15 min); see spec §7.3.
 const RETRY_DELAYS_MS = [1 * 60_000, 5 * 60_000, 15 * 60_000];
@@ -73,6 +73,19 @@ function stripTags(html) {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
 }
 
+const NUMBER_WORDS = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8,
+  nine: 9, ten: 10, eleven: 11, twelve: 12, eighteen: 18, twenty: 20,
+  twentyfour: 24, 'twenty-four': 24,
+};
+
+function toMonths(numStr, unit) {
+  const lower = numStr.toLowerCase();
+  const n = NUMBER_WORDS[lower] ?? Number(numStr);
+  if (!Number.isFinite(n)) return null;
+  return unit.startsWith('day') ? Math.round(n / 30) : n;
+}
+
 /**
  * Parse retention figures from CWA docs HTML. Returns
  *   { raw_events_retention_months, aggregated_retention_months }
@@ -91,15 +104,16 @@ function parseRetention(html) {
     /aggregat[a-z]*[^.]{0,200}?(\d+)\s*(months?|days?)/i,
     /page\s*view\s*counts?[^.]{0,200}?(\d+)\s*(months?|days?)/i,
     /(\d+)\s*(months?|days?)[^.]{0,80}?aggregat/i,
+    // G D.10.1 — FAQ shape: "you can access data for the previous six months"
+    // Tolerant variants: "past N months", "last N months".
+    /(?:access|view|see)\s+[^.]{0,80}?(?:previous|past|last)\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|eighteen|twenty[\s-]?four|twentyfour)\s+(months?|days?)/i,
   ];
   let aggregatedMonths = null;
   for (const re of aggregatedPatterns) {
     const m = text.match(re);
     if (m) {
-      const n = Number(m[1]);
-      const unit = m[2].toLowerCase();
-      aggregatedMonths = unit.startsWith('day') ? Math.round(n / 30) : n;
-      break;
+      aggregatedMonths = toMonths(m[1], m[2].toLowerCase());
+      if (aggregatedMonths !== null) break;
     }
   }
 

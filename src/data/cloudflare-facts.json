@@ -15,7 +15,7 @@
     "status": "active",
     "raw_events_retention_months": null,
     "aggregated_retention_months": 6,
-    "source_url": "https://developers.cloudflare.com/web-analytics/data-retention/",
+    "source_url": "https://developers.cloudflare.com/web-analytics/faq/",
     "verified_at": "2026-04-29T00:00:00Z",
     "last_known_good_at": "2026-04-29T00:00:00Z"
   }

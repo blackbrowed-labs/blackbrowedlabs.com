@@ -58,6 +58,8 @@ jobs:
           PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
           PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
           VERIFIED_AT: ${{ vars.VERIFIER_LAST_OK_AT }}
+          VERIFIED_AT_DPF: ${{ vars.VERIFIER_DPF_VERIFIED_AT }}
+          VERIFIED_AT_CWA: ${{ vars.VERIFIER_CWA_VERIFIED_AT }}
         run: npm run build
 
       - name: Deploy to Cloudflare

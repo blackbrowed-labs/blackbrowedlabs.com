@@ -5,7 +5,7 @@
  * src/data/cloudflare-facts.json (specifically: aggregated retention
  * months, and the absence of a published raw-events retention period).
  *
- * Source: https://developers.cloudflare.com/web-analytics/data-retention/
+ * Source: https://developers.cloudflare.com/web-analytics/faq/
  *
  * Source-of-truth: plans/active/pass-2/g-d-2/spec.md §6 (interface) and
  * §3.5/§3.6 (mode #5 / mode #6 detection).
@@ -76,7 +76,7 @@ function stripTags(html) {
 const NUMBER_WORDS = {
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8,
   nine: 9, ten: 10, eleven: 11, twelve: 12, eighteen: 18, twenty: 20,
-  twentyfour: 24, 'twenty-four': 24,
+  'twenty four': 24, 'twenty-four': 24,
 };
 
 function toMonths(numStr, unit) {

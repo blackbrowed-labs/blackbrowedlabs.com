@@ -4,6 +4,9 @@
  * the PUBLIC_ENVIRONMENT environment variable. Runs before `astro build`
  * via the "build" npm script.
  *
+ * Run from the project root (as `npm run build` does); paths resolve
+ * against `process.cwd()`.
+ *
  * - production: long-lived caching for static assets; no robots tag.
  * - staging (or anything else): same caching + X-Robots-Tag: noindex,
  *   nofollow on every path. Triad member 2 of 3 (meta tag + robots.txt

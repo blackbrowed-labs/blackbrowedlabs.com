@@ -530,7 +530,7 @@ The repo's `.gitignore` is at the root and covers three categories of files:
     - Block force pushes: enabled
     - Other toggles intentionally off — `dev` is an integration branch and direct commits are expected
 
-- **Status checks deliberately not required:** "Require status checks to pass" is off on `protect-main` because GitHub requires at least one specific check to be named, and we don't yet have a PR-triggered CI workflow (the deploy workflows are push-triggered, not PR-triggered). Pass 2 backlog item #5: add a PR-triggered CI workflow (`npm ci && npm run build` at minimum) and add it as a required status check on `protect-main`.
+- **Required status checks:** `protect-main` requires the `build-pr` check from `.github/workflows/ci-pr.yml` to pass before merge (added 2026-04-28, ruleset id `15468856`). The workflow runs `npm ci` → `npm run check` → `npm run build` on every PR targeting `main`, plus a warn-only verifier-freshness probe (60-day soft threshold, 90-day hard gate enforced separately in the deploy and nightly workflows). `strict_required_status_checks_policy: true` requires the check to have run against the PR's latest head SHA, not a stale one. The job name `build-pr` is what's registered with GitHub Actions and what the ruleset references — renaming the job would invalidate the binding and require a re-flip.
 
 - **Default branch:** `main`. Changed from `dev` to `main` at the same time as ruleset configuration. Workflow is now: feature work on `dev` → auto-deploy to staging (`dev.blackbrowedlabs.com`) → PR `dev` → `main` → auto-deploy to production (`blackbrowedlabs.com`).
 

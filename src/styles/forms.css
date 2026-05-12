@@ -1,0 +1,146 @@
+/* =============================================================
+   Forms — shared CSS module.
+
+   Consumed by:
+   - src/components/forms/ContactForm.astro
+
+   Per docs/CSS_CONVENTIONS.md §2, future forms get their own BEM
+   namespace (e.g. .subscribe-form__field, .feedback-form__submit)
+   and add their rule blocks below the .contact-form__* block in
+   this file. Visual treatment carries over by re-implementing the
+   look under the new namespace, not by class-attribute aliasing.
+
+   Pre-extraction this CSS lived in ContactForm.astro's scoped
+   <style> block. Moved out during Phase J of Pass 3 (2026-05-12).
+   Closes backlog #9.
+   ============================================================= */
+
+/* ─── .contact-form (Phase B.1's only form). */
+/* `margin-inline: auto` carries over from I.1 Option B (Lars
+   decision 2026-05-12) — the page-level centring fix that
+   Phase I applied to ContactForm.astro's scoped block also
+   moves into this extracted module. Do NOT drop this line during
+   extraction; the J.3 plan's verification grep will catch a miss. */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.contact-form__status:empty { display: none; }
+.contact-form__status--ok {
+  background: var(--color-surface-card);
+  border-left: 2px solid var(--bbl-primary);
+  padding: 1rem 1.25rem;
+  color: var(--color-text);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+.contact-form__status--error {
+  background: var(--color-error-bg);
+  border-left: 2px solid var(--bbl-error);
+  padding: 1rem 1.25rem;
+  color: var(--color-error-text);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.contact-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.contact-form__field label {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-small);
+}
+.contact-form__field input,
+.contact-form__field textarea {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-bbl-2);
+  padding: 0.625rem 0.75rem;
+  font-size: var(--text-body);
+  line-height: 1.4;
+}
+.contact-form__field input:focus-visible,
+.contact-form__field textarea:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--color-focus-ring);
+}
+.contact-form__field textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+/*
+   Field-level error state. Two triggers — `:user-invalid` (modern
+   pseudo-class that only fires AFTER the user has interacted, so
+   untouched required fields don't go red on first paint) and the
+   explicit `.contact-form__field--error` class set by the inline
+   script on server-error returns. Both produce the same red border
+   and red label.
+*/
+.contact-form__field input:user-invalid,
+.contact-form__field textarea:user-invalid,
+.contact-form__field--error input,
+.contact-form__field--error textarea {
+  border-color: var(--bbl-error);
+}
+.contact-form__field--error label {
+  color: var(--color-error-text);
+}
+
+/*
+   Honeypot: invisible to humans + AT, present in DOM for scrapers.
+   position:absolute + off-screen — NOT display:none, which some
+   bots check to skip. tabindex=-1 keeps keyboard nav clean.
+*/
+.contact-form__honeypot {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-form__turnstile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.contact-form__turnstile-attribution {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-caption);
+  margin: 0;
+}
+
+.contact-form__submit {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.625rem 1.125rem;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: var(--radius-bbl-2);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  cursor: pointer;
+  transition: background var(--duration-bbl-fast) var(--ease-bbl);
+}
+.contact-form__submit:hover { background: var(--bbl-primary-hover); }
+.contact-form__submit:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}

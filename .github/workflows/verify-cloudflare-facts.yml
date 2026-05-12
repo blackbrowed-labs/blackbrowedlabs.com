@@ -141,7 +141,7 @@ jobs:
             --base dev \
             --head "$BRANCH" \
             --title "chore(verifier): cloudflare-facts value change (${DATE_TAG})" \
-            --body "Automated PR from verify-cloudflare-facts.yml — at least one verified fact changed or went absent at the upstream source. Review the diff; the privacy pages render this data verbatim. The BASELINE prose in docs/BASELINE_COPY.md may need a paired update."
+            --body "Automated PR from verify-cloudflare-facts.yml — at least one verified fact's value changed at the upstream source (or, for DPF, the listed organisation is no longer present). Review the diff; the privacy pages render this data verbatim. The BASELINE prose in docs/BASELINE_COPY.md may need a paired update."
 
       - name: Open verifier-alert Issue on failure
         if: ${{ steps.run.outputs.has_failure == 'true' && steps.run.outputs.dry_run == 'false' }}

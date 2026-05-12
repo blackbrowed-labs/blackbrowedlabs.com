@@ -34,7 +34,10 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  actions: write  # G D.11.1: needed to PATCH the VERIFIER_LAST_OK_AT repo variable
+  # Note: the VERIFIER_LAST_OK_AT variable update uses a separate
+  # fine-grained PAT (secret VERIFIER_VARIABLE_TOKEN) — GITHUB_TOKEN
+  # with `actions: write` is not sufficient for the Actions Variables
+  # API (HTTP 403 on PATCH). See G D.10/11 fix-up commit.
 
 jobs:
   verify:
@@ -81,7 +84,11 @@ jobs:
       - name: Update VERIFIER_LAST_OK_AT (clean run only)
         if: ${{ steps.run.outputs.all_ok == 'true' && steps.run.outputs.dry_run == 'false' }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fine-grained PAT with Variables: read/write on this repo
+          # only. GITHUB_TOKEN with `actions: write` returns HTTP 403
+          # on the Actions Variables API; the workflow-permissions YAML
+          # does not expose a `variables` scope.
+          GH_TOKEN: ${{ secrets.VERIFIER_VARIABLE_TOKEN }}
         run: |
           set -euo pipefail
           NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)

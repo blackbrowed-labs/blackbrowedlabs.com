@@ -68,8 +68,8 @@ const CHECKS = [
   { factKey: 'cwa_retention', mod: cwaRetention, scenarioPrefix: 'cwa-', defaultFixture: 'cwa-active' },
 ];
 
-function fixturePathFor(scenario) {
-  return resolve(FIXTURES_DIR, `${scenario}.html`);
+function fixturePathFor(scenario, ext = 'html') {
+  return resolve(FIXTURES_DIR, `${scenario}.${ext}`);
 }
 
 /**
@@ -136,9 +136,10 @@ async function main() {
       const fixtureName = MOCK_SCENARIO.startsWith(scenarioPrefix)
         ? MOCK_SCENARIO
         : defaultFixture;
-      opts = { fixture: fixturePathFor(fixtureName) };
+      const ext = mod.fixtureExtension ?? 'html';
+      opts = { fixture: fixturePathFor(fixtureName, ext) };
       console.log(
-        `[verifier:orchestrator] ${mod.factName}: routing to fixture ${fixtureName}.html`,
+        `[verifier:orchestrator] ${mod.factName}: routing to fixture ${fixtureName}.${ext}`,
       );
     }
 

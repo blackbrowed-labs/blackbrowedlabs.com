@@ -51,17 +51,17 @@ npm run check  # astro check (TypeScript + content collections)
 edits show immediately and stale build-time data does not block the
 workflow.
 
-`npm run build` runs three scripts in order:
+`npm run build` runs two scripts in order:
 
-1. `scripts/check-cloudflare-facts-freshness.mjs` — fails the build if
-   `src/data/cloudflare-facts.json`'s `verifiedDate` is older than 90
-   days. Refresh the file by re-checking the listed source URLs (DPF
-   participant page + Cloudflare Web Analytics FAQ) and updating the
-   date.
-2. `scripts/build-headers.mjs` — emits `public/_headers` for Cloudflare
+1. `scripts/build-headers.mjs` — emits `public/_headers` for Cloudflare
    Workers Static Assets.
-3. `astro build` followed by `scripts/extract-tokens.mjs` — produces
+2. `astro build` followed by `scripts/extract-tokens.mjs` — produces
    `dist/` plus a tokens-only CSS asset for the static fallback HTML.
+
+Verifier-data freshness is enforced in CI (deploy + nightly workflows),
+not at build time — the gate reads the `VERIFIER_LAST_OK_AT` GitHub
+Actions repo variable and fails when the verifier's last clean run is
+older than 90 days.
 
 Editing prose: most legal text lives in `docs/BASELINE_COPY.md` and is
 rendered verbatim by page templates. Editorial Markdown for the home,

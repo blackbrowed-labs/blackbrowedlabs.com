@@ -211,7 +211,6 @@ async function main() {
   const hasFailure = statuses.some((s) => s === 'parser-broken' || s === 'unreachable');
   const previousJson = await readFile(DATA_PATH, 'utf8');
   const nextJson = JSON.stringify(data, null, 2) + '\n';
-  const hasDiff = previousJson !== nextJson; // kept internal-only for the JSON-write decision
 
   // Emit GH outputs only on real (non-dry-run) execution. Dry-run is the
   // synthetic / dispatch path; the workflow explicitly pins flags to

@@ -12,6 +12,16 @@
  *   the date users see on the privacy pages.
  * - Per-fact `last_known_good_at` mirrors `verified_at` on success and is
  *   left untouched on failure — useful for "stale" detection.
+ *
+ * G D.11 display-date sourcing note: the top-level `bbl-verified-at`
+ * meta marker + visible "zuletzt geprüft am ..." prose on the privacy
+ * pages flows through `getEffectiveVerifiedDate()` (env-preferred, JSON
+ * fallback). The per-fact `bbl-verified-at-dpf` / `bbl-verified-at-cwa`
+ * markers in `<head>` deliberately read JSON's per-fact `verified_at`
+ * fields directly, NOT this helper — they're diagnostic markers
+ * tracking the JSON-side ground truth per fact, separate from the
+ * unified display date. Don't "fix" the asymmetry without revisiting
+ * the verifier post-deploy smoke design.
  */
 
 import facts from '../data/cloudflare-facts.json';

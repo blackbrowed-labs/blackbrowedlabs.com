@@ -5,6 +5,9 @@
  * `has_value_diff`, `has_failure`) so the workflow can route to the
  * matching notification channel (silent variable refresh, PR, or Issue).
  *
+ * Run from the project root (as the verify-cloudflare-facts.yml
+ * workflow does); paths resolve against `process.cwd()`.
+ *
  * Source-of-truth: plans/active/pass-2/g-d-2/spec.md (original design) +
  * plans/active/pass-2/g-d-10/plan.md G D.11.1 (alert-model rewrite).
  *

@@ -14,6 +14,9 @@
  *
  * Runs after `astro build` in the npm "build" script so the file lands
  * only in the build artefact (dist/) and is not committed.
+ *
+ * Run from the project root (as `npm run build` does); paths resolve
+ * against `process.cwd()`.
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';

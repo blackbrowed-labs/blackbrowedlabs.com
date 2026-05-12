@@ -8,7 +8,8 @@
  *
  * Source-of-truth: plans/active/pass-2/g-d-10/g-d-10-2/dpf-investigation.md
  * (endpoint, method, body, JSON field paths) and plans/active/pass-2/g-d-2/
- * spec.md §6.3 / §3.2 / §3.4 (mode #2 / mode #4 detection contract).
+ * spec.md §3.2 / §3.4 / §9.1 / §9.3 (mode #2 / mode #4 detection contract,
+ * error-handling style, parser-shape constraints).
  * Runs as a registered check inside scripts/run-verifier.mjs.
  *
  * Failure-mode coverage:

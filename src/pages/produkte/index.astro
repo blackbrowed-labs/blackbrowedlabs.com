@@ -62,11 +62,11 @@ const description =
             {products.map((entry) => (
               <li class="products-index__item">
                 <h2 class="products-index__name">
-                  <a href={`/produkte/${entry.data.slug}`}>{entry.data.name}</a>
+                  <a href={`/produkte/${entry.data.slug}/`}>{entry.data.name}</a>
                 </h2>
                 <p class="products-index__tagline">{entry.data.tagline}</p>
                 <p class="products-index__description">{entry.data.description}</p>
-                <a class="products-index__more" href={`/produkte/${entry.data.slug}`}>
+                <a class="products-index__more" href={`/produkte/${entry.data.slug}/`}>
                   {t.productsIndex.populatedArrowLabel}
                 </a>
               </li>

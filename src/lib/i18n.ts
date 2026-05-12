@@ -9,12 +9,16 @@
 import type { Locale } from '../i18n';
 
 /**
- * Canonical path form: leading slash, no trailing slash, except the
- * root path which is just "/".
+ * Canonical path form: leading slash, trailing slash kept (or added),
+ * except the root path which is just "/".
+ * Phase E (trailing-slash alignment) inverted this from the original
+ * "strip trailing slash" behaviour — kept symmetric with Astro's
+ * `trailingSlash: 'always'` so counterpart-map lookups and slug splits
+ * use the same shape Astro emits.
  */
 function canonicalise(path: string): string {
   if (path === '' || path === '/') return '/';
-  return path.endsWith('/') ? path.slice(0, -1) : path;
+  return path.endsWith('/') ? path : `${path}/`;
 }
 
 /**
@@ -23,25 +27,25 @@ function canonicalise(path: string): string {
  * switcher renders the missing side as aria-disabled.
  */
 const counterparts: Record<string, string> = {
-  '/': '/en',
-  '/en': '/',
-  '/ueber': '/en/about',
-  '/en/about': '/ueber',
-  '/kontakt': '/en/contact',
-  '/en/contact': '/kontakt',
-  '/impressum': '/en/legal',
-  '/en/legal': '/impressum',
-  '/datenschutz': '/en/privacy',
-  '/en/privacy': '/datenschutz',
-  '/produkte': '/en/products',
-  '/en/products': '/produkte',
-  '/404': '/en/404',
-  '/en/404': '/404',
+  '/': '/en/',
+  '/en/': '/',
+  '/ueber/': '/en/about/',
+  '/en/about/': '/ueber/',
+  '/kontakt/': '/en/contact/',
+  '/en/contact/': '/kontakt/',
+  '/impressum/': '/en/legal/',
+  '/en/legal/': '/impressum/',
+  '/datenschutz/': '/en/privacy/',
+  '/en/privacy/': '/datenschutz/',
+  '/produkte/': '/en/products/',
+  '/en/products/': '/produkte/',
+  '/404/': '/en/404/',
+  '/en/404/': '/404/',
 };
 
 export function getLocaleFromPath(path: string): Locale {
   const canonical = canonicalise(path);
-  return canonical === '/en' || canonical.startsWith('/en/') ? 'en' : 'de';
+  return canonical.startsWith('/en/') ? 'en' : 'de';
 }
 
 export function getCounterpartUrl(path: string): string | null {

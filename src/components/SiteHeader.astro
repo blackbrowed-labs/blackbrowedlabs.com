@@ -18,13 +18,13 @@ const path = Astro.url.pathname;
 const locale = getLocaleFromPath(path);
 const t = getUiStrings(locale);
 
-const homeHref = locale === 'de' ? '/' : '/en';
-const productsHref = locale === 'de' ? '/produkte' : '/en/products';
-const productsActive = path === productsHref || path.startsWith(productsHref + '/');
-const aboutHref = locale === 'de' ? '/ueber' : '/en/about';
-const aboutActive = path === aboutHref || path === aboutHref + '/';
-const contactHref = locale === 'de' ? '/kontakt' : '/en/contact';
-const contactActive = path === contactHref || path === contactHref + '/';
+const homeHref = locale === 'de' ? '/' : '/en/';
+const productsHref = locale === 'de' ? '/produkte/' : '/en/products/';
+const productsActive = path.startsWith(productsHref);
+const aboutHref = locale === 'de' ? '/ueber/' : '/en/about/';
+const aboutActive = path === aboutHref;
+const contactHref = locale === 'de' ? '/kontakt/' : '/en/contact/';
+const contactActive = path === contactHref;
 ---
 
 <header class="site-header">

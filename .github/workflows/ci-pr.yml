@@ -40,6 +40,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verifier freshness check (warn-only)
+        # Read-only surface-the-stuck-verifier signal at PR time. Warns
+        # (does not fail) above 60 days so a stale verifier doesn't block
+        # editorial PRs; the hard 90-day gate lives in the deploy and
+        # nightly workflows where stale-deploy is a real problem.
+        run: |
+          set -euo pipefail
+          LAST_OK="${{ vars.VERIFIER_LAST_OK_AT }}"
+          if [ -z "$LAST_OK" ]; then
+            echo "::warning::VERIFIER_LAST_OK_AT repo variable is unset. The verifier may not have run yet."
+            exit 0
+          fi
+          LAST_OK_TS=$(date -d "$LAST_OK" +%s 2>/dev/null || python3 -c "import datetime, sys; print(int(datetime.datetime.fromisoformat(sys.argv[1].replace('Z','+00:00')).timestamp()))" "$LAST_OK")
+          NOW_TS=$(date -u +%s)
+          AGE_DAYS=$(( (NOW_TS - LAST_OK_TS) / 86400 ))
+          if [ "$AGE_DAYS" -gt 60 ]; then
+            echo "::warning::Verifier last clean run was $AGE_DAYS days ago (variable: $LAST_OK). Investigate verifier health; deploys will start blocking at 90 days."
+          else
+            echo "[workflow] verifier freshness OK ($AGE_DAYS days since last clean run)"
+          fi
+
       - name: Astro check
         run: npm run check
 

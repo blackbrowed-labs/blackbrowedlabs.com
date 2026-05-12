@@ -46,6 +46,7 @@ jobs:
       - name: Build
         env:
           PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
+          VERIFIED_AT: ${{ vars.VERIFIER_LAST_OK_AT }}
         run: npm run build
 
       - name: Deploy to Cloudflare Workers (staging)

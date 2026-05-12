@@ -7,6 +7,7 @@
 
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./products.css";
 
 
 /* ─── Self-hosted Inter (four static weights) ─────────────────── */

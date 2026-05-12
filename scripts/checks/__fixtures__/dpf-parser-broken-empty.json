@@ -1,0 +1,11 @@
+{
+  "RecordCount": 1,
+  "SumCount": 1,
+  "Items": [
+    {
+      "OrganizationPublicDisplayName": "Example Org With Only Swiss Cert",
+      "EUCert": null,
+      "SwissCert": { "PublicStatus": "Active" }
+    }
+  ]
+}

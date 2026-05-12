@@ -1,32 +1,67 @@
 #!/usr/bin/env node
 /**
  * DPF active-list check. Verifies Cloudflare, Inc. is in the active
- * EU-U.S. Data Privacy Framework participant list at
- * https://www.dataprivacyframework.gov/list.
+ * EU-U.S. Data Privacy Framework participant list. The user-facing
+ * citation remains https://www.dataprivacyframework.gov/list (a React
+ * SPA that the verifier cannot statically parse); the verifier itself
+ * queries the SPA's backing JSON API at dpfapi.azurewebsites.net.
  *
- * Source-of-truth: plans/active/pass-2/g-d-2/spec.md §6.3 (worked example)
- * and §3.2/§3.4 (mode #2 / mode #4 detection). Runs as a registered check
- * inside scripts/run-verifier.mjs.
+ * Source-of-truth: plans/active/pass-2/g-d-10/g-d-10-2/dpf-investigation.md
+ * (endpoint, method, body, JSON field paths) and plans/active/pass-2/g-d-2/
+ * spec.md §6.3 / §3.2 / §3.4 (mode #2 / mode #4 detection contract).
+ * Runs as a registered check inside scripts/run-verifier.mjs.
  *
  * Failure-mode coverage:
- *   - Mode #2 (parser-broken):    source HTML lacks expected structural
- *                                 markers ("Active Participant" section).
+ *   - Mode #2 (parser-broken):    API response lacks expected structural
+ *                                 markers (SumCount/Items shape).
  *   - Mode #3 (unreachable):      fetch failed/timed out after 3 retries
  *                                 (1/5/15 min backoff per spec §7.3).
- *   - Mode #4 (absent):           source parsed cleanly but Cloudflare
+ *   - Mode #4 (absent):           response parsed cleanly but Cloudflare
  *                                 not present in the active list.
  *   - Otherwise:                  status 'ok', value = canonical org name.
  *
  * Error-handling style: status-return (per spec §9.3). Throws are caught
  * inside the module and converted to CheckResult with the appropriate
  * non-ok status. The orchestrator never sees a thrown exception.
+ *
+ * Fixture format: JSON (fixtureExtension = 'json'). Per-check extension
+ * support landed in G D.10.0; this module opts into it because the
+ * upstream now serves JSON, not HTML.
  */
 
 import { readFile } from 'node:fs/promises';
 
 export const factName = 'dpf';
+// User-facing citation surfaced via cloudflare-facts.json. The privacy
+// pages link readers here; it remains the SPA URL even though the
+// verifier itself talks to the JSON API below.
 export const sourceUrl = 'https://www.dataprivacyframework.gov/list';
 export const expectedValue = 'Cloudflare, Inc.';
+export const fixtureExtension = 'json';
+
+// Verifier-only endpoint. Anonymous, no cookies, no Origin/Referer
+// gating today (verified in g-d-10-2/dpf-investigation.md). Substring
+// `Search: "Cloudflare"` filter is a verifier-side optimisation — the
+// active-status check happens server-side via `Status: "Active"` and is
+// independent of the search term. If Cloudflare ever rebrands or the
+// upstream changes their search semantics to exact-match, the verifier
+// flips to `absent` (mode #4) loudly; deliberate trade per the
+// investigation doc.
+const API_ENDPOINT = 'https://dpfapi.azurewebsites.net/api/participants';
+const REQUEST_BODY = {
+  DataCovered: [],
+  Frameworks: [],
+  Industries: [],
+  PageNumber: 0,
+  RecourseMechanisms: [],
+  StatutoryBody: [],
+  RowsPerPage: 10,
+  Search: 'Cloudflare',
+  StartLetter: '',
+  Status: 'Active',
+  States: [],
+  VerificationMethod: '',
+};
 
 // Retry backoff per spec §7.3: 1 / 5 / 15 minutes. Total retry budget
 // is 21 minutes, fitting comfortably inside the 30-minute workflow
@@ -38,16 +73,19 @@ async function fetchWithRetry(url) {
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
     try {
       console.log(
-        `[verifier:${factName}] attempt ${attempt + 1}/${RETRY_DELAYS_MS.length + 1}: GET ${url}`,
+        `[verifier:${factName}] attempt ${attempt + 1}/${RETRY_DELAYS_MS.length + 1}: POST ${url}`,
       );
       const res = await fetch(url, {
+        method: 'POST',
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         headers: {
-          accept: 'text/html',
+          accept: 'application/json',
+          'content-type': 'application/json',
           'user-agent': 'blackbrowedlabs-verifier/1.0',
         },
+        body: JSON.stringify(REQUEST_BODY),
       });
-      if (res.ok) return await res.text();
+      if (res.ok) return await res.json();
       if (attempt === RETRY_DELAYS_MS.length) {
         throw new Error(`HTTP ${res.status} after ${attempt} retries`);
       }
@@ -67,46 +105,40 @@ async function fetchWithRetry(url) {
 }
 
 /**
- * Heuristic structural-marker check. The DPF list page must contain at
- * least one of the expected anchor strings. If neither is present, the
- * page has been restructured (mode #2) and the parser is broken.
+ * Heuristic structural-marker check. The API response must be the
+ * expected `{ RecordCount, Items, SumCount }` envelope. If the shape
+ * changes — empty payload, error wrapper, an Items array missing — the
+ * upstream has been restructured (mode #2) and the parser is broken.
+ *
+ * `SumCount > 0` catches the upstream-data-wipe regression separately
+ * from a Cloudflare-specific withdrawal: a payload with SumCount===0 is
+ * suspect (parser-broken), whereas a non-zero SumCount with Cloudflare
+ * absent from Items is the real "Cloudflare withdrew" signal (absent).
  */
-function hasStructuralMarkers(html) {
-  return html.includes('Active Participant') || html.includes('Participant Name');
+function hasStructuralMarkers(payload) {
+  return (
+    payload &&
+    typeof payload === 'object' &&
+    typeof payload.SumCount === 'number' &&
+    payload.SumCount > 0 &&
+    Array.isArray(payload.Items)
+  );
 }
 
 /**
- * Parse organisation names from the active participants section. Regex-
- * based per spec §9.1: zero new dependencies, fails loudly on structure
- * change. Returns string[] of names (lowercased for matching).
+ * Parse active EU-US-framework organisation names from the API
+ * response. Per the investigation doc, the EU-US framework lives in
+ * `EUCert` (FrameworkId 1) — SwissCert / UKCert are separate
+ * frameworks and shouldn't be conflated for the "is Cloudflare on the
+ * EU-US DPF" question this verifier answers. Returns string[] of
+ * names (lowercased for matching).
  */
-function parseActiveOrgs(html) {
-  const names = [];
-
-  // Strategy 1: rows with "active" in their class attribute (per the
-  // worked example in §6.3). Matches the synthetic fixtures.
-  const activeRowMatches = html.matchAll(
-    /<tr[^>]*class="[^"]*active[^"]*"[^>]*>[\s\S]*?<\/tr>/gi,
-  );
-  for (const row of activeRowMatches) {
-    const tdMatch = row[0].match(/<td[^>]*>\s*([^<]+?)\s*<\/td>/);
-    if (tdMatch) names.push(tdMatch[1].trim().toLowerCase());
-  }
-
-  // Strategy 2 fallback: if strategy 1 found nothing but the page DOES
-  // contain structural markers (so it's not parser-broken), try a
-  // looser scan for org names adjacent to "Active" status text. This
-  // makes the parser slightly more tolerant of upstream HTML drift.
-  if (names.length === 0 && html.includes('Active Participant')) {
-    const looseRowMatches = html.matchAll(
-      /<tr[^>]*>\s*<td[^>]*>\s*([^<]+?)\s*<\/td>[\s\S]*?Active[\s\S]*?<\/tr>/gi,
-    );
-    for (const row of looseRowMatches) {
-      names.push(row[1].trim().toLowerCase());
-    }
-  }
-
-  return names;
+function parseActiveOrgs(payload) {
+  return payload.Items.filter(
+    (p) => p && p.EUCert && p.EUCert.PublicStatus === 'Active',
+  )
+    .map((p) => String(p.OrganizationPublicDisplayName ?? '').trim().toLowerCase())
+    .filter(Boolean);
 }
 
 /**
@@ -116,11 +148,11 @@ function parseActiveOrgs(html) {
 export async function check({ fixture } = {}) {
   const checked_at = new Date().toISOString();
 
-  let html;
+  let payload;
   try {
-    html = fixture
-      ? await readFile(fixture, 'utf8')
-      : await fetchWithRetry(sourceUrl);
+    payload = fixture
+      ? JSON.parse(await readFile(fixture, 'utf8'))
+      : await fetchWithRetry(API_ENDPOINT);
   } catch (err) {
     return {
       status: 'unreachable',
@@ -132,7 +164,7 @@ export async function check({ fixture } = {}) {
     };
   }
 
-  if (!hasStructuralMarkers(html)) {
+  if (!hasStructuralMarkers(payload)) {
     return {
       status: 'parser-broken',
       value: null,
@@ -140,13 +172,13 @@ export async function check({ fixture } = {}) {
       source_url: sourceUrl,
       checked_at,
       error:
-        'Expected structural markers ("Active Participant" / "Participant Name") absent from DPF list page; upstream may have been restructured.',
+        'Expected structural markers ({RecordCount, Items, SumCount}) absent from DPF API payload; upstream may have been restructured.',
     };
   }
 
   let orgs;
   try {
-    orgs = parseActiveOrgs(html);
+    orgs = parseActiveOrgs(payload);
   } catch (err) {
     return {
       status: 'parser-broken',
@@ -165,7 +197,7 @@ export async function check({ fixture } = {}) {
       expected: expectedValue,
       source_url: sourceUrl,
       checked_at,
-      error: `parser found 0 active rows in ${html.length}-byte response`,
+      error: `parser found 0 active rows in ${payload.Items.length}-record response`,
     };
   }
 

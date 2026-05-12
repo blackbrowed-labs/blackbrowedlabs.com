@@ -71,11 +71,13 @@ jobs:
             node scripts/run-verifier.mjs --dry-run
             echo "dry_run=true" >> "$GITHUB_OUTPUT"
             # In dry-run the orchestrator does not advance GH outputs that
-            # gate live channel steps; explicitly pin all three flags to
-            # false so the variable-update, PR, and Issue gates are skipped.
+            # gate live channel steps; explicitly pin all flags to false
+            # so the variable-update, PR, and Issue gates all skip.
             echo "all_ok=false" >> "$GITHUB_OUTPUT"
             echo "has_value_diff=false" >> "$GITHUB_OUTPUT"
             echo "has_failure=false" >> "$GITHUB_OUTPUT"
+            echo "dpf_ok=false" >> "$GITHUB_OUTPUT"
+            echo "cwa_retention_ok=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           node scripts/run-verifier.mjs
@@ -96,6 +98,30 @@ jobs:
           gh api -X PATCH \
             "/repos/${{ github.repository }}/actions/variables/VERIFIER_LAST_OK_AT" \
             -f name=VERIFIER_LAST_OK_AT -f value="$NOW"
+
+      - name: Update VERIFIER_DPF_VERIFIED_AT (when DPF check returned ok)
+        if: ${{ steps.run.outputs.dpf_ok == 'true' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.VERIFIER_VARIABLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "[workflow] updating VERIFIER_DPF_VERIFIED_AT to $NOW"
+          gh api -X PATCH \
+            "/repos/${{ github.repository }}/actions/variables/VERIFIER_DPF_VERIFIED_AT" \
+            -f name=VERIFIER_DPF_VERIFIED_AT -f value="$NOW"
+
+      - name: Update VERIFIER_CWA_VERIFIED_AT (when CWA check returned ok)
+        if: ${{ steps.run.outputs.cwa_retention_ok == 'true' && steps.run.outputs.dry_run == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.VERIFIER_VARIABLE_TOKEN }}
+        run: |
+          set -euo pipefail
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "[workflow] updating VERIFIER_CWA_VERIFIED_AT to $NOW"
+          gh api -X PATCH \
+            "/repos/${{ github.repository }}/actions/variables/VERIFIER_CWA_VERIFIED_AT" \
+            -f name=VERIFIER_CWA_VERIFIED_AT -f value="$NOW"
 
       - name: Open auto-PR for value change
         if: ${{ steps.run.outputs.has_value_diff == 'true' && steps.run.outputs.dry_run == 'false' }}

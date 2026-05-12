@@ -212,17 +212,27 @@ async function main() {
   const previousJson = await readFile(DATA_PATH, 'utf8');
   const nextJson = JSON.stringify(data, null, 2) + '\n';
 
+  // Per-fact ok flags for independent per-fact variable updates
+  // (G D.12). Allows VERIFIER_DPF_VERIFIED_AT / VERIFIER_CWA_VERIFIED_AT
+  // to advance whenever the corresponding fact returned 'ok', even on
+  // mixed-status runs where one fact is changed/failing and the other
+  // is fine. Independent of the top-level `all_ok` gate.
+  const dpfOk = results.dpf.status === 'ok';
+  const cwaRetentionOk = results.cwa_retention.status === 'ok';
+
   // Emit GH outputs only on real (non-dry-run) execution. Dry-run is the
   // synthetic / dispatch path; the workflow explicitly pins flags to
-  // false in that branch so live PR / Issue steps stay quiet.
+  // false in that branch so live PR / Issue / variable steps stay quiet.
   if (!DRY_RUN) {
     await emitGithubOutput('all_ok', allOk);
     await emitGithubOutput('has_value_diff', hasValueDiff);
     await emitGithubOutput('has_failure', hasFailure);
+    await emitGithubOutput('dpf_ok', dpfOk);
+    await emitGithubOutput('cwa_retention_ok', cwaRetentionOk);
   }
 
   console.log(
-    `[verifier:orchestrator] summary: all_ok=${allOk} has_value_diff=${hasValueDiff} has_failure=${hasFailure}`,
+    `[verifier:orchestrator] summary: all_ok=${allOk} has_value_diff=${hasValueDiff} has_failure=${hasFailure} dpf_ok=${dpfOk} cwa_retention_ok=${cwaRetentionOk}`,
   );
 
   if (DRY_RUN) {
@@ -230,6 +240,8 @@ async function main() {
     console.log(nextJson);
     const wouldDo = [];
     if (allOk) wouldDo.push('update VERIFIER_LAST_OK_AT variable');
+    if (dpfOk) wouldDo.push('update VERIFIER_DPF_VERIFIED_AT variable');
+    if (cwaRetentionOk) wouldDo.push('update VERIFIER_CWA_VERIFIED_AT variable');
     if (hasValueDiff) wouldDo.push('open auto-PR');
     if (hasFailure) wouldDo.push('open verifier-alert Issue');
     console.log(

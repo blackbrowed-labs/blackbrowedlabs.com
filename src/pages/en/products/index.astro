@@ -20,7 +20,7 @@ const description =
 <BaseLayout title={`${title} — Blackbrowed Labs`} description={description}>
   <nav class="breadcrumb" aria-label={t.breadcrumb.ariaLabel}>
     <div class="breadcrumb__inner">
-      <a href="/en">Blackbrowed Labs</a>
+      <a href="/en/">Blackbrowed Labs</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>
       <span class="breadcrumb__current" aria-current="page">{t.productsIndex.breadcrumb}</span>
     </div>
@@ -52,11 +52,11 @@ const description =
             {products.map((entry) => (
               <li class="products-index__item">
                 <h2 class="products-index__name">
-                  <a href={`/en/products/${entry.data.slug}`}>{entry.data.name}</a>
+                  <a href={`/en/products/${entry.data.slug}/`}>{entry.data.name}</a>
                 </h2>
                 <p class="products-index__tagline">{entry.data.tagline}</p>
                 <p class="products-index__description">{entry.data.description}</p>
-                <a class="products-index__more" href={`/en/products/${entry.data.slug}`}>
+                <a class="products-index__more" href={`/en/products/${entry.data.slug}/`}>
                   {t.productsIndex.populatedArrowLabel}
                 </a>
               </li>

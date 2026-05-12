@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   output: 'static',
   site: process.env.PUBLIC_SITE_URL ?? 'https://dev.blackbrowedlabs.com',
-  trailingSlash: 'never',
+  trailingSlash: 'always',
   i18n: {
     defaultLocale: 'de',
     locales: ['de', 'en'],

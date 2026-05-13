@@ -1,0 +1,58 @@
+name: rebuild-on-dispatch-staging
+
+# Mirrors rebuild-on-dispatch.yml on the same `product-release-published`
+# event, but builds from `dev` with PUBLIC_ENVIRONMENT=staging and deploys
+# via `wrangler deploy --env staging`. A single dispatch from a product
+# repo therefore refreshes both production and staging in parallel.
+#
+# Note on default-branch routing: `repository_dispatch` workflows only
+# fire from files on the repo's default branch (`main`). This file must
+# reach `main` via the periodic dev → main rollout before it begins
+# receiving dispatches.
+
+on:
+  repository_dispatch:
+    types: [product-release-published]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    name: Rebuild and deploy staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log dispatch payload
+        run: |
+          echo "Dispatched by product: ${{ github.event.client_payload.productSlug }}"
+          echo "Tag: ${{ github.event.client_payload.tagName }}"
+
+      - name: Checkout dev
+        uses: actions/checkout@v6
+        with:
+          ref: dev
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for staging
+        env:
+          PUBLIC_ENVIRONMENT: staging
+          PRODUCT_REPOS_PAT: ${{ secrets.PRODUCT_REPOS_PAT }}
+          PUBLIC_CWA_TOKEN: ${{ secrets.PUBLIC_CWA_TOKEN }}
+        run: npm run build
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env staging

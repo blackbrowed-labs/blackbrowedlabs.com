@@ -388,8 +388,8 @@ Release notes are language-neutral (GitHub releases have one version each). They
 
 1. In every product repo under `blackbrowed-labs`, a GitHub Actions workflow triggers on `release: published`.
 2. That workflow sends a `repository_dispatch` event to the website repo with `event_type: product-release-published` and a payload containing the product slug and release tag.
-3. In the website repo, a workflow listens for that event type and triggers a production deploy.
-4. During the build, the `releases` content loader re-fetches from the GitHub API. New release appears.
+3. In the website repo, two workflows listen for that event type and trigger production and staging deploys in parallel (`.github/workflows/rebuild-on-dispatch.yml` and `.github/workflows/rebuild-on-dispatch-staging.yml`). The pair mirrors the per-environment-file convention already in use for `deploy-{staging,production}.yml` and `rebuild-nightly{,-staging}.yml`.
+4. During each build, the `releases` content loader re-fetches from the GitHub API. New release appears on both environments within ~60 seconds.
 
 Cross-repo PAT with `actions: write` on the website repo lives as a secret in each product repo.
 

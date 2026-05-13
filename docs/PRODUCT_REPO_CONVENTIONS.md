@@ -27,15 +27,17 @@ done starting point for new product repos.
 
 ## 2. Tag format
 
-- Semantic Versioning, lowercase `v` prefix: `vX.Y.Z`. Examples:
-  `v1.0.0`, `v0.4.2`, `v2.13.7`.
+- Semantic Versioning, bare numerals: `X.Y.Z`. Examples:
+  `1.0.0`, `0.4.2`, `2.13.7`. Per the [SemVer 2.0.0 FAQ](https://semver.org/spec/v2.0.0.html#is-v123-a-semantic-version),
+  `v1.2.3` is *not* a semantic version — the canonical form has no
+  `v` prefix.
 - Pre-release marking: prefer GitHub's `isPrerelease` flag (set when
   publishing the Release on github.com or via `gh release create
   --prerelease`) over a tag suffix.
 - Exception: during the v0/v1 era a suffix is acceptable for clarity
-  (`v0.1.0-pre`, `v0.1.0-rc.1`). Both forms parse as valid semver and
+  (`0.1.0-pre`, `0.1.0-rc.1`). Both forms parse as valid semver and
   both work with the workflow's CHANGELOG extractor. Once the project
-  reaches a stable `v1.0.0` and beyond, drop suffixes and use the
+  reaches a stable `1.0.0` and beyond, drop suffixes and use the
   `isPrerelease` flag exclusively.
 - Tags are immutable. Do not delete and force-push the same tag at a
   different SHA — see §8 "Idempotency and re-tagging".
@@ -52,7 +54,7 @@ Format: [Keep a Changelog 1.1](https://keepachangelog.com/en/1.1.0/).
 ### 3.1 Per-version section structure
 
 ```markdown
-## [vX.Y.Z] — YYYY-MM-DD
+## [X.Y.Z] — YYYY-MM-DD
 
 ### Added
 - ...
@@ -77,10 +79,11 @@ Subsections that are empty for a given release are omitted. The
 extractor preserves whitespace and Markdown inside the section but
 trims leading/trailing blank lines.
 
-The `## [vX.Y.Z] — YYYY-MM-DD` heading is matched against the pushed
-tag. The extractor accepts both `## [v0.1.0]` and `## [0.1.0]` heading
-styles for forward compatibility — but pick one and stick with it for
-a given repo to keep diffs clean.
+The `## [X.Y.Z] — YYYY-MM-DD` heading is matched against the pushed
+tag. The extractor accepts both `## [0.1.0]` (canonical) and
+`## [v0.1.0]` (legacy) heading styles for forward compatibility. Bare
+numerals are canonical; pick one and stick with it for a given repo
+to keep diffs clean.
 
 ### 3.2 Initial CHANGELOG.md template
 
@@ -100,7 +103,7 @@ All notable changes to this project documented per
 ```
 
 The `## [Unreleased]` section is a working buffer. When you cut a
-release, rename it to `## [vX.Y.Z] — YYYY-MM-DD` and start a fresh
+release, rename it to `## [X.Y.Z] — YYYY-MM-DD` and start a fresh
 `## [Unreleased]` above it.
 
 ## 4. Release workflow
@@ -111,15 +114,16 @@ shape is part of the cross-repo contract):
 
 ```yaml
 # .github/workflows/release.yml
-# Triggers on tag push (vX.Y.Z); extracts CHANGELOG.md section as release body;
+# Triggers on tag push (X.Y.Z); extracts CHANGELOG.md section as release body;
 # dispatches product-release-published to blackbrowed-labs/blackbrowedlabs.com.
+# Tag form is bare SemVer numerals (no `v` prefix) per https://semver.org/spec/v2.0.0.html#is-v123-a-semantic-version.
 
 name: release
 
 on:
   push:
     tags:
-      - 'v*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
 
 env:
   # Forward-defense for GitHub's Node 20 deprecation (default flip 2026-06-02,
@@ -199,9 +203,9 @@ Notes on the workflow:
 - The `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` env var is forward-defense
   for the Node 20 deprecation timeline (default flip 2026-06-02,
   removal 2026-09-16). It is harmless after Node 24 becomes default.
-- The `awk` extractor accepts both `## [v0.1.0]` and `## [0.1.0]`
-  heading styles. The `sed -e '/./,$!d'` step trims leading blank
-  lines.
+- The `awk` extractor accepts both `## [0.1.0]` (canonical) and
+  `## [v0.1.0]` (legacy) heading styles. The `sed -e '/./,$!d'` step
+  trims leading blank lines.
 - The GitHub Release creation step is idempotent: if a Release already
   exists for the tag, the step logs and continues to the dispatch
   step. This keeps the website rebuild firing even when a tag is
@@ -300,13 +304,13 @@ result.
 ### 7.1 UI
 
 1. Edit `CHANGELOG.md` directly on github.com — move `[Unreleased]`
-   entries under a new `## [vX.Y.Z] — YYYY-MM-DD` heading. Commit to
+   entries under a new `## [X.Y.Z] — YYYY-MM-DD` heading. Commit to
    `main`.
 2. Repo home → Releases tab → "Draft a new release".
-3. "Choose a tag" → type `vX.Y.Z` → click "Create new tag: vX.Y.Z on
+3. "Choose a tag" → type `X.Y.Z` → click "Create new tag: X.Y.Z on
    publish". Target: `main`.
-4. Title: `vX.Y.Z`.
-5. Description: paste the body of the matching `## [vX.Y.Z]` section
+4. Title: `X.Y.Z`.
+5. Description: paste the body of the matching `## [X.Y.Z]` section
    from `CHANGELOG.md`. (The workflow will also extract this
    automatically; pasting here is for the github.com Release UI in
    case the user lands there before the workflow runs.)
@@ -320,11 +324,11 @@ by the tag push that publishing the release performs.
 
 ```bash
 # After updating CHANGELOG.md and pushing main:
-git tag -a vX.Y.Z -m "vX.Y.Z"
-git push origin vX.Y.Z
+git tag -a X.Y.Z -m "X.Y.Z"
+git push origin X.Y.Z
 # The workflow auto-creates the GitHub Release from the CHANGELOG
 # section. To mark prerelease:
-#   gh release edit vX.Y.Z --prerelease
+#   gh release edit X.Y.Z --prerelease
 ```
 
 The workflow is idempotent — see §9.
@@ -350,7 +354,7 @@ See PRODUCT_REPO_CONVENTIONS.md §5.
 2. Re-trigger the workflow. Note the workflow does not re-run on a
    tag that has already been processed once. To force a re-run for the
    same intended release, either:
-   - Bump a patch version (e.g., `vX.Y.Z+1`) and re-tag — preferred,
+   - Bump a patch version (e.g., `X.Y.Z+1`) and re-tag — preferred,
      leaves a clean audit trail.
    - Or delete the workflow run and re-run from the Actions tab UI
      ("Re-run all jobs"). The `gh release create` step is idempotent
@@ -361,12 +365,12 @@ See PRODUCT_REPO_CONVENTIONS.md §5.
 **Symptom:** the "Extract CHANGELOG section" step fails with:
 
 ```
-::error::No CHANGELOG section found for tag vX.Y.Z.
-Add a '## [vX.Y.Z]' or '## [X.Y.Z]' section to CHANGELOG.md before tagging.
+::error::No CHANGELOG section found for tag X.Y.Z.
+Add a '## [X.Y.Z]' section to CHANGELOG.md before tagging.
 ```
 
 **Recovery:**
-1. Edit `CHANGELOG.md` and add the missing `## [vX.Y.Z] — YYYY-MM-DD`
+1. Edit `CHANGELOG.md` and add the missing `## [X.Y.Z] — YYYY-MM-DD`
    section.
 2. Push to `main`.
 3. Tag a new version (e.g., bump patch). The workflow does not re-run
@@ -391,7 +395,7 @@ its scope changed.
 **Symptom:** the "Create GitHub Release" step logs:
 
 ```
-Release vX.Y.Z already exists; skipping create.
+Release X.Y.Z already exists; skipping create.
 ```
 
 The workflow continues to the dispatch step. The website rebuild
@@ -404,8 +408,8 @@ pushed tag, or the workflow file has a YAML syntax error and was
 disabled.
 
 **Recovery:**
-1. Verify the tag matches the `v*` glob (lowercase `v` prefix). A
-   tag like `1.0.0` (no `v`) will not match.
+1. Verify the tag matches the `[0-9]+.[0-9]+.[0-9]+*` glob (bare
+   SemVer). A tag like `v1.0.0` (with `v` prefix) will not match.
 2. Open the Actions tab on github.com — disabled workflows show with
    a red banner.
 3. Validate the YAML locally (`yq eval . .github/workflows/release.yml`

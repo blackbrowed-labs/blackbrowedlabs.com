@@ -1,22 +1,22 @@
 {
   "_meta": {
     "schema_version": 1,
-    "last_check_attempt": "2026-04-29T00:00:00Z",
+    "last_check_attempt": "2026-08-24T02:57:06.904Z",
     "freshness_threshold_days": 30
   },
   "dpf": {
     "status": "active",
     "organization_name": "Cloudflare, Inc.",
     "source_url": "https://www.dataprivacyframework.gov/list",
-    "verified_at": "2026-04-29T00:00:00Z",
-    "last_known_good_at": "2026-04-29T00:00:00Z"
+    "verified_at": "2026-08-24T02:57:03.751Z",
+    "last_known_good_at": "2026-08-24T02:57:03.751Z"
   },
   "cwa_retention": {
-    "status": "active",
+    "status": "changed",
     "raw_events_retention_months": null,
-    "aggregated_retention_months": 6,
+    "aggregated_retention_months": 0,
     "source_url": "https://developers.cloudflare.com/web-analytics/faq/",
-    "verified_at": "2026-04-29T00:00:00Z",
+    "verified_at": "2026-08-24T02:57:06.800Z",
     "last_known_good_at": "2026-04-29T00:00:00Z"
   }
 }

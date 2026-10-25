@@ -8,12 +8,16 @@
  *   3. Workers Rate Limit binding — 5 submissions per 60s per IP.
  *      Exceeded → 303 ?error=rate_limit.
  *   4. Turnstile siteverify against challenges.cloudflare.com.
- *      Graceful degradation per A12 §7.2: a submission with no
- *      Turnstile token (no-JS path) is allowed through; the
- *      rate-limit + honeypot checks above already protect that
- *      path. Failed verify → 303 ?error=turnstile.
- *   5. Validate name / email / message presence + email shape.
- *      Failed → 303 ?error=validation.
+ *      Mandatory: a missing, empty, or siteverify-rejected token →
+ *      303 ?error=turnstile. The earlier "graceful degradation for
+ *      the no-JS path" was closed in G B.1.3 after sustained
+ *      direct-POST spam exploited exactly that branch.
+ *   5. Validate name / email / message presence + email shape,
+ *      and run heuristic content filters (length bounds, URL-count
+ *      ceiling, URL-in-name guard). Failed → 303 ?error=validation.
+ *      Heuristic rejections intentionally fold into the same visible
+ *      code as shape rejections — a specific message would help a
+ *      spammer tune.
  *   6. Build a MIME message with mimetext, send via env.EMAIL
  *      (cloudflare:email's send_email binding from the .com Worker
  *      out via .de Email Routing → IONOS lars@blackbrowedlabs.com).
@@ -65,25 +69,27 @@ export async function handleContactSubmission(
     return redirectTo(returnTo, '?error=rate_limit');
   }
 
-  // 4. Turnstile siteverify (graceful degradation if no token).
+  // 4. Turnstile siteverify (mandatory — see docstring step 4).
   const turnstileToken = readField(formData, 'cf-turnstile-response');
-  if (turnstileToken) {
-    const verified = await verifyTurnstile(
+  const turnstileVerified =
+    turnstileToken.length > 0 &&
+    (await verifyTurnstile(
       turnstileToken,
       env.TURNSTILE_SECRET_KEY,
       cfConnectingIp,
-    );
-    if (!verified) {
-      return redirectTo(returnTo, '?error=turnstile');
-    }
+    ));
+  if (!turnstileVerified) {
+    return redirectTo(returnTo, '?error=turnstile');
   }
-  // No-JS path: rate-limit + honeypot already protect this submission.
 
-  // 5. Validate user-facing fields.
+  // 5. Validate user-facing fields + heuristic content filters.
   const name = readField(formData, 'name');
   const email = readField(formData, 'email');
   const message = readField(formData, 'message');
   if (!name || !email || !message || !isLikelyEmail(email)) {
+    return redirectTo(returnTo, '?error=validation');
+  }
+  if (looksLikeSpam(name, email, message)) {
     return redirectTo(returnTo, '?error=validation');
   }
 
@@ -178,4 +184,20 @@ function isLikelyEmail(value: string): boolean {
   // rejects malformed addresses with more authority than a regex. We
   // just guard against obvious junk that wouldn't be deliverable.
   return /^\S+@\S+\.\S+$/.test(value);
+}
+
+function looksLikeSpam(name: string, email: string, message: string): boolean {
+  // Heuristics: cheap, server-only, no deps, and shaped so a real
+  // human writing in DE or EN does not hit them. On the first match
+  // the submission is dropped into ?error=validation — same visible
+  // code as a shape rejection, to avoid giving a spammer feedback
+  // that would help them tune. Added G B.1.3.
+  if (message.length < 10) return true;
+  if (message.length > 5000) return true;
+  if (name.length > 100) return true;
+  if (email.length > 254) return true; // RFC 5321 §4.5.3.1.3 cap.
+  if (/https?:\/\//i.test(name)) return true;
+  const urlMatches = message.match(/https?:\/\//gi);
+  if (urlMatches && urlMatches.length > 2) return true;
+  return false;
 }

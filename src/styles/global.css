@@ -93,6 +93,14 @@
     font-weight: var(--font-weight-light);
     line-height: var(--leading-h1);
     letter-spacing: var(--tracking-h1);
+    /* Avoid single-word h1 overflow at 360px (e.g. "Datenschutzerklärung").
+       hyphens: auto uses the browser's language-specific hyphenation
+       dictionary via the <html lang> attribute; overflow-wrap: break-word
+       is the fallback when no hyphenation point exists. No-op for the
+       short titles on home/about/impressum/products/contact/404. */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   h2 {

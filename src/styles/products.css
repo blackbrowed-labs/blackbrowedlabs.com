@@ -319,6 +319,9 @@
   color: var(--color-text);
   font-size: var(--text-body);
   line-height: 1.65;
+  /* Release notes include 40-character commit hashes in <code>, which
+     overflow at 360px. Allow break at any point rather than clipping. */
+  overflow-wrap: anywhere;
 }
 /* NOTE: the per-page scoped rules used `:global(h1)` etc. inside
    `.release__body` because Astro scoping otherwise prevents the

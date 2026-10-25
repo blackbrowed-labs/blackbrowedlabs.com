@@ -54,8 +54,18 @@ export const fixtureExtension = 'json';
 // the whole active list in one response. See
 // plans/active/pass-3/g/dpf-pagination-investigation.md for the
 // probe-by-probe evidence and the EUCert.PublicStatus distribution
-// (Active=2,960; Active-Re-cert=638 — the verifier still treats only
-// strict "Active" as live).
+// (Active=2,960; Active-Re-cert=638).
+//
+// Participant-status widening (2026-10-25): parseActiveOrgs now accepts
+// any EUCert.PublicStatus beginning with "Active" — so both strict
+// "Active" and the transitional "Active - Re-certification under Review"
+// count as live. Rationale: the DPF framework treats a participant mid
+// re-cert review as a continuing participant, and the organisation
+// record remains in the API payload with an Active-prefixed status. The
+// prior strict equality was flagging Cloudflare as "absent" whenever
+// their re-cert window was open (a scheduled upstream event, not a
+// withdrawal). Non-Active-prefixed statuses (e.g. "Inactive",
+// "Withdrawn", "Pending") still fail the filter and surface as absent.
 const API_ENDPOINT = 'https://dpfapi.azurewebsites.net/api/participants';
 // Investigation: plans/active/pass-3/g/dpf-pagination-investigation.md
 // confirms RowsPerPage values >= SumCount return the complete active
@@ -149,10 +159,19 @@ function hasStructuralMarkers(payload) {
  * frameworks and shouldn't be conflated for the "is Cloudflare on the
  * EU-US DPF" question this verifier answers. Returns string[] of
  * names (lowercased for matching).
+ *
+ * Status filter: accepts any EUCert.PublicStatus beginning with
+ * "Active" (strict "Active" plus transitional variants like
+ * "Active - Re-certification under Review"). See the header comment
+ * block for rationale. Non-Active-prefixed statuses are filtered out.
  */
 function parseActiveOrgs(payload) {
   return payload.Items.filter(
-    (p) => p && p.EUCert && p.EUCert.PublicStatus === 'Active',
+    (p) =>
+      p &&
+      p.EUCert &&
+      typeof p.EUCert.PublicStatus === 'string' &&
+      p.EUCert.PublicStatus.startsWith('Active'),
   )
     .map((p) => String(p.OrganizationPublicDisplayName ?? '').trim().toLowerCase())
     .filter(Boolean);

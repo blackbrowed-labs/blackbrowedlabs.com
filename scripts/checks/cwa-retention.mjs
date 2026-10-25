@@ -100,13 +100,26 @@ function parseRetention(html) {
 
   // Aggregated retention. Look near keywords "aggregated" or
   // "page view counts" and pull the adjacent integer + unit.
+  //
+  // Pattern ordering is load-bearing: the current FAQ page phrases the
+  // retention figure as "access data for the previous six months" (an
+  // access-period sentence, no "aggregated" nearby), so pattern-4 must
+  // match first on live content. The previous number-first-then-
+  // "aggregated" fallback was removed on 2026-10-25 after it was found
+  // to false-positive on the adjacent beacon-sampling sentence
+  // ("retain unsampled beacon data for the past 7 days, after this
+  // point data is aggregated down to around 10%" → captured "7 days",
+  // producing an aggregated_retention_months = 0, which has nothing
+  // to do with retention). Pattern-4 (the FAQ shape) + pattern-1
+  // ("aggregated ... N months") + pattern-2 ("page view counts ...
+  // N months") between them cover the real shapes without the gap-
+  // overshooting hazard.
   const aggregatedPatterns = [
-    /aggregat[a-z]*[^.]{0,200}?(\d+)\s*(months?|days?)/i,
-    /page\s*view\s*counts?[^.]{0,200}?(\d+)\s*(months?|days?)/i,
-    /(\d+)\s*(months?|days?)[^.]{0,80}?aggregat/i,
     // G D.10.1 — FAQ shape: "you can access data for the previous six months"
     // Tolerant variants: "past N months", "last N months".
     /(?:access|view|see)\s+[^.]{0,80}?(?:previous|past|last)\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|eighteen|twenty[\s-]?four|twentyfour)\s+(months?|days?)/i,
+    /aggregat[a-z]*[^.]{0,200}?(\d+)\s*(months?|days?)/i,
+    /page\s*view\s*counts?[^.]{0,200}?(\d+)\s*(months?|days?)/i,
   ];
   let aggregatedMonths = null;
   for (const re of aggregatedPatterns) {

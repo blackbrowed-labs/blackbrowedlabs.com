@@ -16,6 +16,7 @@ exercises both checks, but only one is the scenario under test).
 | Fixture | Branch triggered | Expected `dpf.status` | Notes |
 |---|---|---|---|
 | `dpf-active.json` | Happy path | `ok` | Cloudflare present in active EU-cert rows |
+| `dpf-active-recert.json` | Happy path — re-cert review | `ok` | Cloudflare's EUCert.PublicStatus is "Active - Re-certification under Review"; the `startsWith('Active')` filter accepts this transitional state (added 2026-10-25) |
 | `dpf-absent.json` | Mode #4 (org missing) | `absent` | Structural markers OK; Cloudflare not in active rows |
 | `dpf-parser-broken.json` | Branch A — missing structural markers | `parser-broken` | Tiny `{"error": "deprecated"}` shape |
 | `dpf-parser-broken-empty.json` | Branch C — `orgs.length === 0` | `parser-broken` | Structural markers OK; zero rows pass the EU-cert filter |

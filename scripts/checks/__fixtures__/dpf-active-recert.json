@@ -1,0 +1,26 @@
+{
+  "RecordCount": 2,
+  "SumCount": 2,
+  "Items": [
+    {
+      "OrganizationId": 3727,
+      "OrganizationPublicDisplayName": "C2FO",
+      "City": "Kansas City ",
+      "State": "MO",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active", "HRData": false, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    },
+    {
+      "OrganizationId": 5666,
+      "OrganizationPublicDisplayName": "Cloudflare, Inc.",
+      "City": "San Francisco",
+      "State": "CA",
+      "EUCert": { "Name": "EU-US Certification", "PublicStatus": "Active - Re-certification under Review", "HRData": true, "NonHRData": true, "FrameworkId": 1 },
+      "SwissCert": { "Name": "SW-US Certification", "PublicStatus": "Active - Re-certification under Review", "HRData": true, "NonHRData": true, "FrameworkId": 2 },
+      "UKCert": { "Name": "UK Extension Certification", "PublicStatus": "Active - Re-certification under Review", "HRData": true, "NonHRData": true, "FrameworkId": 3 },
+      "CoveredEntities": []
+    }
+  ]
+}
